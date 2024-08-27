@@ -13,7 +13,7 @@ RUN npm install
 COPY . .
 
 # Opcionalmente construye el código del backend, si necesario
- RUN npm run build
+ RUN npm run start
 
 # Etapa de construcción para el frontend Svelte
 # ============================================
