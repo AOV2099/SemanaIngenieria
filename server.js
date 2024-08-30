@@ -31,7 +31,7 @@ let key;
 
 // Conexión a Redis
 const redisClient = redis.createClient({
-  host: process.env.REDIS_HOST || 'localhost', // Utiliza 'localhost' si REDIS_HOST no está definido
+  host: process.env.REDIS_HOST || 'redis', // Utiliza 'localhost' si REDIS_HOST no está definido
   port: process.env.REDIS_PORT || 6379         // Utiliza 6379 si REDIS_PORT no está definido
 });
 function connectRedis() {
