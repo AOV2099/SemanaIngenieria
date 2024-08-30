@@ -5,7 +5,7 @@ const path = require("path");
 const { fileURLToPath } = require("url");
 const cors = require("cors");
 const APP_PORT = process.env.APP_PORT || 3000;
-const REDIS_HOST = process.env.REDIS_HOST || "redis";
+const REDIS_HOST = process.env.REDIS_HOST || "redis-stack";
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 const APP_MODE =process.env.REDIS_PORT || "0"
 

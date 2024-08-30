@@ -1,11 +1,14 @@
 # Uso de una imagen base ligera de Node.js
 FROM node:20.3.0-slim
 
+# Instalar redis-tools para tener acceso a redis-cli
+RUN apt-get update && apt-get install -y redis-tools
+
 # Definir el directorio de trabajo
 WORKDIR /app
 
 # Establecer variables de entorno
-ENV REDIS_HOST=13.58.164.15
+ENV REDIS_HOST=redis-stack
 ENV REDIS_PORT=6379
 ENV APP_PORT=3000
 ENV APP_MODE=1
