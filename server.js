@@ -4,7 +4,7 @@ const express = require("express");
 const path = require("path");
 const { fileURLToPath } = require("url");
 const cors = require("cors");
-
+const APP_PORT = process.env.APP_HOST || 3000;
 //redis
 const redis = require("redis");
 //uuid
@@ -31,10 +31,9 @@ let key;
 
 // Conexión a Redis
 const redisClient = redis.createClient({
-  host: "redis",
-  port: 6379,
+  host: process.env.REDIS_HOST || 'localhost', // Utiliza 'localhost' si REDIS_HOST no está definido
+  port: process.env.REDIS_PORT || 6379         // Utiliza 6379 si REDIS_PORT no está definido
 });
-
 function connectRedis() {
   console.log("Connecting to Redis...");
 
@@ -272,9 +271,64 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "svelte", "public", "index.html"));
 });
 
-https.createServer(httpsOptions, app).listen(3000, () => {
+// Inscribirse a eventos (idAsistente, idEvento)
+app.post("/api/evento/:idEvento/:idAsistente", async (req, res) => {
+  console.log("POST /api/evento/:idEvento/:idAsistente");
+  const idEvento = req.params.idEvento;
+  const idAsistente = req.params.idAsistente;
+  try {
+    const eventos = await redisClient.json.get(KEY_EVENTS);
+    const index = eventos.findIndex((e) => e.id === idEvento);
+    if (index === -1) {
+      res.status(404).json({ error: "Evento no encontrado" });
+      return;
+    }
+    const evento = eventos[index];
+    if (evento.attendees.includes(idAsistente)) {
+      res.status(400).json({ error: "Ya estás inscrito en este evento" });
+      return;
+    }
+    if (evento.attendees.length >= evento.max_attendees) {
+      res.status(400).json({ error: "Evento lleno" });
+      return;
+    }
+    evento.attendees.push(idAsistente);
+    await redisClient.json.set(KEY_EVENTS, "$", eventos);
+    res.status(200).send("Inscrito correctamente");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Desinscribirse de eventos (idAsistente, idEvento)
+app.delete("/api/evento/:idEvento/:idAsistente", async (req, res) => {
+  console.log("DELETE /api/evento/:idEvento/:idAsistente");
+  const idEvento = req.params.idEvento;
+  const idAsistente = req.params.idAsistente;
+  try {
+    const eventos = await redisClient.json.get(KEY_EVENTS);
+    const index = eventos.findIndex((e) => e.id === idEvento);
+    if (index === -1) {
+      res.status(404).json({ error: "Evento no encontrado" });
+      return;
+    }
+    const evento = eventos[index];
+    const attendeeIndex = evento.attendees.findIndex((a) => a === idAsistente);
+    if (attendeeIndex === -1) {
+      res.status(400).json({ error: "No estás inscrito en este evento" });
+      return;
+    }
+    evento.attendees.splice(attendeeIndex, 1);
+    await redisClient.json.set(KEY_EVENTS, "$", eventos);
+    res.status(200).send("Desinscrito correctamente");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
+https.createServer(httpsOptions, app).listen(APP_PORT, () => {
   connectRedis();
-  console.log("HTTPS server running on port 3000");
-  //root url
-  console.log("https://localhost:3000");
+  console.log("HTTPS server running on port" + APP_PORT);
 });

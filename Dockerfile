@@ -1,6 +1,15 @@
+
+
+
 # Etapa de construcción para el backend Node.js
 # =============================================
 FROM node:14 AS backend-builder
+
+# Establecer variables de entorno
+ENV REDIS_HOST=redis
+ENV REDIS_PORT=6379
+
+ENV APP_PORT = 3000
 
 # Establece el directorio de trabajo para el backend
 WORKDIR /app

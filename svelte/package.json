@@ -8,7 +8,7 @@
     "dev": "rollup -c -w",
     "build": "rollup -c"
   },
-  "proxy": "http://localhost:2000",
+  "proxy": "http://localhost:3000",
   "keywords": [],
   "author": "",
   "license": "ISC",
