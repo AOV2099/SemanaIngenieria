@@ -1,10 +1,44 @@
-# Uso de una imagen base ligera de Node.js
-FROM node:20.3.0-slim
+# Uso de una imagen base ligera de Node.js para el backend
+FROM node:20.3.0-slim AS backend
 
 # Instalar redis-tools para tener acceso a redis-cli
-RUN apt-get update && apt-get install -y redis-tools
+RUN apt-get update && apt-get install -y --no-install-recommends redis-tools \
+    && rm -rf /var/lib/apt/lists/*
 
-# Definir el directorio de trabajo
+# Definir el directorio de trabajo para el backend
+WORKDIR /app
+
+# Copiar y instalar dependencias del backend
+COPY package*.json ./
+RUN npm install
+
+# Copiar el resto de los archivos del backend
+COPY . .
+
+# Construcción del frontend
+FROM node:20.3.0-slim AS frontend
+
+# Definir el directorio de trabajo para el frontend
+WORKDIR /svelte
+
+# Copiar y instalar dependencias del frontend
+COPY svelte/package*.json ./
+RUN npm install
+
+# Construir el frontend
+COPY svelte/ ./
+RUN npm run build
+
+# Construir la imagen final con ambos resultados
+FROM node:20.3.0-slim
+
+# Copiar el backend desde la etapa anterior
+COPY --from=backend /app /app
+
+# Copiar los archivos compilados del frontend al backend (suponiendo que se sirvan desde /public)
+COPY --from=frontend /svelte/public /app/public
+
+# Definir el directorio de trabajo para el contenedor final
 WORKDIR /app
 
 # Establecer variables de entorno
@@ -12,12 +46,6 @@ ENV REDIS_HOST=172.17.0.3
 ENV REDIS_PORT=6379
 ENV APP_PORT=3000
 ENV APP_MODE=1
-
-# Copiar los archivos del proyecto al directorio de trabajo
-COPY . .
-
-# Instalar dependencias
-RUN npm install
 
 # Exponer el puerto que la aplicación usará
 EXPOSE 3000
