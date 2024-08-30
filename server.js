@@ -5,6 +5,8 @@ const path = require("path");
 const { fileURLToPath } = require("url");
 const cors = require("cors");
 const APP_PORT = process.env.APP_PORT || 3000;
+const REDIS_HOST = process.env.REDIS_HOST || "redis";
+const REDIS_PORT = process.env.REDIS_PORT || 6379;
 //redis
 const redis = require("redis");
 //uuid
@@ -31,8 +33,8 @@ let key;
 
 // Conexión a Redis
 const redisClient = redis.createClient({
-  host: process.env.REDIS_HOST || 'redis', // Utiliza 'localhost' si REDIS_HOST no está definido
-  port: process.env.REDIS_PORT || 6379         // Utiliza 6379 si REDIS_PORT no está definido
+  host: REDIS_HOST, // Utiliza 'localhost' si REDIS_HOST no está definido
+  port: REDIS_PORT, // Utiliza 6379 si REDIS_PORT no está definido
 });
 function connectRedis() {
   console.log("Connecting to Redis...");
@@ -325,8 +327,6 @@ app.delete("/api/evento/:idEvento/:idAsistente", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
 
 https.createServer(httpsOptions, app).listen(APP_PORT, () => {
   connectRedis();
