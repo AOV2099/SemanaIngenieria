@@ -7,12 +7,12 @@ const cors = require("cors");
 const APP_PORT = process.env.APP_PORT || 3000;
 const REDIS_HOST = process.env.REDIS_HOST || "redis-stack";
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
-const APP_MODE =process.env.REDIS_PORT || "0"
+const APP_MODE = process.env.APP_MODE || "0";  // Cambié REDIS_PORT a APP_MODE aquí
 
-console.log ("APP MODE", APP_MODE)
+console.log("APP MODE", APP_MODE);
 console.log("APP PORT", APP_PORT);
-console.log("REDIS HOST", REDIS_HOST)
-console.log("REDIS PORT", REDIS_HOST)
+console.log("REDIS HOST", REDIS_HOST);
+console.log("REDIS PORT", REDIS_PORT);  // Cambié REDIS_HOST a REDIS_PORT aquí
 
 //redis
 const redis = require("redis");

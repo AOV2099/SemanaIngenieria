@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y redis-tools
 WORKDIR /app
 
 # Establecer variables de entorno
-ENV REDIS_HOST=redis-stack
+ENV REDIS_HOST=172.17.0.3
 ENV REDIS_PORT=6379
 ENV APP_PORT=3000
 ENV APP_MODE=1
