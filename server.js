@@ -4,10 +4,12 @@ const express = require("express");
 const path = require("path");
 const { fileURLToPath } = require("url");
 const cors = require("cors");
+
 const APP_PORT = process.env.APP_PORT || 3000;
-const REDIS_HOST = "172.17.0.3" || "redis-stack";
+const REDIS_HOST = process.env.REDIS_HOST || "localhost";  // Cambié REDIS_PORT a REDIS_HOST aquí
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 const APP_MODE = process.env.APP_MODE || "0";  // Cambié REDIS_PORT a APP_MODE aquí
+const redisURL = `redis://${process.env.REDIS_HOST || "127.0.0.1"}:${process.env.REDIS_PORT || 6379}`;
 
 console.log("APP MODE", APP_MODE);
 console.log("APP PORT", APP_PORT);
@@ -39,14 +41,31 @@ let cert;
 let key;
 
 // Conexión a Redis
-const redisClient = redis.createClient({
+/*const redisClient = redis.createClient({
   host: REDIS_HOST, // Utiliza 'localhost' si REDIS_HOST no está definido
   port: REDIS_PORT, // Utiliza 6379 si REDIS_PORT no está definido
+});*/
+/*const redisClient = redis.createClient({
+  url: redisURL
+});*/
+
+const redisClient = redis.createClient({
+  socket: {
+    host: process.env.REDIS_HOST || "127.0.0.1",
+    port: process.env.REDIS_PORT || 6379
+  }
 });
-function connectRedis() {
+
+async function connectRedis() {
   console.log("Connecting to Redis...");
 
-  redisClient.connect();
+  try {
+    await redisClient.connect();
+    console.log(`Connected to Redis at ${redisClient.options.socket.host}:${redisClient.options.socket.port}`);
+  } catch (error) {
+    console.error("Failed to connect to Redis:", error);
+    
+  }
 
   redisClient.on("end", () => {
     console.log("Redis connection ended");
@@ -61,6 +80,9 @@ function connectRedis() {
   });
 
   redisClient.on("connect", () => {
+    //print redis connection data
+    console.log("redis client:", redisClient.host, redisClient.port);
+
     console.log("Redis connected");
   });
 
@@ -336,7 +358,7 @@ app.delete("/api/evento/:idEvento/:idAsistente", async (req, res) => {
   }
 });
 
-https.createServer(httpsOptions, app).listen(APP_PORT, () => {
-  connectRedis();
+https.createServer(httpsOptions, app).listen(APP_PORT, async () => {
+  await connectRedis();
   console.log("HTTPS server running on port" + APP_PORT);
 });
