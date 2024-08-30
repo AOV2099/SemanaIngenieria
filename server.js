@@ -4,7 +4,7 @@ const express = require("express");
 const path = require("path");
 const { fileURLToPath } = require("url");
 const cors = require("cors");
-const APP_PORT = process.env.APP_HOST || 3000;
+const APP_PORT = process.env.APP_PORT || 3000;
 //redis
 const redis = require("redis");
 //uuid
