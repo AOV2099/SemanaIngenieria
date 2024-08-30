@@ -5,7 +5,7 @@ const path = require("path");
 const { fileURLToPath } = require("url");
 const cors = require("cors");
 const APP_PORT = process.env.APP_PORT || 3000;
-const REDIS_HOST = process.env.REDIS_HOST || "redis-stack";
+const REDIS_HOST = "172.17.0.3" || "redis-stack";
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 const APP_MODE = process.env.APP_MODE || "0";  // Cambié REDIS_PORT a APP_MODE aquí
 
@@ -65,6 +65,7 @@ function connectRedis() {
   });
 
   redisClient.on("error", (error) => {
+    
     console.error(error);
   });
 }
