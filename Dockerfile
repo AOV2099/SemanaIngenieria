@@ -1,6 +1,3 @@
-
-
-
 # Etapa de construcción para el backend Node.js
 # =============================================
 FROM node:14 AS backend-builder
