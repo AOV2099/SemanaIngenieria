@@ -4,6 +4,7 @@
   import Scanner from './routes/Scanner.svelte';
   import {Router, Route, Link} from 'svelte-routing';
   import UserEvents from './routes/UserEvents.svelte';
+  import { Toaster } from "svelte-french-toast";
 
 </script>
 
@@ -14,5 +15,8 @@
       <Route path="/events" component={UserEvents} />
 
   </Router>
+
+
+<Toaster />
 <style>
 </style>

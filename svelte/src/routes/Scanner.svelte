@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import QrScanner from "qr-scanner";
   import toast, { Toaster } from "svelte-french-toast";
+  import { API_URL } from "../store";
 
   let videoElement;
   let qrScanner;
@@ -68,7 +69,8 @@
           lastToastTime = now;
           console.log("QR code scanned:", result);
           scanResult = result.data;
-          toast.success("Visita registrada: " + scanResult, toastOptions);
+          //toast.success("Visita registrada: " + scanResult, toastOptions);
+          registerVisit(scanResult);
         }
       },
       {
@@ -83,6 +85,46 @@
         alert("Error starting QR Scanner: " + err);
       });
     });
+  }
+
+  async function registerVisit(qrReading) {
+    try {
+      let userId = -1;
+      let eventId = "";
+      let tranformedQrReading = qrReading.split("-");
+
+      if (tranformedQrReading.length < 2) {
+        toast.error("QR inválido");
+        return;
+      }
+
+      userId = tranformedQrReading[0];
+      for (let i = 1; i < tranformedQrReading.length; i++) {
+        eventId += tranformedQrReading[i] + "-";
+      }
+
+      eventId = eventId.slice(0, -1); //remove last character
+
+      const res = await fetch(`${API_URL}/api/evento/visit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          event_id: eventId,
+        }),
+      });
+
+      const result = await res.json();
+      if (result.ok) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   onMount(() => {
@@ -108,7 +150,7 @@
 
 <Toaster />
 
-<nav class="navbar navbar-dark bg-primary" style="border-radius: 12px;">
+<nav class="navbar navbar-dark bg-primary shadow-lg" style="">
   <div class="container-fluid">
     <a class="navbar-brand" href="#">
       <img
@@ -130,9 +172,9 @@
       >
         <i class="bi bi-camera-video-fill"></i>
       </button>
-      <button class="btn btn-secondary" type="submit">
+      <!--<button class="btn btn-secondary" type="submit">
         <i class="bi bi-grid-fill"></i>
-      </button>
+      </button>-->
     </form>
   </div>
 </nav>
@@ -165,8 +207,36 @@
       <div class="modal-body">
         <div class="row">
           {#each cameras as camera}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+
             <div
-              class="card text-center col-sm-6"
+              class="card mb-3 shadow-sm"
+              on:click={() => {
+                selectCamera(camera.id);
+                //close modal
+                document.getElementById("cameraModal").click();
+              }}
+            >
+              <div class="row">
+                <div class="col-3">
+                  <img
+                    src="https://media.istockphoto.com/id/1226328537/vector/image-place-holder-with-a-gray-camera-icon.jpg?s=612x612&w=0&k=20&c=qRydgCNlE44OUSSoz5XadsH7WCkU59-l-dwrvZzhXsI="
+                    class="card-img-top"
+                    alt="..."
+                  />
+                </div>
+
+                <div
+                  class="col-9 d-flex justify-content-center align-items-center"
+                >
+                  <p class="card-text">{camera.label}</p>
+                </div>
+              </div>
+            </div>
+
+            <!--
+            <div
+              class="card text-center col-6"
               on:click={() => {
                 selectCamera(camera.id);
                 //close modal
@@ -183,6 +253,7 @@
                 <p class="card-text">{camera.label}</p>
               </div>
             </div>
+            -->
           {/each}
         </div>
       </div>

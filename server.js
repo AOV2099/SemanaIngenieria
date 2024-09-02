@@ -6,20 +6,23 @@ const { fileURLToPath } = require("url");
 const cors = require("cors");
 
 const APP_PORT = process.env.APP_PORT || 3000;
-const REDIS_HOST = process.env.REDIS_HOST || "localhost";  // Cambié REDIS_PORT a REDIS_HOST aquí
+const REDIS_HOST = process.env.REDIS_HOST || "localhost"; // Cambié REDIS_PORT a REDIS_HOST aquí
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
-const APP_MODE = process.env.APP_MODE || "0";  // Cambié REDIS_PORT a APP_MODE aquí
-const redisURL = `redis://${process.env.REDIS_HOST || "127.0.0.1"}:${process.env.REDIS_PORT || 6379}`;
+const APP_MODE = process.env.APP_MODE || "0"; // Cambié REDIS_PORT a APP_MODE aquí
+const redisURL = `redis://${process.env.REDIS_HOST || "127.0.0.1"}:${
+  process.env.REDIS_PORT || 6379
+}`;
 
 console.log("APP MODE", APP_MODE);
 console.log("APP PORT", APP_PORT);
 console.log("REDIS HOST", REDIS_HOST);
-console.log("REDIS PORT", REDIS_PORT);  // Cambié REDIS_HOST a REDIS_PORT aquí
+console.log("REDIS PORT", REDIS_PORT); // Cambié REDIS_HOST a REDIS_PORT aquí
 
 //redis
 const redis = require("redis");
 //uuid
 const { v4: uuidv4 } = require("uuid");
+const { log } = require("console");
 
 const app = express();
 // Middleware para servir archivos estáticos (Svelte)
@@ -36,6 +39,7 @@ app.use(
 );
 
 const KEY_EVENTS = "UNAM_EVENTOS";
+const KEY_ATTENDEES = "SI_ALUMNOS";
 
 let cert;
 let key;
@@ -52,8 +56,8 @@ let key;
 const redisClient = redis.createClient({
   socket: {
     host: process.env.REDIS_HOST || "127.0.0.1",
-    port: process.env.REDIS_PORT || 6379
-  }
+    port: process.env.REDIS_PORT || 6379,
+  },
 });
 
 async function connectRedis() {
@@ -61,10 +65,11 @@ async function connectRedis() {
 
   try {
     await redisClient.connect();
-    console.log(`Connected to Redis at ${redisClient.options.socket.host}:${redisClient.options.socket.port}`);
+    console.log(
+      `Connected to Redis at ${redisClient.options.socket.host}:${redisClient.options.socket.port}`
+    );
   } catch (error) {
     console.error("Failed to connect to Redis:", error);
-    
   }
 
   redisClient.on("end", () => {
@@ -87,7 +92,6 @@ async function connectRedis() {
   });
 
   redisClient.on("error", (error) => {
-    
     console.error(error);
   });
 }
@@ -187,7 +191,7 @@ app.get("/build/bundle.css", (req, res) => {
     "build",
     "bundle.css"
   );
-  console.log("Full path to bundle: ", fullPath);
+  //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
@@ -199,13 +203,13 @@ app.get("/build/bundle.js", (req, res) => {
     "build",
     "bundle.js"
   );
-  console.log("Full path to bundle: ", fullPath);
+  //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
 app.get("/global.css", (req, res) => {
   const fullPath = path.join(__dirname, "svelte", "public", "global.css");
-  console.log("Full path to bundle: ", fullPath);
+  //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
@@ -222,6 +226,15 @@ app.get("/api/eventos", async (req, res) => {
   //ibtener json de redis
   try {
     const eventos = await redisClient.json.get(KEY_EVENTS);
+
+    eventos.forEach((evento) => {
+      if (!evento.attendees) {
+        evento.attendees = [];
+      }
+      //retornar unicamente el numero de asistentes por seguridad
+      evento.attendees = evento.attendees.length;
+    });
+
     res.status(200).json(eventos);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -267,7 +280,13 @@ app.put("/api/evento", async (req, res) => {
       res.status(404).json({ error: "Evento no encontrado" });
       return;
     }
-    eventos[index] = evento;
+    //actualizar evento sin borrar info previa
+    eventos[index].forEach((key) => {
+      if (evento[key]) {
+        eventos[index][key] = evento[key];
+      }
+    });
+
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
     res.status(200).send("Evento actualizado correctamente");
   } catch (error) {
@@ -295,67 +314,173 @@ app.delete("/api/evento/:id", async (req, res) => {
   }
 });
 
+// Inscribirse a eventos (idAsistente, idEvento)
+app.post("/api/evento/atendees/suscribe", async (req, res) => {
+  console.log("POST /api/evento/atendees/suscribe");
+  const idEvento = req.body.event_id;
+  const idAsistente = req.body.user_id;
+
+  try {
+    const eventos = await redisClient.json.get(KEY_EVENTS);
+    const index = eventos.findIndex((e) => e.id === idEvento);
+    if (index === -1) {
+      res.status(404).json({ error: "Evento no encontrado" });
+      return;
+    }
+    const evento = eventos[index];
+
+    if (!evento.attendees) {
+      evento.attendees = [];
+    }
+
+    // Verificar si el asistente ya está inscrito
+    if (evento.attendees.includes(idAsistente)) {
+      //console.log("Ya inscrito", idAsistente);
+      res.status(400).json({ error: "Ya estás inscrito a este evento" });
+      return;
+    }
+
+    // Verificar cupo disponible
+    if (evento.attendees.length >= evento.max_attendees) {
+      //console.log("Evento lleno", idAsistente);
+      res.status(400).json({ error: "Evento lleno" });
+      return;
+    }
+
+    // Añadir asistente al evento
+    evento.attendees.push(idAsistente);
+    await redisClient.json.set(KEY_EVENTS, "$", eventos);
+
+    // Manejar la inscripción del asistente a sus eventos
+    let attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
+    let attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
+
+    attendee.events.push(idEvento);
+    await redisClient.hSet(
+      KEY_ATTENDEES,
+      idAsistente,
+      JSON.stringify(attendee)
+    );
+
+    res.status(200).json({ message: "Inscrito correctamente", ok: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//desinscribirse de un evento
+app.post("/api/evento/atendees/unsuscribe", async (req, res) => {
+  console.log("POST /api/evento/atendees/unsuscribe");
+  const idEvento = req.body.event_id;
+  const idAsistente = req.body.user_id;
+
+  try {
+    const eventos = await redisClient.json.get(KEY_EVENTS);
+    const index = eventos.findIndex((e) => e.id === idEvento);
+    if (index === -1) {
+      res.status(404).json({ error: "Evento no encontrado" });
+      return;
+    }
+    const evento = eventos[index];
+
+    if (!evento.attendees) {
+      evento.attendees = [];
+    }
+
+    // Verificar si el asistente ya está inscrito
+    if (!evento.attendees.includes(idAsistente)) {
+      res.status(400).json({ error: "No estás inscrito a este evento" });
+      return;
+    }
+
+    // Eliminar asistente del evento
+    evento.attendees = evento.attendees.filter((id) => id !== idAsistente);
+    await redisClient.json.set(KEY_EVENTS, "$", eventos);
+
+    // Manejar la inscripción del asistente a sus eventos
+    let attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
+    let attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
+
+    attendee.events = attendee.events.filter((id) => id !== idEvento);
+    await redisClient.hSet(
+      KEY_ATTENDEES,
+      idAsistente,
+      JSON.stringify(attendee)
+    );
+
+    res.status(200).send("Desinscrito correctamente");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//obtener lista de eventos inscritos por usuario
+app.get("/api/evento/atendee/:id", async (req, res) => {
+  try {
+    console.log("GET /api/evento/atendee/:id");
+    const idAsistente = req.params.id;
+    const attendees = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
+    //console.log(attendees);
+    if (!attendees) {
+      res.status(404).json({ error: "Usuario no encontrado" });
+      return;
+    }
+    res.status(200).json(JSON.parse(attendees).events);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//refistrar visitas
+app.post("/api/evento/visit", async (req, res) => {
+  console.log("POST /api/evento/visit");
+  const idEvento = req.body.event_id;
+  const idAsistente = req.body.user_id;
+
+  console.log("idEvento", idEvento);
+  console.log("idAsistente", idAsistente);
+  
+  try {
+    const eventos = await redisClient.json.get(KEY_EVENTS);
+    const index = eventos.findIndex((e) => e.id === idEvento);
+    if (index === -1) {
+      res.status(404).json({ error: "Evento no encontrado" });
+      return;
+    }
+    const evento = eventos[index];
+
+    if (!evento.visits) {
+      evento.visits = [];
+    }
+
+    // Verificar si el asistente ya está inscrito
+    if (evento.visits.includes(idAsistente)) {
+      res.status(400).json({ error: "Ya se ha visitado este evento para: " + idAsistente });
+      return;
+    }
+
+    // verificamos que el usuario esté inscrito al evento
+    if (!evento.attendees.includes(idAsistente)) {
+      res.status(400).json({ error: "El usuario no está inscrito al evento" });
+      return;
+    }
+
+    // Añadir asistente al evento
+    evento.visits.push(idAsistente);
+    await redisClient.json.set(KEY_EVENTS, "$", eventos);
+
+    res.status(200).json({ message: "Visita registrada correctamente para: " + idAsistente, ok: true});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Asegúrate de que cualquier otra ruta no específica devuelva tu archivo HTML principal de Svelte
 // Rutas de API y otros manejadores específicos aquí
 
 // Luego al final, tu capturador para SPA
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "svelte", "public", "index.html"));
-});
-
-// Inscribirse a eventos (idAsistente, idEvento)
-app.post("/api/evento/:idEvento/:idAsistente", async (req, res) => {
-  console.log("POST /api/evento/:idEvento/:idAsistente");
-  const idEvento = req.params.idEvento;
-  const idAsistente = req.params.idAsistente;
-  try {
-    const eventos = await redisClient.json.get(KEY_EVENTS);
-    const index = eventos.findIndex((e) => e.id === idEvento);
-    if (index === -1) {
-      res.status(404).json({ error: "Evento no encontrado" });
-      return;
-    }
-    const evento = eventos[index];
-    if (evento.attendees.includes(idAsistente)) {
-      res.status(400).json({ error: "Ya estás inscrito en este evento" });
-      return;
-    }
-    if (evento.attendees.length >= evento.max_attendees) {
-      res.status(400).json({ error: "Evento lleno" });
-      return;
-    }
-    evento.attendees.push(idAsistente);
-    await redisClient.json.set(KEY_EVENTS, "$", eventos);
-    res.status(200).send("Inscrito correctamente");
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Desinscribirse de eventos (idAsistente, idEvento)
-app.delete("/api/evento/:idEvento/:idAsistente", async (req, res) => {
-  console.log("DELETE /api/evento/:idEvento/:idAsistente");
-  const idEvento = req.params.idEvento;
-  const idAsistente = req.params.idAsistente;
-  try {
-    const eventos = await redisClient.json.get(KEY_EVENTS);
-    const index = eventos.findIndex((e) => e.id === idEvento);
-    if (index === -1) {
-      res.status(404).json({ error: "Evento no encontrado" });
-      return;
-    }
-    const evento = eventos[index];
-    const attendeeIndex = evento.attendees.findIndex((a) => a === idAsistente);
-    if (attendeeIndex === -1) {
-      res.status(400).json({ error: "No estás inscrito en este evento" });
-      return;
-    }
-    evento.attendees.splice(attendeeIndex, 1);
-    await redisClient.json.set(KEY_EVENTS, "$", eventos);
-    res.status(200).send("Desinscrito correctamente");
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
 
 https.createServer(httpsOptions, app).listen(APP_PORT, async () => {

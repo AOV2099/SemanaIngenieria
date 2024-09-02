@@ -1,5 +1,5 @@
 <script>
-  import toast, { Toaster } from "svelte-french-toast";
+  import toast from "svelte-french-toast";
   import { API_URL } from "../store";
   import { onMount } from "svelte";
 
@@ -262,7 +262,6 @@
   });
 </script>
 
-<Toaster />
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <nav class="navbar navbar-dark bg-dark elevated fixed-top">
   <div class="container-fluid">
@@ -284,7 +283,7 @@
 <br />
 <br />
 
-<div class="container card elevated" style="height: 100%; overflow:auto;">
+<div class="container card elevated" style="height: 85%; overflow:auto; overflow-x:hidden">
   <div class="row p-5 pb-2" style="margin-bottom: 0px;">
     <!--Info cards-->
 
@@ -460,7 +459,7 @@
         <div class="row">
           <!--imagen-->
 
-          {#if selectedEvent.imageUrl}
+          <!--{#if selectedEvent.imageUrl}
             <div class="d-flex justify-content-center">
               <div class="image-preview mb-3">
                 <img
@@ -479,7 +478,7 @@
               accept="image/*"
               on:change={handleFileUpload}
             />
-          </div>
+          </div>-->
 
           <!--Nombre del evento-->
           <div class="input-group mb-3 col-12">
@@ -609,7 +608,7 @@
               bind:value={selectedEvent.exponent}
               type="text"
               class="form-control"
-              placeholder="Exponente"
+              placeholder="Ponente"
               aria-label="eventExponent"
               aria-describedby="basic-addon1"
             />

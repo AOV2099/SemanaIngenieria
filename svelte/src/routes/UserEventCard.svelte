@@ -1,5 +1,8 @@
 <script>
   import { onMount } from "svelte";
+  import toast from "svelte-french-toast";
+  import { API_URL, openDetailModal, userModalData } from "../store";
+  import qrCode from "qrcode";
 
   export let event = {
     id: 1,
@@ -8,7 +11,8 @@
     start_time: "10:00",
     end_time: "12:00",
     location: "Facultad de Ciencias",
-    description: "loremp ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec purus feugiat, molestie ipsum id, tincidunt nunc. Nulla facilisi. Nulla nec purus feugiat, molestie ipsum id, tincidunt nunc. Nulla facilisi.",
+    description:
+      "loremp ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec purus feugiat, molestie ipsum id, tincidunt nunc. Nulla facilisi. Nulla nec purus feugiat, molestie ipsum id, tincidunt nunc. Nulla facilisi.",
     attendees: 0,
     max_attendees: 100,
     career: "Ingeniería en Computación",
@@ -17,9 +21,9 @@
     img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
   };
 
-  export let color = "#85c1e9";
-
-  export let userId = 1;
+  export let color;
+  export let userId;
+  export let isSuscribed = false;
 
   const nombreDia = new Date(event.date).toLocaleDateString("es-ES", {
     weekday: "long",
@@ -32,19 +36,113 @@
     month: "long",
   });
 
-  function openDetailModal() {
-    console.log("Opening modal");
-    var detailModal = new bootstrap.Modal(
-      document.getElementById("detail-modal"),
-      {
-        keyboard: false,
-      }
-    );
-    detailModal.show();
+  async function generateQR() {
+    const qr = await qrCode.toDataURL(userId + "-" + event.id, {
+      errorCorrectionLevel: "H",
+      type: "image/jpeg",
+      quality: 0.3,
+      margin: 1,
+      color: {
+        dark: "#000000",
+        light: "#ffffff",
+      },
+    });
+    console.log("qrBase64", qr);
+    return qr;
   }
 
-  function incribirEvento() {
-    console.log("Inscribiendo");
+  /*async function openDetailModal() {
+    if (isSuscribed) {
+      console.log("Opening modal");
+
+      await generateQR();
+      var detailModal = new bootstrap.Modal(
+        document.getElementById("detail-modal"),
+        {
+          keyboard: false,
+        }
+      );
+      detailModal.show();
+    } else {
+      toast.error("Debes inscribirte para al evento ver tu QR");
+    }
+  }*/
+
+  async function handleSuscription() {
+    if (isSuscribed) {
+      await unsuscribeEvent();
+    } else {
+      await incribirEvento();
+    }
+  }
+
+  async function incribirEvento() {
+    try {
+      const res = await fetch(`${API_URL}/api/evento/atendees/suscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          event_id: event.id,
+          user_id: userId,
+        }),
+      });
+      let response = await res.json();
+      //console.log("response catched", response);
+
+      switch (res.status) {
+        case 200:
+          //console.log("response", response.message);
+          toast.success(response.message);
+          isSuscribed = true;
+          event.attendees++;
+          break;
+        case 400:
+          toast.error(response.error);
+          break;
+
+        default:
+          toast.error("Error al inscribirse");
+          break;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function unsuscribeEvent() {
+    try {
+      const res = await fetch(`${API_URL}/api/evento/atendees/unsuscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          event_id: event.id,
+          user_id: userId,
+        }),
+      });
+      //let response = await res.json();
+      //console.log("response", response);
+
+      switch (res.status) {
+        case 200:
+          toast.success("Se ha dado de baja correctamente");
+          isSuscribed = false;
+          event.attendees--;
+          break;
+        case 400:
+          toast.error("No estás inscrito en este evento");
+          break;
+
+        default:
+          toast.error("Error al darse de baja");
+          break;
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   onMount(() => {
@@ -60,44 +158,66 @@
     openDetailModal();
   }}
 > -->
-<div class="main-card-container" style="background-color: {color};">
-  <!--fecha de evento-->
-  <div class="d-flex justify-content-between">
-    <div class="info-box">
-      {nombreDia.toUpperCase()}
-      {numeroDia.toUpperCase()}
+<div class="main-card-container shadow" style="background-color: {color};">
+  <div
+    on:click={async () => {
+      if (!isSuscribed) {
+        toast.error("Debes inscribirte para al evento ver tu QR");
+        return;
+      } else {
+        userModalData.set({
+          event: event,
+          qrBase64: await generateQR(),
+        });
+
+        openDetailModal();
+      }
+    }}
+  >
+    <!--fecha de evento-->
+    <div class="d-flex justify-content-between">
+      <div class="info-box">
+        {nombreDia.toUpperCase()}
+        {numeroDia.toUpperCase()}
+      </div>
+
+      <div class="info-box">
+        {event.start_time} - {event.end_time} hrs.
+      </div>
     </div>
 
-    <div class="info-box">
-      {event.start_time} - {event.end_time} hrs.
+    <!--Nombre de evento-->
+    <div class="event-name">
+      {event.name.toUpperCase()}
     </div>
-  </div>
-
-  <!--Nombre de evento-->
-  <div class="event-name">
-    {event.name.toUpperCase()}
-  </div>
-  <div class="d-flex justify-content-start">
-    <p class="event-info">
-      {event.career} <br />
-      {event.location} <br />
-      {event.exponent}
-    </p>
+    <div class="d-flex justify-content-start">
+      <p class="event-info">
+        {event.career} <br />
+        {event.location} <br />
+        {event.exponent}
+      </p>
+    </div>
   </div>
   <div class="d-flex justify-content-between">
     <p class="event-info" style="font-weight: 700; margin-top:8px">
       <span style="font-weight: 300;"> Asistentes: </span>
-      {event.attendees} / {event.max_attendees}
+      {event.attendees || 0} / {event.max_attendees}
     </p>
 
     <button
       class="btn btn-light"
-      on:click={() => {
-        incribirEvento();
+      on:click={async () => {
+        await handleSuscription();
       }}
-      >Inscribirse</button> 
-  </div></div
->
+    >
+      {#if isSuscribed}
+        Darse de baja
+      {:else}
+        Inscribirse
+      {/if}
+    </button>
+  </div>
+</div>
 
 <!--<div class="d-flex justify-content-center">
     <button
@@ -113,17 +233,19 @@
 <!-- Button trigger modal -->
 
 <!-- Modal -->
-<div
-  class="modal fade modal-dialog-scrollable"
+<!--<div
+  class="modal fade"
   id="detail-modal"
   tabindex="-1"
   aria-labelledby="detail-modalLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog">
+  <div
+    class="modal-dialog modal-dialog modal-dialog-centered modal-dialog-scrollable"
+  >
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="detail-modalLabel">{event.name}</h1>
+        <h1 class="modal-title fs-5" id="detail-modalLabel">{$userModalData.event.name}</h1>
         <button
           type="button"
           class="btn-close"
@@ -132,36 +254,38 @@
         ></button>
       </div>
       <div class="modal-body">
-        <!--badges para los horarios-->
+        
+   
         <div class="">
           <span class="badge bg-primary"
-            >{nombreDia} {numeroDia} de {nombreMes}</span
+          >{nombreDia} {numeroDia} de {nombreMes}</span
           >
           <span class="badge bg-success"
-            >{event.start_time} - {event.end_time} hrs.</span
+          >{$userModalData.event.start_time} - {$userModalData.event.end_time} hrs.</span
           >
-          <span class="badge bg-secondary">{event.location}</span>
-
-          <span class="badge bg-info">{event.attendees} / {event.max_attendees}</span>
-          <span class="badge bg-warning">{event.career}</span>
-
+          <span class="badge bg-secondary">{$userModalData.event.location}</span>
+          
+          <span class="badge bg-info"
+          >{$userModalData.event.attendees} / {$userModalData.event.max_attendees}</span
+          >
+          <span class="badge bg-warning">{$userModalData.event.career}</span>
+          
+          <span class="badge bg-danger">{$userModalData.event.exponent}</span>
         </div>
-        <hr>
-
-        <div>
-            <h5>Exponente:</h5>
-            <p>{event.exponent}</p>
+        <hr />
+        
+        <div id="qr-container">
+          <img class="w-100" src={$userModalData.qrBase64} alt="QR" />
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
           >Cerrar</button
         >
-        <button type="button" class="btn btn-primary">Inscribirse</button>
       </div>
     </div>
   </div>
-</div>
+</div>-->
 
 <style>
   .expand-btn {

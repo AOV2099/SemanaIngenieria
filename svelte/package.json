@@ -26,6 +26,7 @@
     "html5-qrcode": "^2.3.8",
     "instascan": "^1.0.0",
     "qr-scanner": "^1.4.2",
+    "qrcode": "^1.5.4",
     "sirv-cli": "^2.0.0",
     "svelte-french-toast": "^1.2.0",
     "svelte-kit": "^1.2.0",
