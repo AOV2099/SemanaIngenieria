@@ -224,6 +224,7 @@ app.get("/img/:imgid", (req, res) => {
     __dirname,
     "svelte",
     "public",
+    "img",
     `${imgid}`
   );
   //console.log("Full path to bundle: ", fullPath);

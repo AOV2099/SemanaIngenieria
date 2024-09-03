@@ -11408,37 +11408,37 @@ function create_fragment$2(ctx) {
 			attr_dev(img, "alt", "event");
 			attr_dev(img, "class", "background-image svelte-1h6815n");
 			set_style(img, "color", "white");
-			add_location(img, file$1, 184, 2, 4827);
+			add_location(img, file$1, 184, 2, 4831);
 			attr_dev(div0, "class", "info-box svelte-1h6815n");
-			add_location(div0, file$1, 208, 6, 5329);
+			add_location(div0, file$1, 208, 6, 5333);
 			attr_dev(div1, "class", "info-box svelte-1h6815n");
-			add_location(div1, file$1, 213, 6, 5440);
+			add_location(div1, file$1, 213, 6, 5444);
 			attr_dev(div2, "class", "d-flex justify-content-between");
-			add_location(div2, file$1, 207, 4, 5278);
+			add_location(div2, file$1, 207, 4, 5282);
 			attr_dev(div3, "class", "event-name svelte-1h6815n");
-			add_location(div3, file$1, 219, 4, 5571);
-			add_location(br0, file$1, 224, 23, 5739);
-			add_location(br1, file$1, 225, 25, 5771);
+			add_location(div3, file$1, 219, 4, 5575);
+			add_location(br0, file$1, 224, 23, 5743);
+			add_location(br1, file$1, 225, 25, 5775);
 			attr_dev(p0, "class", "event-info svelte-1h6815n");
-			add_location(p0, file$1, 223, 6, 5693);
+			add_location(p0, file$1, 223, 6, 5697);
 			attr_dev(div4, "class", "d-flex justify-content-start");
-			add_location(div4, file$1, 222, 4, 5644);
-			add_location(div5, file$1, 191, 2, 4939);
+			add_location(div4, file$1, 222, 4, 5648);
+			add_location(div5, file$1, 191, 2, 4943);
 			set_style(span, "font-weight", "300");
-			add_location(span, file$1, 232, 6, 5955);
+			add_location(span, file$1, 232, 6, 5959);
 			attr_dev(p1, "class", "event-info svelte-1h6815n");
 			set_style(p1, "font-weight", "700");
 			set_style(p1, "margin-top", "8px");
-			add_location(p1, file$1, 231, 4, 5885);
+			add_location(p1, file$1, 231, 4, 5889);
 			attr_dev(button, "class", "btn btn-light");
-			add_location(button, file$1, 236, 4, 6075);
+			add_location(button, file$1, 236, 4, 6079);
 			attr_dev(div6, "class", "d-flex justify-content-between");
-			add_location(div6, file$1, 230, 2, 5836);
+			add_location(div6, file$1, 230, 2, 5840);
 			attr_dev(div7, "class", "main-card-container shadow svelte-1h6815n");
 			set_style(div7, "background-color", /*cardStyleData*/ ctx[2].color);
 			set_style(div7, "overflow", "hidden");
 			set_style(div7, "position", "relative");
-			add_location(div7, file$1, 180, 0, 4692);
+			add_location(div7, file$1, 180, 0, 4696);
 		},
 		l: function claim(nodes) {
 			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11576,7 +11576,7 @@ function instance$2($$self, $$props, $$invalidate) {
 
 		if (careerCatalog) {
 			$$invalidate(2, cardStyleData = careerCatalog);
-			$$invalidate(2, cardStyleData.img = API_URL + "/" + cardStyleData.img_bg, cardStyleData);
+			$$invalidate(2, cardStyleData.img = API_URL + "/img/" + cardStyleData.img_bg, cardStyleData);
 			console.log("Career found", event.career);
 			console.log("Career data", cardStyleData);
 		} else {
