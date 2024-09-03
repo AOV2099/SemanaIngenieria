@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import toast from "svelte-french-toast";
-  import { API_URL, openDetailModal, userModalData } from "../store";
+  import { API_URL, availableCareers, openDetailModal, userModalData } from "../store";
   import qrCode from "qrcode";
 
   export let event = {
@@ -20,6 +20,25 @@
     status: "Activo",
     img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
   };
+
+  let cardStyleData = {
+    name: "UNAM",
+    color: "#8bc34a",
+    img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
+  };
+
+  function getCardStyleData(){
+    //console.log("Available careers", $availableCareers);
+    const careerCatalog = $availableCareers.find((career) => career.name === event.career);
+    if (careerCatalog) {
+      cardStyleData = careerCatalog;
+      cardStyleData.img = API_URL + "/img/"+ cardStyleData.img_bg;
+      console.log("Career found", event.career);
+      console.log("Career data", cardStyleData);
+    } else{
+      console.log("Career not found", event.career);
+    }
+  }
 
   export let color;
   export let userId;
@@ -147,6 +166,7 @@
 
   onMount(() => {
     //cardClickListener();
+    getCardStyleData();
   });
 </script>
 
@@ -158,7 +178,17 @@
     openDetailModal();
   }}
 > -->
-<div class="main-card-container shadow" style="background-color: {color};">
+<div
+  class="main-card-container shadow"
+  style="background-color: {cardStyleData.color}; overflow: hidden; position: relative;"
+>
+  <img
+    src={cardStyleData.img}
+    alt="event"
+    class="background-image"
+    style="color: white;"
+  />
+
   <div
     on:click={async () => {
       if (!isSuscribed) {
@@ -211,9 +241,9 @@
       }}
     >
       {#if isSuscribed}
-        Darse de baja
+        Eliminar registro
       {:else}
-        Inscribirse
+        Registrar evento
       {/if}
     </button>
   </div>
@@ -299,7 +329,21 @@
     margin: 8px;
     max-height: 300px;
     padding: 18px;
+    position: relative; /* Esta línea es importante para que funcione el posicionamiento absoluto de la imagen */
   }
+
+.background-image {
+  position: absolute;
+  top: 0%;  /* Mueve la imagen 10% hacia abajo desde la parte superior del contenedor */
+  left: 40%; /* Mueve la imagen al centro, y desde ahí ajustaremos */
+  width: 50%; /* Reduce el ancho para que no ocupe todo el contenedor si no es necesario */
+  height: 100%; /* Ajusta la altura si es necesario */
+  object-fit: cover;
+  opacity: 0.1;
+  z-index: 0;
+  pointer-events: none;
+}
+
 
   .info-box {
     border-radius: 50px;

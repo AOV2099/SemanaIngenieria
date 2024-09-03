@@ -1108,6 +1108,10 @@ function attr_dev(node, attribute, value) {
     else
         dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
 }
+function prop_dev(node, property, value) {
+    node[property] = value;
+    dispatch_dev('SvelteDOMSetProperty', { node, property, value });
+}
 function set_data_dev(text, data) {
     data = '' + data;
     if (text.data === data)
@@ -2020,7 +2024,7 @@ function create_if_block_2(ctx) {
 }
 
 // (11:38) 
-function create_if_block_1$1(ctx) {
+function create_if_block_1$2(ctx) {
 	let switch_instance;
 	let switch_instance_anchor;
 	let current;
@@ -2084,7 +2088,7 @@ function create_if_block_1$1(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_if_block_1$1.name,
+		id: create_if_block_1$2.name,
 		type: "if",
 		source: "(11:38) ",
 		ctx
@@ -2136,7 +2140,7 @@ function create_if_block_3(ctx) {
 	let current_block_type_index;
 	let if_block;
 	let current;
-	const if_block_creators = [create_if_block_4, create_else_block$6];
+	const if_block_creators = [create_if_block_4, create_else_block$7];
 	const if_blocks = [];
 
 	function select_block_type_1(ctx, dirty) {
@@ -2213,7 +2217,7 @@ function create_if_block_3(ctx) {
 }
 
 // (20:4) {:else}
-function create_else_block$6(ctx) {
+function create_else_block$7(ctx) {
 	let checkmarkicon;
 	let current;
 	const checkmarkicon_spread_levels = [/*iconTheme*/ ctx[0]];
@@ -2259,7 +2263,7 @@ function create_else_block$6(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_else_block$6.name,
+		id: create_else_block$7.name,
 		type: "else",
 		source: "(20:4) {:else}",
 		ctx
@@ -2326,7 +2330,7 @@ function create_fragment$d(ctx) {
 	let if_block;
 	let if_block_anchor;
 	let current;
-	const if_block_creators = [create_if_block$7, create_if_block_1$1, create_if_block_2];
+	const if_block_creators = [create_if_block$7, create_if_block_1$2, create_if_block_2];
 	const if_blocks = [];
 
 	function select_block_type(ctx, dirty) {
@@ -2502,7 +2506,7 @@ class ToastIcon extends SvelteComponentDev {
 const file$a = "node_modules/svelte-french-toast/dist/components/ToastMessage.svelte";
 
 // (7:1) {:else}
-function create_else_block$5(ctx) {
+function create_else_block$6(ctx) {
 	let switch_instance;
 	let switch_instance_anchor;
 	let current;
@@ -2574,7 +2578,7 @@ function create_else_block$5(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_else_block$5.name,
+		id: create_else_block$6.name,
 		type: "else",
 		source: "(7:1) {:else}",
 		ctx
@@ -2621,7 +2625,7 @@ function create_fragment$c(ctx) {
 	let current_block_type_index;
 	let if_block;
 	let current;
-	const if_block_creators = [create_if_block$6, create_else_block$5];
+	const if_block_creators = [create_if_block$6, create_else_block$6];
 	const if_blocks = [];
 
 	function select_block_type(ctx, dirty) {
@@ -2777,7 +2781,7 @@ const get_default_slot_context$4 = ctx => ({
 });
 
 // (28:1) {:else}
-function create_else_block$4(ctx) {
+function create_else_block$5(ctx) {
 	let current;
 	const default_slot_template = /*#slots*/ ctx[6].default;
 	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[7], get_default_slot_context$4);
@@ -2830,7 +2834,7 @@ function create_else_block$4(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_else_block$4.name,
+		id: create_else_block$5.name,
 		type: "else",
 		source: "(28:1) {:else}",
 		ctx
@@ -3099,7 +3103,7 @@ function create_fragment$b(ctx) {
 	let div_class_value;
 	let div_style_value;
 	let current;
-	const if_block_creators = [create_if_block$5, create_else_block$4];
+	const if_block_creators = [create_if_block$5, create_else_block$5];
 	const if_blocks = [];
 
 	function select_block_type(ctx, dirty) {
@@ -3331,7 +3335,7 @@ const get_default_slot_changes$3 = dirty => ({ toast: dirty & /*toast*/ 1 });
 const get_default_slot_context$3 = ctx => ({ toast: /*toast*/ ctx[0] });
 
 // (34:1) {:else}
-function create_else_block$3(ctx) {
+function create_else_block$4(ctx) {
 	let current;
 	const default_slot_template = /*#slots*/ ctx[8].default;
 	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[7], get_default_slot_context$3);
@@ -3384,7 +3388,7 @@ function create_else_block$3(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_else_block$3.name,
+		id: create_else_block$4.name,
 		type: "else",
 		source: "(34:1) {:else}",
 		ctx
@@ -3498,7 +3502,7 @@ function create_fragment$a(ctx) {
 	let current_block_type_index;
 	let if_block;
 	let current;
-	const if_block_creators = [create_if_block$4, create_else_block$3];
+	const if_block_creators = [create_if_block$4, create_else_block$4];
 	const if_blocks = [];
 
 	function select_block_type(ctx, dirty) {
@@ -4109,9 +4113,51 @@ var userModalData = writable({
     qrCode: "UwU",
 });
 
+/*xport var availableCareers = writable([
+    "División de las Ciencias Físico-Matemáticas y de las Ingenierías",
+    "Ingeniería Civil",
+    "Ingeniería en Computación",
+    "Ingeniería Eléctrica-Electrónica",
+    "Ingeniería Industrial",
+    "Ingeniería Mecánica",
+]);*/
+
+var availableCareers = writable([
+    {
+        name: "División de las Ciencias Físico-Matemáticas y de las Ingenierías",
+        color: "#3f51b5",
+        img_bg: "DIV-blanco.svg"
+    },
+    {
+        name: "Ingeniería Civil",
+        color: "#e91e63",
+        img_bg: "ICI-blanco.svg"
+    },
+    {
+        name: "Ingeniería en Computación",
+        color: "#f44336",
+        img_bg: "ICO-blanco.svg"
+    },
+    {
+        name: "Ingeniería Eléctrica-Electrónica",
+        color: "#03a9f4",
+        img_bg: "IEE-blanco.svg"
+    },
+    {
+        name: "Ingeniería Industrial",
+        color: "#9c27b0",
+        img_bg: "IID-blanco.svg"
+    },
+    {
+        name: "Ingeniería Mecánica",
+        color: "#009688",
+        img_bg: "IMC-blanco.svg"
+    },
+]);
+
 function openDetailModal() {
 
-    
+
 
   var detailModal = new bootstrap.Modal(
     document.getElementById("detail-modal"),
@@ -4129,12 +4175,19 @@ const file$6 = "src/routes/EventCreator.svelte";
 
 function get_each_context$2(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[22] = list[i];
+	child_ctx[24] = list[i];
+	child_ctx[26] = i;
 	return child_ctx;
 }
 
-// (386:4) {#each events as event}
-function create_each_block$2(ctx) {
+function get_each_context_1(ctx, list, i) {
+	const child_ctx = ctx.slice();
+	child_ctx[27] = list[i];
+	return child_ctx;
+}
+
+// (333:4) {#each events as event}
+function create_each_block_1(ctx) {
 	let div2;
 	let div1;
 	let div0;
@@ -4142,32 +4195,40 @@ function create_each_block$2(ctx) {
 	let img_src_value;
 	let t0;
 	let h5;
-	let t1_value = /*event*/ ctx[22].name + "";
+	let t1_value = /*event*/ ctx[27].name + "";
 	let t1;
 	let t2;
 	let h60;
 	let t3;
-	let t4_value = /*event*/ ctx[22].date + "";
+	let t4_value = /*event*/ ctx[27].date + "";
 	let t4;
 	let t5;
 	let h61;
 	let t6;
-	let t7_value = /*event*/ ctx[22].location + "";
+	let t7_value = /*event*/ ctx[27].location + "";
 	let t7;
 	let t8;
 	let h62;
 	let t9;
-	let t10_value = (/*event*/ ctx[22].attendees || 0) + "";
+	let t10_value = (/*event*/ ctx[27].attendees || 0) + "";
 	let t10;
 	let t11;
-	let t12_value = /*event*/ ctx[22].max_attendees + "";
+	let t12_value = /*event*/ ctx[27].max_attendees + "";
 	let t12;
 	let t13;
 	let mounted;
 	let dispose;
 
-	function click_handler() {
-		return /*click_handler*/ ctx[6](/*event*/ ctx[22]);
+	function func_3(...args) {
+		return /*func_3*/ ctx[8](/*event*/ ctx[27], ...args);
+	}
+
+	function func_4(...args) {
+		return /*func_4*/ ctx[9](/*event*/ ctx[27], ...args);
+	}
+
+	function click_handler_1() {
+		return /*click_handler_1*/ ctx[10](/*event*/ ctx[27]);
 	}
 
 	const block = {
@@ -4194,25 +4255,26 @@ function create_each_block$2(ctx) {
 			t11 = text("/");
 			t12 = text(t12_value);
 			t13 = space();
-			if (!src_url_equal(img.src, img_src_value = /*event*/ ctx[22].img || "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png")) attr_dev(img, "src", img_src_value);
-			attr_dev(img, "class", "card-img-top img-thumbnai0 limg-fluid p-4 svelte-yjlyqq");
+			if (!src_url_equal(img.src, img_src_value = API_URL + "/img/" + /*$availableCareers*/ ctx[2].find(func_3).img_bg)) attr_dev(img, "src", img_src_value);
+			attr_dev(img, "class", "img-thumbnail limg-fluid p-4 ");
 			attr_dev(img, "alt", "...");
-			add_location(img, file$6, 395, 12, 10308);
+			set_style(img, "background-color", /*$availableCareers*/ ctx[2].find(func_4).color);
+			add_location(img, file$6, 342, 12, 8851);
 			attr_dev(div0, "class", "d-flex justify-content-center p-2");
-			add_location(div0, file$6, 394, 10, 10248);
+			add_location(div0, file$6, 341, 10, 8791);
 			attr_dev(h5, "class", "card-title text-center");
-			add_location(h5, file$6, 402, 10, 10557);
+			add_location(h5, file$6, 352, 10, 9227);
 			attr_dev(h60, "class", "card-subtitle mb-2 text-muted text-center");
-			add_location(h60, file$6, 403, 10, 10620);
+			add_location(h60, file$6, 353, 10, 9290);
 			attr_dev(h61, "class", "card-subtitle mb-2 text-muted text-center");
-			add_location(h61, file$6, 406, 10, 10733);
+			add_location(h61, file$6, 356, 10, 9403);
 			attr_dev(h62, "class", "card-subtitle mb-2 text-muted text-center");
-			add_location(h62, file$6, 409, 10, 10850);
+			add_location(h62, file$6, 359, 10, 9520);
 			attr_dev(div1, "class", "card p-3");
 			set_style(div1, "height", "100%");
-			add_location(div1, file$6, 393, 8, 10193);
+			add_location(div1, file$6, 340, 8, 8736);
 			attr_dev(div2, "class", "col-12 col-md-6 col-lg-4 col-xl-3 event-card mb-4 svelte-yjlyqq");
-			add_location(div2, file$6, 387, 6, 10036);
+			add_location(div2, file$6, 334, 6, 8579);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div2, anchor);
@@ -4239,22 +4301,26 @@ function create_each_block$2(ctx) {
 			append_dev(div2, t13);
 
 			if (!mounted) {
-				dispose = listen_dev(div2, "click", click_handler, false, false, false, false);
+				dispose = listen_dev(div2, "click", click_handler_1, false, false, false, false);
 				mounted = true;
 			}
 		},
 		p: function update(new_ctx, dirty) {
 			ctx = new_ctx;
 
-			if (dirty & /*events*/ 1 && !src_url_equal(img.src, img_src_value = /*event*/ ctx[22].img || "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png")) {
+			if (dirty & /*$availableCareers, events*/ 5 && !src_url_equal(img.src, img_src_value = API_URL + "/img/" + /*$availableCareers*/ ctx[2].find(func_3).img_bg)) {
 				attr_dev(img, "src", img_src_value);
 			}
 
-			if (dirty & /*events*/ 1 && t1_value !== (t1_value = /*event*/ ctx[22].name + "")) set_data_dev(t1, t1_value);
-			if (dirty & /*events*/ 1 && t4_value !== (t4_value = /*event*/ ctx[22].date + "")) set_data_dev(t4, t4_value);
-			if (dirty & /*events*/ 1 && t7_value !== (t7_value = /*event*/ ctx[22].location + "")) set_data_dev(t7, t7_value);
-			if (dirty & /*events*/ 1 && t10_value !== (t10_value = (/*event*/ ctx[22].attendees || 0) + "")) set_data_dev(t10, t10_value);
-			if (dirty & /*events*/ 1 && t12_value !== (t12_value = /*event*/ ctx[22].max_attendees + "")) set_data_dev(t12, t12_value);
+			if (dirty & /*$availableCareers, events*/ 5) {
+				set_style(img, "background-color", /*$availableCareers*/ ctx[2].find(func_4).color);
+			}
+
+			if (dirty & /*events*/ 1 && t1_value !== (t1_value = /*event*/ ctx[27].name + "")) set_data_dev(t1, t1_value);
+			if (dirty & /*events*/ 1 && t4_value !== (t4_value = /*event*/ ctx[27].date + "")) set_data_dev(t4, t4_value);
+			if (dirty & /*events*/ 1 && t7_value !== (t7_value = /*event*/ ctx[27].location + "")) set_data_dev(t7, t7_value);
+			if (dirty & /*events*/ 1 && t10_value !== (t10_value = (/*event*/ ctx[27].attendees || 0) + "")) set_data_dev(t10, t10_value);
+			if (dirty & /*events*/ 1 && t12_value !== (t12_value = /*event*/ ctx[27].max_attendees + "")) set_data_dev(t12, t12_value);
 		},
 		d: function destroy(detaching) {
 			if (detaching) detach_dev(div2);
@@ -4265,16 +4331,144 @@ function create_each_block$2(ctx) {
 
 	dispatch_dev("SvelteRegisterBlock", {
 		block,
-		id: create_each_block$2.name,
+		id: create_each_block_1.name,
 		type: "each",
-		source: "(386:4) {#each events as event}",
+		source: "(333:4) {#each events as event}",
 		ctx
 	});
 
 	return block;
 }
 
-// (635:10) {#if selectedEvent.id}
+// (533:16) {:else}
+function create_else_block$3(ctx) {
+	let option;
+	let t_value = /*career*/ ctx[24].name + "";
+	let t;
+	let option_value_value;
+
+	const block = {
+		c: function create() {
+			option = element("option");
+			t = text(t_value);
+			option.__value = option_value_value = /*career*/ ctx[24].name;
+			option.value = option.__value;
+			add_location(option, file$6, 533, 18, 15043);
+		},
+		m: function mount(target, anchor) {
+			insert_dev(target, option, anchor);
+			append_dev(option, t);
+		},
+		p: function update(ctx, dirty) {
+			if (dirty & /*$availableCareers*/ 4 && t_value !== (t_value = /*career*/ ctx[24].name + "")) set_data_dev(t, t_value);
+
+			if (dirty & /*$availableCareers*/ 4 && option_value_value !== (option_value_value = /*career*/ ctx[24].name)) {
+				prop_dev(option, "__value", option_value_value);
+				option.value = option.__value;
+			}
+		},
+		d: function destroy(detaching) {
+			if (detaching) detach_dev(option);
+		}
+	};
+
+	dispatch_dev("SvelteRegisterBlock", {
+		block,
+		id: create_else_block$3.name,
+		type: "else",
+		source: "(533:16) {:else}",
+		ctx
+	});
+
+	return block;
+}
+
+// (531:16) {#if index == 0}
+function create_if_block_1$1(ctx) {
+	let option;
+	let t_value = /*career*/ ctx[24].name + "";
+	let t;
+	let option_value_value;
+
+	const block = {
+		c: function create() {
+			option = element("option");
+			t = text(t_value);
+			option.selected = true;
+			option.__value = option_value_value = /*career*/ ctx[24].name;
+			option.value = option.__value;
+			add_location(option, file$6, 531, 18, 14961);
+		},
+		m: function mount(target, anchor) {
+			insert_dev(target, option, anchor);
+			append_dev(option, t);
+		},
+		p: function update(ctx, dirty) {
+			if (dirty & /*$availableCareers*/ 4 && t_value !== (t_value = /*career*/ ctx[24].name + "")) set_data_dev(t, t_value);
+
+			if (dirty & /*$availableCareers*/ 4 && option_value_value !== (option_value_value = /*career*/ ctx[24].name)) {
+				prop_dev(option, "__value", option_value_value);
+				option.value = option.__value;
+			}
+		},
+		d: function destroy(detaching) {
+			if (detaching) detach_dev(option);
+		}
+	};
+
+	dispatch_dev("SvelteRegisterBlock", {
+		block,
+		id: create_if_block_1$1.name,
+		type: "if",
+		source: "(531:16) {#if index == 0}",
+		ctx
+	});
+
+	return block;
+}
+
+// (530:14) {#each $availableCareers as career, index}
+function create_each_block$2(ctx) {
+	let if_block_anchor;
+
+	function select_block_type(ctx, dirty) {
+		if (/*index*/ ctx[26] == 0) return create_if_block_1$1;
+		return create_else_block$3;
+	}
+
+	let current_block_type = select_block_type(ctx);
+	let if_block = current_block_type(ctx);
+
+	const block = {
+		c: function create() {
+			if_block.c();
+			if_block_anchor = empty();
+		},
+		m: function mount(target, anchor) {
+			if_block.m(target, anchor);
+			insert_dev(target, if_block_anchor, anchor);
+		},
+		p: function update(ctx, dirty) {
+			if_block.p(ctx, dirty);
+		},
+		d: function destroy(detaching) {
+			if_block.d(detaching);
+			if (detaching) detach_dev(if_block_anchor);
+		}
+	};
+
+	dispatch_dev("SvelteRegisterBlock", {
+		block,
+		id: create_each_block$2.name,
+		type: "each",
+		source: "(530:14) {#each $availableCareers as career, index}",
+		ctx
+	});
+
+	return block;
+}
+
+// (573:10) {#if selectedEvent.id}
 function create_if_block$3(ctx) {
 	let button;
 	let mounted;
@@ -4286,13 +4480,13 @@ function create_if_block$3(ctx) {
 			button.textContent = "Eliminar";
 			attr_dev(button, "type", "button");
 			attr_dev(button, "class", "btn btn-danger");
-			add_location(button, file$6, 635, 12, 17978);
+			add_location(button, file$6, 573, 12, 16294);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, button, anchor);
 
 			if (!mounted) {
-				dispose = listen_dev(button, "click", /*click_handler_2*/ ctx[18], false, false, false, false);
+				dispose = listen_dev(button, "click", /*click_handler_2*/ ctx[20], false, false, false, false);
 				mounted = true;
 			}
 		},
@@ -4308,7 +4502,7 @@ function create_if_block$3(ctx) {
 		block,
 		id: create_if_block$3.name,
 		type: "if",
-		source: "(635:10) {#if selectedEvent.id}",
+		source: "(573:10) {#if selectedEvent.id}",
 		ctx
 	});
 
@@ -4323,161 +4517,167 @@ function create_fragment$8(ctx) {
 	let img_src_value;
 	let t0;
 	let t1;
-	let br0;
+	let button0;
+	let i0;
 	let t2;
-	let br1;
 	let t3;
-	let br2;
+	let br0;
 	let t4;
-	let br3;
+	let br1;
 	let t5;
+	let br2;
+	let t6;
+	let br3;
+	let t7;
 	let div20;
 	let div13;
 	let div3;
 	let div2;
-	let i0;
-	let t6;
+	let i1;
+	let t8;
 	let div1;
 	let h50;
-	let t8;
-	let h60;
-	let t9;
-	let t10_value = /*events*/ ctx[0].length + "";
 	let t10;
+	let h60;
 	let t11;
+	let t12_value = /*events*/ ctx[0].length + "";
+	let t12;
+	let t13;
 	let div6;
 	let div5;
-	let i1;
-	let t12;
+	let i2;
+	let t14;
 	let div4;
 	let h51;
-	let t14;
-	let h61;
-	let t15;
-	let t16_value = /*events*/ ctx[0].reduce(func, 0) + "";
 	let t16;
+	let h61;
 	let t17;
+	let t18_value = /*events*/ ctx[0].reduce(func, 0) + "";
+	let t18;
+	let t19;
 	let div9;
 	let div8;
-	let i2;
-	let t18;
+	let i3;
+	let t20;
 	let div7;
 	let h52;
-	let t20;
-	let h62;
-	let t21;
-	let t22_value = /*events*/ ctx[0].reduce(func_1, 0) + "";
 	let t22;
+	let h62;
 	let t23;
+	let t24_value = /*events*/ ctx[0].reduce(func_1, 0) + "";
+	let t24;
+	let t25;
 	let div12;
 	let div11;
-	let i3;
-	let t24;
+	let i4;
+	let t26;
 	let div10;
 	let h53;
-	let t26;
-	let h63;
-	let t27;
-	let t28_value = " " + "";
 	let t28;
+	let h63;
 	let t29;
-	let t30_value = /*events*/ ctx[0].reduce(/*func_2*/ ctx[5], 0) + "";
+	let t30_value = " " + "";
 	let t30;
 	let t31;
+	let t32_value = /*events*/ ctx[0].reduce(/*func_2*/ ctx[6], 0) + "";
+	let t32;
+	let t33;
 	let div14;
 	let hr;
-	let t32;
-	let br4;
-	let t33;
-	let div19;
 	let t34;
+	let br4;
+	let t35;
+	let div19;
 	let div18;
 	let div17;
 	let div16;
 	let div15;
-	let i4;
-	let t35;
+	let i5;
+	let t36;
 	let h54;
-	let t37;
-	let div38;
+	let t38;
+	let t39;
 	let div37;
 	let div36;
+	let div35;
 	let div21;
 	let h55;
-	let t39;
-	let button0;
-	let t40;
-	let div33;
+	let t41;
+	let button1;
+	let t42;
 	let div32;
+	let div31;
 	let div22;
 	let span0;
-	let i5;
-	let t41;
-	let input0;
-	let t42;
-	let div23;
-	let span1;
 	let i6;
 	let t43;
-	let input1;
+	let input0;
 	let t44;
-	let div24;
-	let span2;
+	let div23;
+	let span1;
 	let i7;
 	let t45;
-	let input2;
+	let input1;
 	let t46;
-	let div25;
-	let span3;
+	let div24;
+	let span2;
 	let i8;
 	let t47;
-	let input3;
+	let input2;
 	let t48;
-	let div26;
-	let span4;
+	let div25;
+	let span3;
 	let i9;
 	let t49;
-	let input4;
+	let input3;
 	let t50;
-	let div27;
-	let span5;
+	let div26;
+	let span4;
 	let i10;
 	let t51;
-	let textarea;
+	let input4;
 	let t52;
-	let div28;
-	let span6;
+	let div27;
+	let span5;
 	let i11;
 	let t53;
 	let input5;
 	let t54;
-	let div29;
-	let span7;
+	let div28;
+	let span6;
 	let i12;
 	let t55;
-	let input6;
+	let select0;
 	let t56;
-	let div30;
-	let span8;
+	let div29;
+	let span7;
 	let i13;
 	let t57;
-	let input7;
+	let input6;
 	let t58;
-	let div31;
-	let span9;
+	let div30;
+	let span8;
 	let i14;
 	let t59;
-	let select;
+	let select1;
 	let option0;
 	let option1;
 	let t62;
-	let div35;
 	let div34;
+	let div33;
 	let t63;
-	let button1;
+	let button2;
 	let mounted;
 	let dispose;
-	let each_value = /*events*/ ctx[0];
+	let each_value_1 = /*events*/ ctx[0];
+	validate_each_argument(each_value_1);
+	let each_blocks_1 = [];
+
+	for (let i = 0; i < each_value_1.length; i += 1) {
+		each_blocks_1[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+	}
+
+	let each_value = /*$availableCareers*/ ctx[2];
 	validate_each_argument(each_value);
 	let each_blocks = [];
 
@@ -4495,429 +4695,423 @@ function create_fragment$8(ctx) {
 			img = element("img");
 			t0 = text("\n      Administrador de Eventos");
 			t1 = space();
-			br0 = element("br");
-			t2 = space();
-			br1 = element("br");
+			button0 = element("button");
+			i0 = element("i");
+			t2 = text("\n      Subir CSV");
 			t3 = space();
-			br2 = element("br");
+			br0 = element("br");
 			t4 = space();
-			br3 = element("br");
+			br1 = element("br");
 			t5 = space();
+			br2 = element("br");
+			t6 = space();
+			br3 = element("br");
+			t7 = space();
 			div20 = element("div");
 			div13 = element("div");
 			div3 = element("div");
 			div2 = element("div");
-			i0 = element("i");
-			t6 = space();
+			i1 = element("i");
+			t8 = space();
 			div1 = element("div");
 			h50 = element("h5");
 			h50.textContent = "Eventos";
-			t8 = space();
+			t10 = space();
 			h60 = element("h6");
-			t9 = text("Total: ");
-			t10 = text(t10_value);
-			t11 = space();
+			t11 = text("Total: ");
+			t12 = text(t12_value);
+			t13 = space();
 			div6 = element("div");
 			div5 = element("div");
-			i1 = element("i");
-			t12 = space();
+			i2 = element("i");
+			t14 = space();
 			div4 = element("div");
 			h51 = element("h5");
 			h51.textContent = "Asistentes";
-			t14 = space();
+			t16 = space();
 			h61 = element("h6");
-			t15 = text("Total: ");
-			t16 = text(t16_value);
-			t17 = space();
+			t17 = text("Total: ");
+			t18 = text(t18_value);
+			t19 = space();
 			div9 = element("div");
 			div8 = element("div");
-			i2 = element("i");
-			t18 = space();
+			i3 = element("i");
+			t20 = space();
 			div7 = element("div");
 			h52 = element("h5");
 			h52.textContent = "Carreras";
-			t20 = space();
+			t22 = space();
 			h62 = element("h6");
-			t21 = text("Total: ");
-			t22 = text(t22_value);
-			t23 = space();
+			t23 = text("Total: ");
+			t24 = text(t24_value);
+			t25 = space();
 			div12 = element("div");
 			div11 = element("div");
-			i3 = element("i");
-			t24 = space();
+			i4 = element("i");
+			t26 = space();
 			div10 = element("div");
 			h53 = element("h5");
 			h53.textContent = "Horas disponibles";
-			t26 = space();
+			t28 = space();
 			h63 = element("h6");
-			t27 = text("Total:");
-			t28 = text(t28_value);
-			t29 = space();
+			t29 = text("Total:");
 			t30 = text(t30_value);
 			t31 = space();
+			t32 = text(t32_value);
+			t33 = space();
 			div14 = element("div");
 			hr = element("hr");
-			t32 = space();
+			t34 = space();
 			br4 = element("br");
-			t33 = space();
+			t35 = space();
 			div19 = element("div");
+			div18 = element("div");
+			div17 = element("div");
+			div16 = element("div");
+			div15 = element("div");
+			i5 = element("i");
+			t36 = space();
+			h54 = element("h5");
+			h54.textContent = "Agregar Evento";
+			t38 = space();
+
+			for (let i = 0; i < each_blocks_1.length; i += 1) {
+				each_blocks_1[i].c();
+			}
+
+			t39 = space();
+			div37 = element("div");
+			div36 = element("div");
+			div35 = element("div");
+			div21 = element("div");
+			h55 = element("h5");
+			h55.textContent = "Evento";
+			t41 = space();
+			button1 = element("button");
+			t42 = space();
+			div32 = element("div");
+			div31 = element("div");
+			div22 = element("div");
+			span0 = element("span");
+			i6 = element("i");
+			t43 = space();
+			input0 = element("input");
+			t44 = space();
+			div23 = element("div");
+			span1 = element("span");
+			i7 = element("i");
+			t45 = space();
+			input1 = element("input");
+			t46 = space();
+			div24 = element("div");
+			span2 = element("span");
+			i8 = element("i");
+			t47 = space();
+			input2 = element("input");
+			t48 = space();
+			div25 = element("div");
+			span3 = element("span");
+			i9 = element("i");
+			t49 = space();
+			input3 = element("input");
+			t50 = space();
+			div26 = element("div");
+			span4 = element("span");
+			i10 = element("i");
+			t51 = space();
+			input4 = element("input");
+			t52 = space();
+			div27 = element("div");
+			span5 = element("span");
+			i11 = element("i");
+			t53 = space();
+			input5 = element("input");
+			t54 = space();
+			div28 = element("div");
+			span6 = element("span");
+			i12 = element("i");
+			t55 = space();
+			select0 = element("select");
 
 			for (let i = 0; i < each_blocks.length; i += 1) {
 				each_blocks[i].c();
 			}
 
-			t34 = space();
-			div18 = element("div");
-			div17 = element("div");
-			div16 = element("div");
-			div15 = element("div");
-			i4 = element("i");
-			t35 = space();
-			h54 = element("h5");
-			h54.textContent = "Agregar Evento";
-			t37 = space();
-			div38 = element("div");
-			div37 = element("div");
-			div36 = element("div");
-			div21 = element("div");
-			h55 = element("h5");
-			h55.textContent = "Evento";
-			t39 = space();
-			button0 = element("button");
-			t40 = space();
-			div33 = element("div");
-			div32 = element("div");
-			div22 = element("div");
-			span0 = element("span");
-			i5 = element("i");
-			t41 = space();
-			input0 = element("input");
-			t42 = space();
-			div23 = element("div");
-			span1 = element("span");
-			i6 = element("i");
-			t43 = space();
-			input1 = element("input");
-			t44 = space();
-			div24 = element("div");
-			span2 = element("span");
-			i7 = element("i");
-			t45 = space();
-			input2 = element("input");
-			t46 = space();
-			div25 = element("div");
-			span3 = element("span");
-			i8 = element("i");
-			t47 = space();
-			input3 = element("input");
-			t48 = space();
-			div26 = element("div");
-			span4 = element("span");
-			i9 = element("i");
-			t49 = space();
-			input4 = element("input");
-			t50 = space();
-			div27 = element("div");
-			span5 = element("span");
-			i10 = element("i");
-			t51 = space();
-			textarea = element("textarea");
-			t52 = space();
-			div28 = element("div");
-			span6 = element("span");
-			i11 = element("i");
-			t53 = space();
-			input5 = element("input");
-			t54 = space();
+			t56 = space();
 			div29 = element("div");
 			span7 = element("span");
-			i12 = element("i");
-			t55 = space();
-			input6 = element("input");
-			t56 = space();
-			div30 = element("div");
-			span8 = element("span");
 			i13 = element("i");
 			t57 = space();
-			input7 = element("input");
+			input6 = element("input");
 			t58 = space();
-			div31 = element("div");
-			span9 = element("span");
+			div30 = element("div");
+			span8 = element("span");
 			i14 = element("i");
 			t59 = space();
-			select = element("select");
+			select1 = element("select");
 			option0 = element("option");
 			option0.textContent = "Activo";
 			option1 = element("option");
 			option1.textContent = "Inactivo";
 			t62 = space();
-			div35 = element("div");
 			div34 = element("div");
+			div33 = element("div");
 			if (if_block) if_block.c();
 			t63 = space();
-			button1 = element("button");
-			button1.textContent = "Guardar";
+			button2 = element("button");
+			button2.textContent = "Guardar";
 			if (!src_url_equal(img.src, img_src_value = "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png")) attr_dev(img, "src", img_src_value);
 			attr_dev(img, "alt", "");
 			attr_dev(img, "width", "30");
 			attr_dev(img, "height", "30");
 			attr_dev(img, "class", "d-inline-block align-text-top me-3");
-			add_location(img, file$6, 268, 6, 6962);
+			add_location(img, file$6, 190, 6, 4785);
 			attr_dev(a, "class", "navbar-brand");
 			attr_dev(a, "href", "#");
-			add_location(a, file$6, 267, 4, 6922);
+			add_location(a, file$6, 189, 4, 4745);
+			attr_dev(i0, "class", "bi bi-arrow-up-circle");
+			add_location(i0, file$6, 200, 6, 5081);
+			attr_dev(button0, "id", "upload-file");
+			attr_dev(button0, "class", "btn btn-success");
+			add_location(button0, file$6, 199, 4, 5025);
 			attr_dev(div0, "class", "container-fluid");
-			add_location(div0, file$6, 266, 2, 6888);
+			add_location(div0, file$6, 188, 2, 4711);
 			attr_dev(nav, "class", "navbar navbar-dark bg-dark elevated fixed-top svelte-yjlyqq");
-			add_location(nav, file$6, 265, 0, 6826);
-			add_location(br0, file$6, 280, 0, 7215);
-			add_location(br1, file$6, 281, 0, 7222);
-			add_location(br2, file$6, 282, 0, 7229);
-			add_location(br3, file$6, 283, 0, 7236);
-			attr_dev(i0, "class", "bi bi-calendar2-week text-white ms-3");
-			set_style(i0, "font-size", "3rem");
-			add_location(i0, file$6, 292, 8, 7534);
-			attr_dev(h50, "class", "text-white ");
-			add_location(h50, file$6, 295, 10, 7674);
-			attr_dev(h60, "class", "text-white ");
-			add_location(h60, file$6, 301, 10, 7784);
-			attr_dev(div1, "class", "ms-4 mt-auto mb-auto");
-			add_location(div1, file$6, 294, 8, 7629);
-			attr_dev(div2, "class", "d-flex bg-primary bg-gradient rounded");
-			add_location(div2, file$6, 291, 6, 7474);
-			attr_dev(div3, "class", "col-3 mb-1 p-2");
-			add_location(div3, file$6, 290, 4, 7439);
-			attr_dev(i1, "class", "bi bi-person-check text-white ms-3");
+			add_location(nav, file$6, 187, 0, 4649);
+			add_location(br0, file$6, 206, 0, 5166);
+			add_location(br1, file$6, 207, 0, 5173);
+			add_location(br2, file$6, 208, 0, 5180);
+			add_location(br3, file$6, 209, 0, 5187);
+			attr_dev(i1, "class", "bi bi-calendar2-week text-white ms-3");
 			set_style(i1, "font-size", "3rem");
-			add_location(i1, file$6, 314, 8, 8060);
-			attr_dev(h51, "class", "text-white ");
-			add_location(h51, file$6, 317, 10, 8198);
-			attr_dev(h61, "class", "text-white ");
-			add_location(h61, file$6, 323, 10, 8315);
-			attr_dev(div4, "class", "ms-4 mt-auto mb-auto");
-			add_location(div4, file$6, 316, 8, 8153);
-			attr_dev(div5, "class", "d-flex bg-success bg-gradient rounded");
-			add_location(div5, file$6, 313, 6, 8000);
-			attr_dev(div6, "class", "col-3 mb-1 p-2");
-			add_location(div6, file$6, 312, 4, 7965);
-			attr_dev(i2, "class", "bi bi-book text-white ms-3");
+			add_location(i1, file$6, 221, 8, 5490);
+			attr_dev(h50, "class", "text-white ");
+			add_location(h50, file$6, 224, 10, 5630);
+			attr_dev(h60, "class", "text-white ");
+			add_location(h60, file$6, 230, 10, 5740);
+			attr_dev(div1, "class", "ms-4 mt-auto mb-auto");
+			add_location(div1, file$6, 223, 8, 5585);
+			attr_dev(div2, "class", "d-flex bg-primary bg-gradient rounded");
+			add_location(div2, file$6, 220, 6, 5430);
+			attr_dev(div3, "class", "col-3 mb-1 p-2");
+			add_location(div3, file$6, 219, 4, 5395);
+			attr_dev(i2, "class", "bi bi-person-check text-white ms-3");
 			set_style(i2, "font-size", "3rem");
-			add_location(i2, file$6, 336, 8, 8627);
-			attr_dev(h52, "class", "text-white ");
-			add_location(h52, file$6, 342, 10, 8793);
-			attr_dev(h62, "class", "text-white ");
-			add_location(h62, file$6, 348, 10, 8908);
-			attr_dev(div7, "class", "ms-4 mt-auto mb-auto");
-			add_location(div7, file$6, 341, 8, 8748);
-			attr_dev(div8, "class", "d-flex bg-warning bg-gradient rounded");
-			add_location(div8, file$6, 335, 6, 8567);
-			attr_dev(div9, "class", "col-3 mb-1 p-2");
-			add_location(div9, file$6, 334, 4, 8532);
-			attr_dev(i3, "class", "bi bi-clock text-white ms-3");
+			add_location(i2, file$6, 243, 8, 6016);
+			attr_dev(h51, "class", "text-white ");
+			add_location(h51, file$6, 246, 10, 6154);
+			attr_dev(h61, "class", "text-white ");
+			add_location(h61, file$6, 252, 10, 6271);
+			attr_dev(div4, "class", "ms-4 mt-auto mb-auto");
+			add_location(div4, file$6, 245, 8, 6109);
+			attr_dev(div5, "class", "d-flex bg-success bg-gradient rounded");
+			add_location(div5, file$6, 242, 6, 5956);
+			attr_dev(div6, "class", "col-3 mb-1 p-2");
+			add_location(div6, file$6, 241, 4, 5921);
+			attr_dev(i3, "class", "bi bi-book text-white ms-3");
 			set_style(i3, "font-size", "3rem");
-			add_location(i3, file$6, 361, 8, 9249);
+			add_location(i3, file$6, 265, 8, 6583);
+			attr_dev(h52, "class", "text-white ");
+			add_location(h52, file$6, 271, 10, 6749);
+			attr_dev(h62, "class", "text-white ");
+			add_location(h62, file$6, 277, 10, 6864);
+			attr_dev(div7, "class", "ms-4 mt-auto mb-auto");
+			add_location(div7, file$6, 270, 8, 6704);
+			attr_dev(div8, "class", "d-flex bg-warning bg-gradient rounded");
+			add_location(div8, file$6, 264, 6, 6523);
+			attr_dev(div9, "class", "col-3 mb-1 p-2");
+			add_location(div9, file$6, 263, 4, 6488);
+			attr_dev(i4, "class", "bi bi-clock text-white ms-3");
+			set_style(i4, "font-size", "3rem");
+			add_location(i4, file$6, 290, 8, 7205);
 			attr_dev(h53, "class", "text-white");
-			add_location(h53, file$6, 363, 10, 9371);
+			add_location(h53, file$6, 292, 10, 7327);
 			attr_dev(h63, "class", "text-white");
-			add_location(h63, file$6, 364, 10, 9427);
+			add_location(h63, file$6, 293, 10, 7383);
 			attr_dev(div10, "class", "ms-4 mt-auto mb-auto");
-			add_location(div10, file$6, 362, 8, 9326);
+			add_location(div10, file$6, 291, 8, 7282);
 			attr_dev(div11, "class", "d-flex bg-danger bg-gradient rounded");
-			add_location(div11, file$6, 360, 6, 9190);
+			add_location(div11, file$6, 289, 6, 7146);
 			attr_dev(div12, "class", "col-3 mb-1 p-2");
-			add_location(div12, file$6, 359, 4, 9155);
+			add_location(div12, file$6, 288, 4, 7111);
 			attr_dev(div13, "class", "row p-5 pb-2");
 			set_style(div13, "margin-bottom", "0px");
-			add_location(div13, file$6, 286, 2, 7338);
-			add_location(hr, file$6, 380, 4, 9882);
-			add_location(br4, file$6, 381, 4, 9893);
+			add_location(div13, file$6, 215, 2, 5294);
+			add_location(hr, file$6, 309, 4, 7838);
+			add_location(br4, file$6, 310, 4, 7849);
 			attr_dev(div14, "class", "ps-5 pe-5");
-			add_location(div14, file$6, 379, 2, 9854);
-			attr_dev(i4, "class", "bi bi-plus-circle text-success");
-			set_style(i4, "font-size", "6rem");
-			add_location(i4, file$6, 427, 12, 11412);
+			add_location(div14, file$6, 308, 2, 7810);
+			attr_dev(i5, "class", "bi bi-plus-circle text-success");
+			set_style(i5, "font-size", "6rem");
+			add_location(i5, file$6, 325, 12, 8276);
 			attr_dev(div15, "class", "d-flex justify-content-center p-3");
-			add_location(div15, file$6, 426, 10, 11352);
+			add_location(div15, file$6, 324, 10, 8216);
 			attr_dev(h54, "class", "card-title text-center");
-			add_location(h54, file$6, 430, 10, 11524);
+			add_location(h54, file$6, 328, 10, 8388);
 			attr_dev(div16, "class", "mt-auto mb-auto");
-			add_location(div16, file$6, 425, 8, 11312);
+			add_location(div16, file$6, 323, 8, 8176);
 			attr_dev(div17, "class", "card");
 			set_style(div17, "height", "100%");
-			add_location(div17, file$6, 424, 6, 11263);
+			add_location(div17, file$6, 322, 6, 8127);
 			attr_dev(div18, "class", "col-12 col-md-6 col-lg-4 col-xl-3 event-card mb-4 svelte-yjlyqq");
-			add_location(div18, file$6, 418, 4, 11123);
+			add_location(div18, file$6, 316, 4, 7987);
 			attr_dev(div19, "class", "row p-5 pt-0");
-			add_location(div19, file$6, 384, 2, 9912);
+			add_location(div19, file$6, 313, 2, 7868);
 			attr_dev(div20, "class", "container card elevated svelte-yjlyqq");
 			set_style(div20, "height", "85%");
 			set_style(div20, "overflow", "auto");
 			set_style(div20, "overflow-x", "hidden");
-			add_location(div20, file$6, 285, 0, 7244);
+			add_location(div20, file$6, 211, 0, 5195);
 			attr_dev(h55, "class", "modal-title");
 			attr_dev(h55, "id", "eventModalLabel");
-			add_location(h55, file$6, 449, 8, 11903);
-			attr_dev(button0, "type", "button");
-			attr_dev(button0, "class", "btn-close");
-			attr_dev(button0, "data-bs-dismiss", "modal");
-			attr_dev(button0, "aria-label", "Close");
-			add_location(button0, file$6, 450, 8, 11968);
+			add_location(h55, file$6, 381, 8, 9986);
+			attr_dev(button1, "type", "button");
+			attr_dev(button1, "class", "btn-close");
+			attr_dev(button1, "data-bs-dismiss", "modal");
+			attr_dev(button1, "aria-label", "Close");
+			add_location(button1, file$6, 382, 8, 10051);
 			attr_dev(div21, "class", "modal-header");
-			add_location(div21, file$6, 448, 6, 11868);
-			attr_dev(i5, "class", "bi bi-book");
-			add_location(i5, file$6, 485, 15, 12993);
+			add_location(div21, file$6, 380, 6, 9951);
+			attr_dev(i6, "class", "bi bi-book");
+			add_location(i6, file$6, 417, 15, 11076);
 			attr_dev(span0, "class", "input-group-text");
 			attr_dev(span0, "id", "basic-addon1");
-			add_location(span0, file$6, 484, 12, 12929);
+			add_location(span0, file$6, 416, 12, 11012);
 			attr_dev(input0, "type", "text");
 			attr_dev(input0, "class", "form-control svelte-yjlyqq");
 			attr_dev(input0, "placeholder", "Nombre del evento");
 			attr_dev(input0, "aria-label", "eventName");
 			attr_dev(input0, "aria-describedby", "basic-addon1");
-			add_location(input0, file$6, 487, 12, 13052);
+			add_location(input0, file$6, 419, 12, 11135);
 			attr_dev(div22, "class", "input-group mb-3 col-12 svelte-yjlyqq");
-			add_location(div22, file$6, 483, 10, 12879);
-			attr_dev(i6, "class", "bi bi-calendar3");
-			add_location(i6, file$6, 500, 15, 13486);
+			add_location(div22, file$6, 415, 10, 10962);
+			attr_dev(i7, "class", "bi bi-calendar3");
+			add_location(i7, file$6, 432, 15, 11569);
 			attr_dev(span1, "class", "input-group-text");
 			attr_dev(span1, "id", "basic-addon1");
-			add_location(span1, file$6, 499, 12, 13422);
+			add_location(span1, file$6, 431, 12, 11505);
 			attr_dev(input1, "type", "date");
 			attr_dev(input1, "class", "form-control");
 			attr_dev(input1, "placeholder", "Fecha del evento");
 			attr_dev(input1, "aria-label", "eventDate");
 			attr_dev(input1, "aria-describedby", "basic-addon1");
-			add_location(input1, file$6, 502, 12, 13550);
+			add_location(input1, file$6, 434, 12, 11633);
 			attr_dev(div23, "class", "input-group mb-3 col-12");
-			add_location(div23, file$6, 498, 10, 13372);
-			attr_dev(i7, "class", "bi bi-clock");
-			add_location(i7, file$6, 515, 15, 13991);
+			add_location(div23, file$6, 430, 10, 11455);
+			attr_dev(i8, "class", "bi bi-clock");
+			add_location(i8, file$6, 447, 15, 12074);
 			attr_dev(span2, "class", "input-group-text");
 			attr_dev(span2, "id", "basic-addon1");
-			add_location(span2, file$6, 514, 12, 13927);
+			add_location(span2, file$6, 446, 12, 12010);
 			attr_dev(input2, "type", "time");
 			attr_dev(input2, "class", "form-control");
 			attr_dev(input2, "placeholder", "Hora de inicio");
 			attr_dev(input2, "aria-label", "eventStartTime");
 			attr_dev(input2, "aria-describedby", "basic-addon1");
-			add_location(input2, file$6, 517, 12, 14051);
+			add_location(input2, file$6, 449, 12, 12134);
 			attr_dev(div24, "class", "input-group mb-3 col-6");
-			add_location(div24, file$6, 513, 10, 13878);
-			attr_dev(i8, "class", "bi bi-clock");
-			add_location(i8, file$6, 530, 15, 14498);
+			add_location(div24, file$6, 445, 10, 11961);
+			attr_dev(i9, "class", "bi bi-clock");
+			add_location(i9, file$6, 462, 15, 12581);
 			attr_dev(span3, "class", "input-group-text");
 			attr_dev(span3, "id", "basic-addon1");
-			add_location(span3, file$6, 529, 12, 14434);
+			add_location(span3, file$6, 461, 12, 12517);
 			attr_dev(input3, "type", "time");
 			attr_dev(input3, "class", "form-control");
 			attr_dev(input3, "placeholder", "Hora de fin");
 			attr_dev(input3, "aria-label", "eventEndTime");
 			attr_dev(input3, "aria-describedby", "basic-addon1");
-			add_location(input3, file$6, 532, 12, 14558);
+			add_location(input3, file$6, 464, 12, 12641);
 			attr_dev(div25, "class", "input-group mb-3 col-6");
-			add_location(div25, file$6, 528, 10, 14385);
-			attr_dev(i9, "class", "bi bi-geo-alt");
-			add_location(i9, file$6, 545, 15, 14992);
+			add_location(div25, file$6, 460, 10, 12468);
+			attr_dev(i10, "class", "bi bi-geo-alt");
+			add_location(i10, file$6, 477, 15, 13075);
 			attr_dev(span4, "class", "input-group-text");
 			attr_dev(span4, "id", "basic-addon1");
-			add_location(span4, file$6, 544, 12, 14928);
+			add_location(span4, file$6, 476, 12, 13011);
 			attr_dev(input4, "type", "text");
 			attr_dev(input4, "class", "form-control svelte-yjlyqq");
 			attr_dev(input4, "placeholder", "Lugar");
 			attr_dev(input4, "aria-label", "eventLocation");
 			attr_dev(input4, "aria-describedby", "basic-addon1");
-			add_location(input4, file$6, 547, 12, 15054);
+			add_location(input4, file$6, 479, 12, 13137);
 			attr_dev(div26, "class", "input-group mb-3 col-6 svelte-yjlyqq");
-			add_location(div26, file$6, 543, 10, 14879);
-			attr_dev(i10, "class", "bi bi-card-text");
-			add_location(i10, file$6, 560, 15, 15502);
+			add_location(div26, file$6, 475, 10, 12962);
+			attr_dev(i11, "class", "bi bi-person");
+			add_location(i11, file$6, 506, 15, 14093);
 			attr_dev(span5, "class", "input-group-text");
 			attr_dev(span5, "id", "basic-addon1");
-			add_location(span5, file$6, 559, 12, 15438);
-			attr_dev(textarea, "class", "form-control");
-			attr_dev(textarea, "placeholder", "Descripción");
-			attr_dev(textarea, "aria-label", "eventDescription");
-			attr_dev(textarea, "aria-describedby", "basic-addon1");
-			add_location(textarea, file$6, 562, 12, 15566);
-			attr_dev(div27, "class", "input-group mb-3 col-12");
-			add_location(div27, file$6, 558, 10, 15388);
-			attr_dev(i11, "class", "bi bi-person");
-			add_location(i11, file$6, 574, 15, 16003);
-			attr_dev(span6, "class", "input-group-text");
-			attr_dev(span6, "id", "basic-addon1");
-			add_location(span6, file$6, 573, 12, 15939);
+			add_location(span5, file$6, 505, 12, 14029);
 			attr_dev(input5, "type", "number");
 			attr_dev(input5, "class", "form-control");
 			attr_dev(input5, "placeholder", "Cupo máximo");
 			attr_dev(input5, "aria-label", "eventMaxAttendees");
 			attr_dev(input5, "aria-describedby", "basic-addon1");
-			add_location(input5, file$6, 576, 12, 16064);
-			attr_dev(div28, "class", "input-group mb-3 col-6");
-			add_location(div28, file$6, 572, 10, 15890);
+			add_location(input5, file$6, 508, 12, 14154);
+			attr_dev(div27, "class", "input-group mb-3 col-6");
+			add_location(div27, file$6, 504, 10, 13980);
 			attr_dev(i12, "class", "bi bi-book");
-			add_location(i12, file$6, 589, 15, 16513);
+			add_location(i12, file$6, 521, 15, 14603);
+			attr_dev(span6, "class", "input-group-text");
+			attr_dev(span6, "id", "basic-addon1");
+			add_location(span6, file$6, 520, 12, 14539);
+			attr_dev(select0, "class", "form-select");
+			attr_dev(select0, "aria-label", "eventCareer");
+			if (/*selectedEvent*/ ctx[1].career === void 0) add_render_callback(() => /*select0_change_handler*/ ctx[17].call(select0));
+			add_location(select0, file$6, 524, 12, 14710);
+			attr_dev(div28, "class", "input-group mb-3 col-6");
+			add_location(div28, file$6, 519, 10, 14490);
+			attr_dev(i13, "class", "bi bi-person");
+			add_location(i13, file$6, 542, 15, 15319);
 			attr_dev(span7, "class", "input-group-text");
 			attr_dev(span7, "id", "basic-addon1");
-			add_location(span7, file$6, 588, 12, 16449);
+			add_location(span7, file$6, 541, 12, 15255);
 			attr_dev(input6, "type", "text");
 			attr_dev(input6, "class", "form-control svelte-yjlyqq");
-			attr_dev(input6, "placeholder", "Carrera");
-			attr_dev(input6, "aria-label", "eventCareer");
+			attr_dev(input6, "placeholder", "Ponente");
+			attr_dev(input6, "aria-label", "eventExponent");
 			attr_dev(input6, "aria-describedby", "basic-addon1");
-			add_location(input6, file$6, 591, 12, 16572);
+			add_location(input6, file$6, 544, 12, 15380);
 			attr_dev(div29, "class", "input-group mb-3 col-6 svelte-yjlyqq");
-			add_location(div29, file$6, 587, 10, 16400);
-			attr_dev(i13, "class", "bi bi-person");
-			add_location(i13, file$6, 604, 15, 17003);
+			add_location(div29, file$6, 540, 10, 15206);
+			attr_dev(i14, "class", "bi bi-bookmark-check");
+			add_location(i14, file$6, 557, 15, 15812);
 			attr_dev(span8, "class", "input-group-text");
 			attr_dev(span8, "id", "basic-addon1");
-			add_location(span8, file$6, 603, 12, 16939);
-			attr_dev(input7, "type", "text");
-			attr_dev(input7, "class", "form-control svelte-yjlyqq");
-			attr_dev(input7, "placeholder", "Ponente");
-			attr_dev(input7, "aria-label", "eventExponent");
-			attr_dev(input7, "aria-describedby", "basic-addon1");
-			add_location(input7, file$6, 606, 12, 17064);
-			attr_dev(div30, "class", "input-group mb-3 col-6 svelte-yjlyqq");
-			add_location(div30, file$6, 602, 10, 16890);
-			attr_dev(i14, "class", "bi bi-bookmark-check");
-			add_location(i14, file$6, 619, 15, 17496);
-			attr_dev(span9, "class", "input-group-text");
-			attr_dev(span9, "id", "basic-addon1");
-			add_location(span9, file$6, 618, 12, 17432);
+			add_location(span8, file$6, 556, 12, 15748);
 			option0.selected = true;
 			option0.__value = "Activo";
 			option0.value = option0.__value;
-			add_location(option0, file$6, 626, 14, 17722);
+			add_location(option0, file$6, 564, 14, 16038);
 			option1.__value = "Inactivo";
 			option1.value = option1.__value;
-			add_location(option1, file$6, 627, 14, 17769);
-			attr_dev(select, "class", "form-select");
-			attr_dev(select, "aria-label", "eventStatus");
-			if (/*selectedEvent*/ ctx[1].status === void 0) add_render_callback(() => /*select_change_handler*/ ctx[17].call(select));
-			add_location(select, file$6, 621, 12, 17565);
-			attr_dev(div31, "class", "input-group mb-3 col-6");
-			add_location(div31, file$6, 617, 10, 17383);
-			attr_dev(div32, "class", "row");
-			add_location(div32, file$6, 458, 8, 12162);
-			attr_dev(div33, "class", "modal-body");
-			add_location(div33, file$6, 457, 6, 12129);
-			add_location(div34, file$6, 633, 8, 17927);
-			attr_dev(button1, "type", "button");
-			attr_dev(button1, "class", "btn btn-primary");
-			add_location(button1, file$6, 647, 8, 18230);
-			attr_dev(div35, "class", "modal-footer justify-content-between");
-			add_location(div35, file$6, 632, 6, 17868);
-			attr_dev(div36, "class", "modal-content");
-			add_location(div36, file$6, 447, 4, 11834);
-			attr_dev(div37, "class", "modal-dialog modal-dialog-centered modal-lg");
-			add_location(div37, file$6, 446, 2, 11772);
-			attr_dev(div38, "class", "modal fade");
-			attr_dev(div38, "id", "eventModal");
-			attr_dev(div38, "tabindex", "-1");
-			attr_dev(div38, "aria-labelledby", "eventModalLabel");
-			attr_dev(div38, "aria-hidden", "true");
-			add_location(div38, file$6, 439, 0, 11651);
+			add_location(option1, file$6, 565, 14, 16085);
+			attr_dev(select1, "class", "form-select");
+			attr_dev(select1, "aria-label", "eventStatus");
+			if (/*selectedEvent*/ ctx[1].status === void 0) add_render_callback(() => /*select1_change_handler*/ ctx[19].call(select1));
+			add_location(select1, file$6, 559, 12, 15881);
+			attr_dev(div30, "class", "input-group mb-3 col-6");
+			add_location(div30, file$6, 555, 10, 15699);
+			attr_dev(div31, "class", "row");
+			add_location(div31, file$6, 390, 8, 10245);
+			attr_dev(div32, "class", "modal-body");
+			add_location(div32, file$6, 389, 6, 10212);
+			add_location(div33, file$6, 571, 8, 16243);
+			attr_dev(button2, "type", "button");
+			attr_dev(button2, "class", "btn btn-primary");
+			add_location(button2, file$6, 585, 8, 16546);
+			attr_dev(div34, "class", "modal-footer justify-content-between");
+			add_location(div34, file$6, 570, 6, 16184);
+			attr_dev(div35, "class", "modal-content");
+			add_location(div35, file$6, 379, 4, 9917);
+			attr_dev(div36, "class", "modal-dialog modal-dialog-centered modal-lg");
+			add_location(div36, file$6, 378, 2, 9855);
+			attr_dev(div37, "class", "modal fade");
+			attr_dev(div37, "id", "eventModal");
+			attr_dev(div37, "tabindex", "-1");
+			attr_dev(div37, "aria-labelledby", "eventModalLabel");
+			attr_dev(div37, "aria-hidden", "true");
+			add_location(div37, file$6, 371, 0, 9734);
 		},
 		l: function claim(nodes) {
 			throw new Error_1$1("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4928,200 +5122,251 @@ function create_fragment$8(ctx) {
 			append_dev(div0, a);
 			append_dev(a, img);
 			append_dev(a, t0);
-			insert_dev(target, t1, anchor);
-			insert_dev(target, br0, anchor);
-			insert_dev(target, t2, anchor);
-			insert_dev(target, br1, anchor);
+			append_dev(div0, t1);
+			append_dev(div0, button0);
+			append_dev(button0, i0);
+			append_dev(button0, t2);
 			insert_dev(target, t3, anchor);
-			insert_dev(target, br2, anchor);
+			insert_dev(target, br0, anchor);
 			insert_dev(target, t4, anchor);
-			insert_dev(target, br3, anchor);
+			insert_dev(target, br1, anchor);
 			insert_dev(target, t5, anchor);
+			insert_dev(target, br2, anchor);
+			insert_dev(target, t6, anchor);
+			insert_dev(target, br3, anchor);
+			insert_dev(target, t7, anchor);
 			insert_dev(target, div20, anchor);
 			append_dev(div20, div13);
 			append_dev(div13, div3);
 			append_dev(div3, div2);
-			append_dev(div2, i0);
-			append_dev(div2, t6);
+			append_dev(div2, i1);
+			append_dev(div2, t8);
 			append_dev(div2, div1);
 			append_dev(div1, h50);
-			append_dev(div1, t8);
+			append_dev(div1, t10);
 			append_dev(div1, h60);
-			append_dev(h60, t9);
-			append_dev(h60, t10);
-			append_dev(div13, t11);
+			append_dev(h60, t11);
+			append_dev(h60, t12);
+			append_dev(div13, t13);
 			append_dev(div13, div6);
 			append_dev(div6, div5);
-			append_dev(div5, i1);
-			append_dev(div5, t12);
+			append_dev(div5, i2);
+			append_dev(div5, t14);
 			append_dev(div5, div4);
 			append_dev(div4, h51);
-			append_dev(div4, t14);
+			append_dev(div4, t16);
 			append_dev(div4, h61);
-			append_dev(h61, t15);
-			append_dev(h61, t16);
-			append_dev(div13, t17);
+			append_dev(h61, t17);
+			append_dev(h61, t18);
+			append_dev(div13, t19);
 			append_dev(div13, div9);
 			append_dev(div9, div8);
-			append_dev(div8, i2);
-			append_dev(div8, t18);
+			append_dev(div8, i3);
+			append_dev(div8, t20);
 			append_dev(div8, div7);
 			append_dev(div7, h52);
-			append_dev(div7, t20);
+			append_dev(div7, t22);
 			append_dev(div7, h62);
-			append_dev(h62, t21);
-			append_dev(h62, t22);
-			append_dev(div13, t23);
+			append_dev(h62, t23);
+			append_dev(h62, t24);
+			append_dev(div13, t25);
 			append_dev(div13, div12);
 			append_dev(div12, div11);
-			append_dev(div11, i3);
-			append_dev(div11, t24);
+			append_dev(div11, i4);
+			append_dev(div11, t26);
 			append_dev(div11, div10);
 			append_dev(div10, h53);
-			append_dev(div10, t26);
+			append_dev(div10, t28);
 			append_dev(div10, h63);
-			append_dev(h63, t27);
-			append_dev(h63, t28);
 			append_dev(h63, t29);
 			append_dev(h63, t30);
-			append_dev(div20, t31);
+			append_dev(h63, t31);
+			append_dev(h63, t32);
+			append_dev(div20, t33);
 			append_dev(div20, div14);
 			append_dev(div14, hr);
-			append_dev(div14, t32);
+			append_dev(div14, t34);
 			append_dev(div14, br4);
-			append_dev(div20, t33);
+			append_dev(div20, t35);
 			append_dev(div20, div19);
-
-			for (let i = 0; i < each_blocks.length; i += 1) {
-				if (each_blocks[i]) {
-					each_blocks[i].m(div19, null);
-				}
-			}
-
-			append_dev(div19, t34);
 			append_dev(div19, div18);
 			append_dev(div18, div17);
 			append_dev(div17, div16);
 			append_dev(div16, div15);
-			append_dev(div15, i4);
-			append_dev(div16, t35);
+			append_dev(div15, i5);
+			append_dev(div16, t36);
 			append_dev(div16, h54);
-			insert_dev(target, t37, anchor);
-			insert_dev(target, div38, anchor);
-			append_dev(div38, div37);
+			append_dev(div19, t38);
+
+			for (let i = 0; i < each_blocks_1.length; i += 1) {
+				if (each_blocks_1[i]) {
+					each_blocks_1[i].m(div19, null);
+				}
+			}
+
+			insert_dev(target, t39, anchor);
+			insert_dev(target, div37, anchor);
 			append_dev(div37, div36);
-			append_dev(div36, div21);
+			append_dev(div36, div35);
+			append_dev(div35, div21);
 			append_dev(div21, h55);
-			append_dev(div21, t39);
-			append_dev(div21, button0);
-			append_dev(div36, t40);
-			append_dev(div36, div33);
-			append_dev(div33, div32);
-			append_dev(div32, div22);
+			append_dev(div21, t41);
+			append_dev(div21, button1);
+			append_dev(div35, t42);
+			append_dev(div35, div32);
+			append_dev(div32, div31);
+			append_dev(div31, div22);
 			append_dev(div22, span0);
-			append_dev(span0, i5);
-			append_dev(div22, t41);
+			append_dev(span0, i6);
+			append_dev(div22, t43);
 			append_dev(div22, input0);
 			set_input_value(input0, /*selectedEvent*/ ctx[1].name);
-			append_dev(div32, t42);
-			append_dev(div32, div23);
+			append_dev(div31, t44);
+			append_dev(div31, div23);
 			append_dev(div23, span1);
-			append_dev(span1, i6);
-			append_dev(div23, t43);
+			append_dev(span1, i7);
+			append_dev(div23, t45);
 			append_dev(div23, input1);
 			set_input_value(input1, /*selectedEvent*/ ctx[1].date);
-			append_dev(div32, t44);
-			append_dev(div32, div24);
+			append_dev(div31, t46);
+			append_dev(div31, div24);
 			append_dev(div24, span2);
-			append_dev(span2, i7);
-			append_dev(div24, t45);
+			append_dev(span2, i8);
+			append_dev(div24, t47);
 			append_dev(div24, input2);
 			set_input_value(input2, /*selectedEvent*/ ctx[1].start_time);
-			append_dev(div32, t46);
-			append_dev(div32, div25);
+			append_dev(div31, t48);
+			append_dev(div31, div25);
 			append_dev(div25, span3);
-			append_dev(span3, i8);
-			append_dev(div25, t47);
+			append_dev(span3, i9);
+			append_dev(div25, t49);
 			append_dev(div25, input3);
 			set_input_value(input3, /*selectedEvent*/ ctx[1].end_time);
-			append_dev(div32, t48);
-			append_dev(div32, div26);
+			append_dev(div31, t50);
+			append_dev(div31, div26);
 			append_dev(div26, span4);
-			append_dev(span4, i9);
-			append_dev(div26, t49);
+			append_dev(span4, i10);
+			append_dev(div26, t51);
 			append_dev(div26, input4);
 			set_input_value(input4, /*selectedEvent*/ ctx[1].location);
-			append_dev(div32, t50);
-			append_dev(div32, div27);
+			append_dev(div31, t52);
+			append_dev(div31, div27);
 			append_dev(div27, span5);
-			append_dev(span5, i10);
-			append_dev(div27, t51);
-			append_dev(div27, textarea);
-			set_input_value(textarea, /*selectedEvent*/ ctx[1].description);
-			append_dev(div32, t52);
-			append_dev(div32, div28);
-			append_dev(div28, span6);
-			append_dev(span6, i11);
-			append_dev(div28, t53);
-			append_dev(div28, input5);
+			append_dev(span5, i11);
+			append_dev(div27, t53);
+			append_dev(div27, input5);
 			set_input_value(input5, /*selectedEvent*/ ctx[1].max_attendees);
-			append_dev(div32, t54);
-			append_dev(div32, div29);
+			append_dev(div31, t54);
+			append_dev(div31, div28);
+			append_dev(div28, span6);
+			append_dev(span6, i12);
+			append_dev(div28, t55);
+			append_dev(div28, select0);
+
+			for (let i = 0; i < each_blocks.length; i += 1) {
+				if (each_blocks[i]) {
+					each_blocks[i].m(select0, null);
+				}
+			}
+
+			select_option(select0, /*selectedEvent*/ ctx[1].career, true);
+			append_dev(div31, t56);
+			append_dev(div31, div29);
 			append_dev(div29, span7);
-			append_dev(span7, i12);
-			append_dev(div29, t55);
+			append_dev(span7, i13);
+			append_dev(div29, t57);
 			append_dev(div29, input6);
-			set_input_value(input6, /*selectedEvent*/ ctx[1].career);
-			append_dev(div32, t56);
-			append_dev(div32, div30);
+			set_input_value(input6, /*selectedEvent*/ ctx[1].exponent);
+			append_dev(div31, t58);
+			append_dev(div31, div30);
 			append_dev(div30, span8);
-			append_dev(span8, i13);
-			append_dev(div30, t57);
-			append_dev(div30, input7);
-			set_input_value(input7, /*selectedEvent*/ ctx[1].exponent);
-			append_dev(div32, t58);
-			append_dev(div32, div31);
-			append_dev(div31, span9);
-			append_dev(span9, i14);
-			append_dev(div31, t59);
-			append_dev(div31, select);
-			append_dev(select, option0);
-			append_dev(select, option1);
-			select_option(select, /*selectedEvent*/ ctx[1].status, true);
-			append_dev(div36, t62);
-			append_dev(div36, div35);
+			append_dev(span8, i14);
+			append_dev(div30, t59);
+			append_dev(div30, select1);
+			append_dev(select1, option0);
+			append_dev(select1, option1);
+			select_option(select1, /*selectedEvent*/ ctx[1].status, true);
+			append_dev(div35, t62);
 			append_dev(div35, div34);
-			if (if_block) if_block.m(div34, null);
-			append_dev(div35, t63);
-			append_dev(div35, button1);
+			append_dev(div34, div33);
+			if (if_block) if_block.m(div33, null);
+			append_dev(div34, t63);
+			append_dev(div34, button2);
 
 			if (!mounted) {
 				dispose = [
-					listen_dev(div18, "click", /*click_handler_1*/ ctx[7], false, false, false, false),
-					listen_dev(input0, "input", /*input0_input_handler*/ ctx[8]),
-					listen_dev(input1, "input", /*input1_input_handler*/ ctx[9]),
-					listen_dev(input2, "input", /*input2_input_handler*/ ctx[10]),
-					listen_dev(input3, "input", /*input3_input_handler*/ ctx[11]),
-					listen_dev(input4, "input", /*input4_input_handler*/ ctx[12]),
-					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[13]),
-					listen_dev(input5, "input", /*input5_input_handler*/ ctx[14]),
-					listen_dev(input6, "input", /*input6_input_handler*/ ctx[15]),
-					listen_dev(input7, "input", /*input7_input_handler*/ ctx[16]),
-					listen_dev(select, "change", /*select_change_handler*/ ctx[17]),
-					listen_dev(button1, "click", /*click_handler_3*/ ctx[19], false, false, false, false)
+					listen_dev(div18, "click", /*click_handler*/ ctx[7], false, false, false, false),
+					listen_dev(input0, "input", /*input0_input_handler*/ ctx[11]),
+					listen_dev(input1, "input", /*input1_input_handler*/ ctx[12]),
+					listen_dev(input2, "input", /*input2_input_handler*/ ctx[13]),
+					listen_dev(input3, "input", /*input3_input_handler*/ ctx[14]),
+					listen_dev(input4, "input", /*input4_input_handler*/ ctx[15]),
+					listen_dev(input5, "input", /*input5_input_handler*/ ctx[16]),
+					listen_dev(select0, "change", /*select0_change_handler*/ ctx[17]),
+					listen_dev(input6, "input", /*input6_input_handler*/ ctx[18]),
+					listen_dev(select1, "change", /*select1_change_handler*/ ctx[19]),
+					listen_dev(button2, "click", /*click_handler_3*/ ctx[21], false, false, false, false)
 				];
 
 				mounted = true;
 			}
 		},
 		p: function update(ctx, [dirty]) {
-			if (dirty & /*events*/ 1 && t10_value !== (t10_value = /*events*/ ctx[0].length + "")) set_data_dev(t10, t10_value);
-			if (dirty & /*events*/ 1 && t16_value !== (t16_value = /*events*/ ctx[0].reduce(func, 0) + "")) set_data_dev(t16, t16_value);
-			if (dirty & /*events*/ 1 && t22_value !== (t22_value = /*events*/ ctx[0].reduce(func_1, 0) + "")) set_data_dev(t22, t22_value);
-			if (dirty & /*events*/ 1 && t30_value !== (t30_value = /*events*/ ctx[0].reduce(/*func_2*/ ctx[5], 0) + "")) set_data_dev(t30, t30_value);
+			if (dirty & /*events*/ 1 && t12_value !== (t12_value = /*events*/ ctx[0].length + "")) set_data_dev(t12, t12_value);
+			if (dirty & /*events*/ 1 && t18_value !== (t18_value = /*events*/ ctx[0].reduce(func, 0) + "")) set_data_dev(t18, t18_value);
+			if (dirty & /*events*/ 1 && t24_value !== (t24_value = /*events*/ ctx[0].reduce(func_1, 0) + "")) set_data_dev(t24, t24_value);
+			if (dirty & /*events*/ 1 && t32_value !== (t32_value = /*events*/ ctx[0].reduce(/*func_2*/ ctx[6], 0) + "")) set_data_dev(t32, t32_value);
 
-			if (dirty & /*openEventModal, events*/ 5) {
-				each_value = /*events*/ ctx[0];
+			if (dirty & /*openEventModal, events, API_URL, $availableCareers*/ 13) {
+				each_value_1 = /*events*/ ctx[0];
+				validate_each_argument(each_value_1);
+				let i;
+
+				for (i = 0; i < each_value_1.length; i += 1) {
+					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+					if (each_blocks_1[i]) {
+						each_blocks_1[i].p(child_ctx, dirty);
+					} else {
+						each_blocks_1[i] = create_each_block_1(child_ctx);
+						each_blocks_1[i].c();
+						each_blocks_1[i].m(div19, null);
+					}
+				}
+
+				for (; i < each_blocks_1.length; i += 1) {
+					each_blocks_1[i].d(1);
+				}
+
+				each_blocks_1.length = each_value_1.length;
+			}
+
+			if (dirty & /*selectedEvent, $availableCareers*/ 6 && input0.value !== /*selectedEvent*/ ctx[1].name) {
+				set_input_value(input0, /*selectedEvent*/ ctx[1].name);
+			}
+
+			if (dirty & /*selectedEvent, $availableCareers*/ 6) {
+				set_input_value(input1, /*selectedEvent*/ ctx[1].date);
+			}
+
+			if (dirty & /*selectedEvent, $availableCareers*/ 6) {
+				set_input_value(input2, /*selectedEvent*/ ctx[1].start_time);
+			}
+
+			if (dirty & /*selectedEvent, $availableCareers*/ 6) {
+				set_input_value(input3, /*selectedEvent*/ ctx[1].end_time);
+			}
+
+			if (dirty & /*selectedEvent, $availableCareers*/ 6 && input4.value !== /*selectedEvent*/ ctx[1].location) {
+				set_input_value(input4, /*selectedEvent*/ ctx[1].location);
+			}
+
+			if (dirty & /*selectedEvent, $availableCareers*/ 6 && to_number(input5.value) !== /*selectedEvent*/ ctx[1].max_attendees) {
+				set_input_value(input5, /*selectedEvent*/ ctx[1].max_attendees);
+			}
+
+			if (dirty & /*$availableCareers*/ 4) {
+				each_value = /*$availableCareers*/ ctx[2];
 				validate_each_argument(each_value);
 				let i;
 
@@ -5133,7 +5378,7 @@ function create_fragment$8(ctx) {
 					} else {
 						each_blocks[i] = create_each_block$2(child_ctx);
 						each_blocks[i].c();
-						each_blocks[i].m(div19, t34);
+						each_blocks[i].m(select0, null);
 					}
 				}
 
@@ -5144,44 +5389,16 @@ function create_fragment$8(ctx) {
 				each_blocks.length = each_value.length;
 			}
 
-			if (dirty & /*selectedEvent*/ 2 && input0.value !== /*selectedEvent*/ ctx[1].name) {
-				set_input_value(input0, /*selectedEvent*/ ctx[1].name);
+			if (dirty & /*selectedEvent, $availableCareers*/ 6) {
+				select_option(select0, /*selectedEvent*/ ctx[1].career);
 			}
 
-			if (dirty & /*selectedEvent*/ 2) {
-				set_input_value(input1, /*selectedEvent*/ ctx[1].date);
+			if (dirty & /*selectedEvent, $availableCareers*/ 6 && input6.value !== /*selectedEvent*/ ctx[1].exponent) {
+				set_input_value(input6, /*selectedEvent*/ ctx[1].exponent);
 			}
 
-			if (dirty & /*selectedEvent*/ 2) {
-				set_input_value(input2, /*selectedEvent*/ ctx[1].start_time);
-			}
-
-			if (dirty & /*selectedEvent*/ 2) {
-				set_input_value(input3, /*selectedEvent*/ ctx[1].end_time);
-			}
-
-			if (dirty & /*selectedEvent*/ 2 && input4.value !== /*selectedEvent*/ ctx[1].location) {
-				set_input_value(input4, /*selectedEvent*/ ctx[1].location);
-			}
-
-			if (dirty & /*selectedEvent*/ 2) {
-				set_input_value(textarea, /*selectedEvent*/ ctx[1].description);
-			}
-
-			if (dirty & /*selectedEvent*/ 2 && to_number(input5.value) !== /*selectedEvent*/ ctx[1].max_attendees) {
-				set_input_value(input5, /*selectedEvent*/ ctx[1].max_attendees);
-			}
-
-			if (dirty & /*selectedEvent*/ 2 && input6.value !== /*selectedEvent*/ ctx[1].career) {
-				set_input_value(input6, /*selectedEvent*/ ctx[1].career);
-			}
-
-			if (dirty & /*selectedEvent*/ 2 && input7.value !== /*selectedEvent*/ ctx[1].exponent) {
-				set_input_value(input7, /*selectedEvent*/ ctx[1].exponent);
-			}
-
-			if (dirty & /*selectedEvent*/ 2) {
-				select_option(select, /*selectedEvent*/ ctx[1].status);
+			if (dirty & /*selectedEvent, $availableCareers*/ 6) {
+				select_option(select1, /*selectedEvent*/ ctx[1].status);
 			}
 
 			if (/*selectedEvent*/ ctx[1].id) {
@@ -5190,7 +5407,7 @@ function create_fragment$8(ctx) {
 				} else {
 					if_block = create_if_block$3(ctx);
 					if_block.c();
-					if_block.m(div34, null);
+					if_block.m(div33, null);
 				}
 			} else if (if_block) {
 				if_block.d(1);
@@ -5201,19 +5418,20 @@ function create_fragment$8(ctx) {
 		o: noop,
 		d: function destroy(detaching) {
 			if (detaching) detach_dev(nav);
-			if (detaching) detach_dev(t1);
-			if (detaching) detach_dev(br0);
-			if (detaching) detach_dev(t2);
-			if (detaching) detach_dev(br1);
 			if (detaching) detach_dev(t3);
-			if (detaching) detach_dev(br2);
+			if (detaching) detach_dev(br0);
 			if (detaching) detach_dev(t4);
-			if (detaching) detach_dev(br3);
+			if (detaching) detach_dev(br1);
 			if (detaching) detach_dev(t5);
+			if (detaching) detach_dev(br2);
+			if (detaching) detach_dev(t6);
+			if (detaching) detach_dev(br3);
+			if (detaching) detach_dev(t7);
 			if (detaching) detach_dev(div20);
+			destroy_each(each_blocks_1, detaching);
+			if (detaching) detach_dev(t39);
+			if (detaching) detach_dev(div37);
 			destroy_each(each_blocks, detaching);
-			if (detaching) detach_dev(t37);
-			if (detaching) detach_dev(div38);
 			if (if_block) if_block.d();
 			mounted = false;
 			run_all(dispose);
@@ -5235,88 +5453,12 @@ const func = (acc, e) => acc + e.attendees;
 const func_1 = (acc, e) => acc + 1;
 
 function instance$8($$self, $$props, $$invalidate) {
+	let $availableCareers;
+	validate_store(availableCareers, 'availableCareers');
+	component_subscribe($$self, availableCareers, $$value => $$invalidate(2, $availableCareers = $$value));
 	let { $$slots: slots = {}, $$scope } = $$props;
 	validate_slots('EventCreator', slots, []);
 	let events = [];
-
-	/*let events = [
-  {
-    id: 1,
-    name: "Evento 1",
-    date: "2021-10-10",
-    start_time: "10:00",
-    end_time: "12:00",
-    location: "Facultad de Ciencias",
-    description: "Evento de prueba 1",
-    attendees: 0,
-    max_attendees: 100,
-    career: "Ingeniería en Computación",
-    exponent: "Dr. Exponente 1",
-    status: "Activo",
-    img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-  },
-  {
-    id: 2,
-    name: "Evento 2",
-    date: "2021-10-11",
-    start_time: "10:00",
-    end_time: "12:00",
-    location: "Facultad de Ciencias",
-    description: "Evento de prueba 2",
-    attendees: 0,
-    max_attendees: 100,
-    career: "Ingeniería en Computación",
-    exponent: "Dr. Exponente 2",
-    status: "Activo",
-    img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-  },
-  {
-    id: 3,
-    name: "Evento 3",
-    date: "2021-10-12",
-    start_time: "10:00",
-    end_time: "12:00",
-    location: "Facultad de Ciencias",
-    description: "Evento de prueba 3",
-    attendees: 0,
-    max_attendees: 100,
-    career: "Ingeniería en Computación",
-    exponent: "Dr. Exponente 3",
-    status: "Activo",
-    img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-  },
-
-  {
-    id: 4,
-    name: "Evento 4",
-    date: "2021-10-13",
-    start_time: "10:00",
-    end_time: "12:00",
-    location: "Facultad de Ciencias",
-    description: "Evento de prueba 4",
-    attendees: 0,
-    max_attendees: 100,
-    career: "Ingeniería en Computación",
-    exponent: "Dr. Exponente 4",
-    status: "Activo",
-    img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-  },
-  {
-    id: 5,
-    name: "Evento 5",
-    date: "2021-10-14",
-    start_time: "10:00",
-    end_time: "12:00",
-    location: "Facultad de Ciencias",
-    description: "Evento de prueba 5",
-    attendees: 0,
-    max_attendees: 100,
-    career: "Ingeniería en Computación",
-    exponent: "Dr. Exponente 5",
-    status: "Activo",
-    img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-  },
-];*/
 	let selectedEvent = {};
 
 	async function getEvents() {
@@ -5375,7 +5517,8 @@ function instance$8($$self, $$props, $$invalidate) {
 		console.log(selectedEvent);
 
 		//Check that all fields are filled
-		if (!selectedEvent.name || !selectedEvent.date || !selectedEvent.start_time || !selectedEvent.end_time || !selectedEvent.location || !selectedEvent.description || !selectedEvent.max_attendees || !selectedEvent.career || !selectedEvent.exponent || !selectedEvent.status) {
+		if (!selectedEvent.name || !selectedEvent.date || !selectedEvent.start_time || !selectedEvent.end_time || !selectedEvent.location || //!selectedEvent.description ||
+		!selectedEvent.max_attendees || !selectedEvent.career || !selectedEvent.exponent || !selectedEvent.status) {
 			toast.error("Por favor llena todos los campos", { duration: 3000, position: "bottom-right" });
 			return;
 		}
@@ -5473,12 +5616,15 @@ function instance$8($$self, $$props, $$invalidate) {
 		return acc + (endHour - startHour);
 	};
 
-	const click_handler = event => {
-		openEventModal(event);
+	const click_handler = () => {
+		openEventModal();
 	};
 
-	const click_handler_1 = () => {
-		openEventModal();
+	const func_3 = (event, c) => c.name == event.career;
+	const func_4 = (event, c) => c.name == event.career;
+
+	const click_handler_1 = event => {
+		openEventModal(event);
 	};
 
 	function input0_input_handler() {
@@ -5506,27 +5652,22 @@ function instance$8($$self, $$props, $$invalidate) {
 		$$invalidate(1, selectedEvent);
 	}
 
-	function textarea_input_handler() {
-		selectedEvent.description = this.value;
-		$$invalidate(1, selectedEvent);
-	}
-
 	function input5_input_handler() {
 		selectedEvent.max_attendees = to_number(this.value);
 		$$invalidate(1, selectedEvent);
 	}
 
-	function input6_input_handler() {
-		selectedEvent.career = this.value;
+	function select0_change_handler() {
+		selectedEvent.career = select_value(this);
 		$$invalidate(1, selectedEvent);
 	}
 
-	function input7_input_handler() {
+	function input6_input_handler() {
 		selectedEvent.exponent = this.value;
 		$$invalidate(1, selectedEvent);
 	}
 
-	function select_change_handler() {
+	function select1_change_handler() {
 		selectedEvent.status = select_value(this);
 		$$invalidate(1, selectedEvent);
 	}
@@ -5542,6 +5683,7 @@ function instance$8($$self, $$props, $$invalidate) {
 	$$self.$capture_state = () => ({
 		toast,
 		API_URL,
+		availableCareers,
 		onMount,
 		events,
 		selectedEvent,
@@ -5549,7 +5691,8 @@ function instance$8($$self, $$props, $$invalidate) {
 		handleFileUpload,
 		openEventModal,
 		saveEvent,
-		deleteEvent
+		deleteEvent,
+		$availableCareers
 	});
 
 	$$self.$inject_state = $$props => {
@@ -5564,22 +5707,24 @@ function instance$8($$self, $$props, $$invalidate) {
 	return [
 		events,
 		selectedEvent,
+		$availableCareers,
 		openEventModal,
 		saveEvent,
 		deleteEvent,
 		func_2,
 		click_handler,
+		func_3,
+		func_4,
 		click_handler_1,
 		input0_input_handler,
 		input1_input_handler,
 		input2_input_handler,
 		input3_input_handler,
 		input4_input_handler,
-		textarea_input_handler,
 		input5_input_handler,
+		select0_change_handler,
 		input6_input_handler,
-		input7_input_handler,
-		select_change_handler,
+		select1_change_handler,
 		click_handler_2,
 		click_handler_3
 	];
@@ -7447,7 +7592,7 @@ function create_fragment$4(ctx) {
 			t7 = space();
 			div2 = element("div");
 			label = element("label");
-			label.textContent = "Escriba su número de boleta";
+			label.textContent = "Escriba su número de cuenta";
 			t9 = space();
 			input = element("input");
 			t10 = space();
@@ -7478,7 +7623,7 @@ function create_fragment$4(ctx) {
 			attr_dev(input, "type", "text");
 			attr_dev(input, "id", "");
 			attr_dev(input, "class", "input form-control");
-			attr_dev(input, "placeholder", "Num. de Boleta UNAM");
+			attr_dev(input, "placeholder", "Num. de Cuenta UNAM");
 			add_location(input, file$3, 57, 22, 1898);
 			attr_dev(div2, "class", "form-outline form-white mb-4");
 			add_location(div2, file$3, 52, 20, 1597);
@@ -11102,13 +11247,13 @@ browser.toString = renderCanvas.bind(null, function (data, _, opts) {
 const { console: console_1$1 } = globals;
 const file$1 = "src/routes/UserEventCard.svelte";
 
-// (215:6) {:else}
+// (245:6) {:else}
 function create_else_block(ctx) {
 	let t;
 
 	const block = {
 		c: function create() {
-			t = text("Inscribirse");
+			t = text("Registrar evento");
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, t, anchor);
@@ -11122,20 +11267,20 @@ function create_else_block(ctx) {
 		block,
 		id: create_else_block.name,
 		type: "else",
-		source: "(215:6) {:else}",
+		source: "(245:6) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (213:6) {#if isSuscribed}
+// (243:6) {#if isSuscribed}
 function create_if_block(ctx) {
 	let t;
 
 	const block = {
 		c: function create() {
-			t = text("Darse de baja");
+			t = text("Eliminar registro");
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, t, anchor);
@@ -11149,7 +11294,7 @@ function create_if_block(ctx) {
 		block,
 		id: create_if_block.name,
 		type: "if",
-		source: "(213:6) {#if isSuscribed}",
+		source: "(243:6) {#if isSuscribed}",
 		ctx
 	});
 
@@ -11158,47 +11303,50 @@ function create_if_block(ctx) {
 
 function create_fragment$2(ctx) {
 	let div7;
+	let img;
+	let img_src_value;
+	let t0;
 	let div5;
 	let div2;
 	let div0;
-	let t3;
-	let div1;
-	let t4_value = /*event*/ ctx[0].start_time + "";
 	let t4;
+	let div1;
+	let t5_value = /*event*/ ctx[0].start_time + "";
 	let t5;
-	let t6_value = /*event*/ ctx[0].end_time + "";
 	let t6;
+	let t7_value = /*event*/ ctx[0].end_time + "";
 	let t7;
 	let t8;
-	let div3;
-	let t9_value = /*event*/ ctx[0].name.toUpperCase() + "";
 	let t9;
+	let div3;
+	let t10_value = /*event*/ ctx[0].name.toUpperCase() + "";
 	let t10;
+	let t11;
 	let div4;
 	let p0;
-	let t11_value = /*event*/ ctx[0].career + "";
-	let t11;
+	let t12_value = /*event*/ ctx[0].career + "";
 	let t12;
-	let br0;
 	let t13;
-	let t14_value = /*event*/ ctx[0].location + "";
+	let br0;
 	let t14;
+	let t15_value = /*event*/ ctx[0].location + "";
 	let t15;
-	let br1;
 	let t16;
-	let t17_value = /*event*/ ctx[0].exponent + "";
+	let br1;
 	let t17;
+	let t18_value = /*event*/ ctx[0].exponent + "";
 	let t18;
+	let t19;
 	let div6;
 	let p1;
 	let span;
-	let t20;
-	let t21_value = (/*event*/ ctx[0].attendees || 0) + "";
 	let t21;
+	let t22_value = (/*event*/ ctx[0].attendees || 0) + "";
 	let t22;
-	let t23_value = /*event*/ ctx[0].max_attendees + "";
 	let t23;
+	let t24_value = /*event*/ ctx[0].max_attendees + "";
 	let t24;
+	let t25;
 	let button;
 	let mounted;
 	let dispose;
@@ -11214,6 +11362,8 @@ function create_fragment$2(ctx) {
 	const block = {
 		c: function create() {
 			div7 = element("div");
+			img = element("img");
+			t0 = space();
 			div5 = element("div");
 			div2 = element("div");
 			div0 = element("div");
@@ -11221,127 +11371,140 @@ function create_fragment$2(ctx) {
 			div0.textContent = `${/*nombreDia*/ ctx[3].toUpperCase()} 
         ${/*numeroDia*/ ctx[4].toUpperCase()}`;
 
-			t3 = space();
+			t4 = space();
 			div1 = element("div");
-			t4 = text(t4_value);
-			t5 = text(" - ");
-			t6 = text(t6_value);
-			t7 = text(" hrs.");
-			t8 = space();
+			t5 = text(t5_value);
+			t6 = text(" - ");
+			t7 = text(t7_value);
+			t8 = text(" hrs.");
+			t9 = space();
 			div3 = element("div");
-			t9 = text(t9_value);
-			t10 = space();
+			t10 = text(t10_value);
+			t11 = space();
 			div4 = element("div");
 			p0 = element("p");
-			t11 = text(t11_value);
-			t12 = space();
-			br0 = element("br");
+			t12 = text(t12_value);
 			t13 = space();
-			t14 = text(t14_value);
-			t15 = space();
-			br1 = element("br");
+			br0 = element("br");
+			t14 = space();
+			t15 = text(t15_value);
 			t16 = space();
-			t17 = text(t17_value);
-			t18 = space();
+			br1 = element("br");
+			t17 = space();
+			t18 = text(t18_value);
+			t19 = space();
 			div6 = element("div");
 			p1 = element("p");
 			span = element("span");
 			span.textContent = "Asistentes:";
-			t20 = space();
-			t21 = text(t21_value);
-			t22 = text(" / ");
-			t23 = text(t23_value);
-			t24 = space();
+			t21 = space();
+			t22 = text(t22_value);
+			t23 = text(" / ");
+			t24 = text(t24_value);
+			t25 = space();
 			button = element("button");
 			if_block.c();
-			attr_dev(div0, "class", "info-box svelte-ul19px");
-			add_location(div0, file$1, 178, 6, 4492);
-			attr_dev(div1, "class", "info-box svelte-ul19px");
-			add_location(div1, file$1, 183, 6, 4603);
+			if (!src_url_equal(img.src, img_src_value = /*cardStyleData*/ ctx[2].img)) attr_dev(img, "src", img_src_value);
+			attr_dev(img, "alt", "event");
+			attr_dev(img, "class", "background-image svelte-1h6815n");
+			set_style(img, "color", "white");
+			add_location(img, file$1, 184, 2, 4831);
+			attr_dev(div0, "class", "info-box svelte-1h6815n");
+			add_location(div0, file$1, 208, 6, 5333);
+			attr_dev(div1, "class", "info-box svelte-1h6815n");
+			add_location(div1, file$1, 213, 6, 5444);
 			attr_dev(div2, "class", "d-flex justify-content-between");
-			add_location(div2, file$1, 177, 4, 4441);
-			attr_dev(div3, "class", "event-name svelte-ul19px");
-			add_location(div3, file$1, 189, 4, 4734);
-			add_location(br0, file$1, 194, 23, 4902);
-			add_location(br1, file$1, 195, 25, 4934);
-			attr_dev(p0, "class", "event-info svelte-ul19px");
-			add_location(p0, file$1, 193, 6, 4856);
+			add_location(div2, file$1, 207, 4, 5282);
+			attr_dev(div3, "class", "event-name svelte-1h6815n");
+			add_location(div3, file$1, 219, 4, 5575);
+			add_location(br0, file$1, 224, 23, 5743);
+			add_location(br1, file$1, 225, 25, 5775);
+			attr_dev(p0, "class", "event-info svelte-1h6815n");
+			add_location(p0, file$1, 223, 6, 5697);
 			attr_dev(div4, "class", "d-flex justify-content-start");
-			add_location(div4, file$1, 192, 4, 4807);
-			add_location(div5, file$1, 161, 2, 4102);
+			add_location(div4, file$1, 222, 4, 5648);
+			add_location(div5, file$1, 191, 2, 4943);
 			set_style(span, "font-weight", "300");
-			add_location(span, file$1, 202, 6, 5118);
-			attr_dev(p1, "class", "event-info svelte-ul19px");
+			add_location(span, file$1, 232, 6, 5959);
+			attr_dev(p1, "class", "event-info svelte-1h6815n");
 			set_style(p1, "font-weight", "700");
 			set_style(p1, "margin-top", "8px");
-			add_location(p1, file$1, 201, 4, 5048);
+			add_location(p1, file$1, 231, 4, 5889);
 			attr_dev(button, "class", "btn btn-light");
-			add_location(button, file$1, 206, 4, 5238);
+			add_location(button, file$1, 236, 4, 6079);
 			attr_dev(div6, "class", "d-flex justify-content-between");
-			add_location(div6, file$1, 200, 2, 4999);
-			attr_dev(div7, "class", "main-card-container shadow svelte-ul19px");
-			set_style(div7, "background-color", /*color*/ ctx[2]);
-			add_location(div7, file$1, 160, 0, 4024);
+			add_location(div6, file$1, 230, 2, 5840);
+			attr_dev(div7, "class", "main-card-container shadow svelte-1h6815n");
+			set_style(div7, "background-color", /*cardStyleData*/ ctx[2].color);
+			set_style(div7, "overflow", "hidden");
+			set_style(div7, "position", "relative");
+			add_location(div7, file$1, 180, 0, 4696);
 		},
 		l: function claim(nodes) {
 			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div7, anchor);
+			append_dev(div7, img);
+			append_dev(div7, t0);
 			append_dev(div7, div5);
 			append_dev(div5, div2);
 			append_dev(div2, div0);
-			append_dev(div2, t3);
+			append_dev(div2, t4);
 			append_dev(div2, div1);
-			append_dev(div1, t4);
 			append_dev(div1, t5);
 			append_dev(div1, t6);
 			append_dev(div1, t7);
-			append_dev(div5, t8);
+			append_dev(div1, t8);
+			append_dev(div5, t9);
 			append_dev(div5, div3);
-			append_dev(div3, t9);
-			append_dev(div5, t10);
+			append_dev(div3, t10);
+			append_dev(div5, t11);
 			append_dev(div5, div4);
 			append_dev(div4, p0);
-			append_dev(p0, t11);
 			append_dev(p0, t12);
-			append_dev(p0, br0);
 			append_dev(p0, t13);
+			append_dev(p0, br0);
 			append_dev(p0, t14);
 			append_dev(p0, t15);
-			append_dev(p0, br1);
 			append_dev(p0, t16);
+			append_dev(p0, br1);
 			append_dev(p0, t17);
-			append_dev(div7, t18);
+			append_dev(p0, t18);
+			append_dev(div7, t19);
 			append_dev(div7, div6);
 			append_dev(div6, p1);
 			append_dev(p1, span);
-			append_dev(p1, t20);
 			append_dev(p1, t21);
 			append_dev(p1, t22);
 			append_dev(p1, t23);
-			append_dev(div6, t24);
+			append_dev(p1, t24);
+			append_dev(div6, t25);
 			append_dev(div6, button);
 			if_block.m(button, null);
 
 			if (!mounted) {
 				dispose = [
-					listen_dev(div5, "click", /*click_handler*/ ctx[8], false, false, false, false),
-					listen_dev(button, "click", /*click_handler_1*/ ctx[9], false, false, false, false)
+					listen_dev(div5, "click", /*click_handler*/ ctx[9], false, false, false, false),
+					listen_dev(button, "click", /*click_handler_1*/ ctx[10], false, false, false, false)
 				];
 
 				mounted = true;
 			}
 		},
 		p: function update(ctx, [dirty]) {
-			if (dirty & /*event*/ 1 && t4_value !== (t4_value = /*event*/ ctx[0].start_time + "")) set_data_dev(t4, t4_value);
-			if (dirty & /*event*/ 1 && t6_value !== (t6_value = /*event*/ ctx[0].end_time + "")) set_data_dev(t6, t6_value);
-			if (dirty & /*event*/ 1 && t9_value !== (t9_value = /*event*/ ctx[0].name.toUpperCase() + "")) set_data_dev(t9, t9_value);
-			if (dirty & /*event*/ 1 && t11_value !== (t11_value = /*event*/ ctx[0].career + "")) set_data_dev(t11, t11_value);
-			if (dirty & /*event*/ 1 && t14_value !== (t14_value = /*event*/ ctx[0].location + "")) set_data_dev(t14, t14_value);
-			if (dirty & /*event*/ 1 && t17_value !== (t17_value = /*event*/ ctx[0].exponent + "")) set_data_dev(t17, t17_value);
-			if (dirty & /*event*/ 1 && t21_value !== (t21_value = (/*event*/ ctx[0].attendees || 0) + "")) set_data_dev(t21, t21_value);
-			if (dirty & /*event*/ 1 && t23_value !== (t23_value = /*event*/ ctx[0].max_attendees + "")) set_data_dev(t23, t23_value);
+			if (dirty & /*cardStyleData*/ 4 && !src_url_equal(img.src, img_src_value = /*cardStyleData*/ ctx[2].img)) {
+				attr_dev(img, "src", img_src_value);
+			}
+
+			if (dirty & /*event*/ 1 && t5_value !== (t5_value = /*event*/ ctx[0].start_time + "")) set_data_dev(t5, t5_value);
+			if (dirty & /*event*/ 1 && t7_value !== (t7_value = /*event*/ ctx[0].end_time + "")) set_data_dev(t7, t7_value);
+			if (dirty & /*event*/ 1 && t10_value !== (t10_value = /*event*/ ctx[0].name.toUpperCase() + "")) set_data_dev(t10, t10_value);
+			if (dirty & /*event*/ 1 && t12_value !== (t12_value = /*event*/ ctx[0].career + "")) set_data_dev(t12, t12_value);
+			if (dirty & /*event*/ 1 && t15_value !== (t15_value = /*event*/ ctx[0].location + "")) set_data_dev(t15, t15_value);
+			if (dirty & /*event*/ 1 && t18_value !== (t18_value = /*event*/ ctx[0].exponent + "")) set_data_dev(t18, t18_value);
+			if (dirty & /*event*/ 1 && t22_value !== (t22_value = (/*event*/ ctx[0].attendees || 0) + "")) set_data_dev(t22, t22_value);
+			if (dirty & /*event*/ 1 && t24_value !== (t24_value = /*event*/ ctx[0].max_attendees + "")) set_data_dev(t24, t24_value);
 
 			if (current_block_type !== (current_block_type = select_block_type(ctx))) {
 				if_block.d(1);
@@ -11353,8 +11516,8 @@ function create_fragment$2(ctx) {
 				}
 			}
 
-			if (dirty & /*color*/ 4) {
-				set_style(div7, "background-color", /*color*/ ctx[2]);
+			if (dirty & /*cardStyleData*/ 4) {
+				set_style(div7, "background-color", /*cardStyleData*/ ctx[2].color);
 			}
 		},
 		i: noop,
@@ -11379,6 +11542,9 @@ function create_fragment$2(ctx) {
 }
 
 function instance$2($$self, $$props, $$invalidate) {
+	let $availableCareers;
+	validate_store(availableCareers, 'availableCareers');
+	component_subscribe($$self, availableCareers, $$value => $$invalidate(11, $availableCareers = $$value));
 	let { $$slots: slots = {}, $$scope } = $$props;
 	validate_slots('UserEventCard', slots, []);
 
@@ -11397,6 +11563,26 @@ function instance$2($$self, $$props, $$invalidate) {
 		status: "Activo",
 		img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png"
 	} } = $$props;
+
+	let cardStyleData = {
+		name: "UNAM",
+		color: "#8bc34a",
+		img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png"
+	};
+
+	function getCardStyleData() {
+		//console.log("Available careers", $availableCareers);
+		const careerCatalog = $availableCareers.find(career => career.name === event.career);
+
+		if (careerCatalog) {
+			$$invalidate(2, cardStyleData = careerCatalog);
+			$$invalidate(2, cardStyleData.img = API_URL + "/img/" + cardStyleData.img_bg, cardStyleData);
+			console.log("Career found", event.career);
+			console.log("Career data", cardStyleData);
+		} else {
+			console.log("Career not found", event.career);
+		}
+	}
 
 	let { color } = $$props;
 	let { userId } = $$props;
@@ -11501,8 +11687,9 @@ function instance$2($$self, $$props, $$invalidate) {
 	}
 
 	onMount(() => {
-		
-	}); //cardClickListener();
+		//cardClickListener();
+		getCardStyleData();
+	});
 
 	$$self.$$.on_mount.push(function () {
 		if (color === undefined && !('color' in $$props || $$self.$$.bound[$$self.$$.props['color']])) {
@@ -11536,8 +11723,8 @@ function instance$2($$self, $$props, $$invalidate) {
 
 	$$self.$$set = $$props => {
 		if ('event' in $$props) $$invalidate(0, event = $$props.event);
-		if ('color' in $$props) $$invalidate(2, color = $$props.color);
-		if ('userId' in $$props) $$invalidate(7, userId = $$props.userId);
+		if ('color' in $$props) $$invalidate(7, color = $$props.color);
+		if ('userId' in $$props) $$invalidate(8, userId = $$props.userId);
 		if ('isSuscribed' in $$props) $$invalidate(1, isSuscribed = $$props.isSuscribed);
 	};
 
@@ -11545,10 +11732,13 @@ function instance$2($$self, $$props, $$invalidate) {
 		onMount,
 		toast,
 		API_URL,
+		availableCareers,
 		openDetailModal,
 		userModalData,
 		qrCode: browser,
 		event,
+		cardStyleData,
+		getCardStyleData,
 		color,
 		userId,
 		isSuscribed,
@@ -11558,13 +11748,15 @@ function instance$2($$self, $$props, $$invalidate) {
 		generateQR,
 		handleSuscription,
 		incribirEvento,
-		unsuscribeEvent
+		unsuscribeEvent,
+		$availableCareers
 	});
 
 	$$self.$inject_state = $$props => {
 		if ('event' in $$props) $$invalidate(0, event = $$props.event);
-		if ('color' in $$props) $$invalidate(2, color = $$props.color);
-		if ('userId' in $$props) $$invalidate(7, userId = $$props.userId);
+		if ('cardStyleData' in $$props) $$invalidate(2, cardStyleData = $$props.cardStyleData);
+		if ('color' in $$props) $$invalidate(7, color = $$props.color);
+		if ('userId' in $$props) $$invalidate(8, userId = $$props.userId);
 		if ('isSuscribed' in $$props) $$invalidate(1, isSuscribed = $$props.isSuscribed);
 	};
 
@@ -11575,11 +11767,12 @@ function instance$2($$self, $$props, $$invalidate) {
 	return [
 		event,
 		isSuscribed,
-		color,
+		cardStyleData,
 		nombreDia,
 		numeroDia,
 		generateQR,
 		handleSuscription,
+		color,
 		userId,
 		click_handler,
 		click_handler_1
@@ -11592,8 +11785,8 @@ class UserEventCard extends SvelteComponentDev {
 
 		init(this, options, instance$2, create_fragment$2, safe_not_equal, {
 			event: 0,
-			color: 2,
-			userId: 7,
+			color: 7,
+			userId: 8,
 			isSuscribed: 1
 		});
 

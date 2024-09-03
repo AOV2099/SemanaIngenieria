@@ -138,10 +138,10 @@ function isJsonEventCorrect(event) {
     console.log("location");
     return false;
   }
-  if (!event.description) {
+  /*if (!event.description) {
     console.log("description");
     return false;
-  }
+  }*/
   if (!event.max_attendees) {
     console.log("max_attendees");
     return false;
@@ -213,6 +213,16 @@ app.get("/global.css", (req, res) => {
   res.sendFile(fullPath);
 });
 
+//get images
+app.get("/img/:img_name", async (req, res) => {
+  const imgName = req.params.img_name;
+  const imgPath = path.join(__dirname, "svelte", "public", "img", imgName);
+  res.sendFile
+  (imgPath);
+
+});
+
+
 app.get("/build/qr-scanner-worker.min*.js", (req, res) => {
   const fileName = req.path.split("/").pop(); // Obtiene el nombre del archivo desde la URL
   const fullPath = path.join(__dirname, "svelte", "public", "build", fileName);
@@ -281,11 +291,10 @@ app.put("/api/evento", async (req, res) => {
       return;
     }
     //actualizar evento sin borrar info previa
-    eventos[index].forEach((key) => {
-      if (evento[key]) {
-        eventos[index][key] = evento[key];
-      }
-    });
+    for (const key in evento) {
+      eventos[index][key] = evento[key];
+
+    }
 
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
     res.status(200).send("Evento actualizado correctamente");
@@ -455,7 +464,7 @@ app.post("/api/evento/visit", async (req, res) => {
 
     // Verificar si el asistente ya está inscrito
     if (evento.visits.includes(idAsistente)) {
-      res.status(400).json({ error: "Ya se ha visitado este evento para: " + idAsistente });
+      res.status(400).json({ error: "Visita ya registrada para este evento de: " + idAsistente });
       return;
     }
 
@@ -474,6 +483,7 @@ app.post("/api/evento/visit", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Asegúrate de que cualquier otra ruta no específica devuelva tu archivo HTML principal de Svelte
 // Rutas de API y otros manejadores específicos aquí

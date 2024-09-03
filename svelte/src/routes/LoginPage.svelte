@@ -53,14 +53,14 @@
                     <div class="form-outline form-white mb-4">
                       <!--<label class="form-label" for="typeEmailX">Username</label>-->
                       <label class="form-label" for="username"
-                        >Escriba su número de boleta</label
+                        >Escriba su número de cuenta</label
                       >
                       <input
                         type="text"
                         id=""
                         bind:value={boleta}
                         class="input form-control"
-                        placeholder="Num. de Boleta UNAM"
+                        placeholder="Num. de Cuenta UNAM"
                       />
                     </div>
 

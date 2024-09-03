@@ -14,6 +14,48 @@ export var userModalData = writable({
     qrCode: "UwU",
 });
 
+/*xport var availableCareers = writable([
+    "División de las Ciencias Físico-Matemáticas y de las Ingenierías",
+    "Ingeniería Civil",
+    "Ingeniería en Computación",
+    "Ingeniería Eléctrica-Electrónica",
+    "Ingeniería Industrial",
+    "Ingeniería Mecánica",
+]);*/
+
+export var availableCareers = writable([
+    {
+        name: "División de las Ciencias Físico-Matemáticas y de las Ingenierías",
+        color: "#3f51b5",
+        img_bg: "DIV-blanco.svg"
+    },
+    {
+        name: "Ingeniería Civil",
+        color: "#e91e63",
+        img_bg: "ICI-blanco.svg"
+    },
+    {
+        name: "Ingeniería en Computación",
+        color: "#f44336",
+        img_bg: "ICO-blanco.svg"
+    },
+    {
+        name: "Ingeniería Eléctrica-Electrónica",
+        color: "#03a9f4",
+        img_bg: "IEE-blanco.svg"
+    },
+    {
+        name: "Ingeniería Industrial",
+        color: "#9c27b0",
+        img_bg: "IID-blanco.svg"
+    },
+    {
+        name: "Ingeniería Mecánica",
+        color: "#009688",
+        img_bg: "IMC-blanco.svg"
+    },
+]);
+
 export async function generateQR(stringData) {
   try {
     qrBase64 = await qrCode.toDataURL(stringData, {
@@ -34,7 +76,7 @@ export async function generateQR(stringData) {
 
 export function openDetailModal() {
 
-    
+
 
   var detailModal = new bootstrap.Modal(
     document.getElementById("detail-modal"),

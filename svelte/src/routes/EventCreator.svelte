@@ -1,87 +1,9 @@
 <script>
   import toast from "svelte-french-toast";
-  import { API_URL } from "../store";
+  import { API_URL, availableCareers } from "../store";
   import { onMount } from "svelte";
 
   let events = [];
-  /*let events = [
-    {
-      id: 1,
-      name: "Evento 1",
-      date: "2021-10-10",
-      start_time: "10:00",
-      end_time: "12:00",
-      location: "Facultad de Ciencias",
-      description: "Evento de prueba 1",
-      attendees: 0,
-      max_attendees: 100,
-      career: "Ingeniería en Computación",
-      exponent: "Dr. Exponente 1",
-      status: "Activo",
-      img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-    },
-    {
-      id: 2,
-      name: "Evento 2",
-      date: "2021-10-11",
-      start_time: "10:00",
-      end_time: "12:00",
-      location: "Facultad de Ciencias",
-      description: "Evento de prueba 2",
-      attendees: 0,
-      max_attendees: 100,
-      career: "Ingeniería en Computación",
-      exponent: "Dr. Exponente 2",
-      status: "Activo",
-      img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-    },
-    {
-      id: 3,
-      name: "Evento 3",
-      date: "2021-10-12",
-      start_time: "10:00",
-      end_time: "12:00",
-      location: "Facultad de Ciencias",
-      description: "Evento de prueba 3",
-      attendees: 0,
-      max_attendees: 100,
-      career: "Ingeniería en Computación",
-      exponent: "Dr. Exponente 3",
-      status: "Activo",
-      img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-    },
-
-    {
-      id: 4,
-      name: "Evento 4",
-      date: "2021-10-13",
-      start_time: "10:00",
-      end_time: "12:00",
-      location: "Facultad de Ciencias",
-      description: "Evento de prueba 4",
-      attendees: 0,
-      max_attendees: 100,
-      career: "Ingeniería en Computación",
-      exponent: "Dr. Exponente 4",
-      status: "Activo",
-      img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-    },
-    {
-      id: 5,
-      name: "Evento 5",
-      date: "2021-10-14",
-      start_time: "10:00",
-      end_time: "12:00",
-      location: "Facultad de Ciencias",
-      description: "Evento de prueba 5",
-      attendees: 0,
-      max_attendees: 100,
-      career: "Ingeniería en Computación",
-      exponent: "Dr. Exponente 5",
-      status: "Activo",
-      img: "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png",
-    },
-  ];*/
 
   let selectedEvent = {};
 
@@ -146,7 +68,7 @@
       !selectedEvent.start_time ||
       !selectedEvent.end_time ||
       !selectedEvent.location ||
-      !selectedEvent.description ||
+      //!selectedEvent.description ||
       !selectedEvent.max_attendees ||
       !selectedEvent.career ||
       !selectedEvent.exponent ||
@@ -275,6 +197,10 @@
       />
       Administrador de Eventos
     </a>
+    <button id="upload-file" class="btn btn-success">
+      <i class="bi bi-arrow-up-circle"></i>
+      Subir CSV
+    </button>
   </div>
 </nav>
 
@@ -283,7 +209,10 @@
 <br />
 <br />
 
-<div class="container card elevated" style="height: 85%; overflow:auto; overflow-x:hidden">
+<div
+  class="container card elevated"
+  style="height: 85%; overflow:auto; overflow-x:hidden"
+>
   <div class="row p-5 pb-2" style="margin-bottom: 0px;">
     <!--Info cards-->
 
@@ -383,37 +312,6 @@
   </div>
 
   <div class="row p-5 pt-0">
-    {#each events as event}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div
-        class="col-12 col-md-6 col-lg-4 col-xl-3 event-card mb-4"
-        on:click={() => {
-          openEventModal(event);
-        }}
-      >
-        <div class="card p-3" style="height: 100%;">
-          <div class="d-flex justify-content-center p-2">
-            <img
-              src={event.img ||
-                "https://propiedadintelectual.unam.mx/assets/img/unamblanco.png"}
-              class="card-img-top img-thumbnai0 limg-fluid p-4"
-              alt="..."
-            />
-          </div>
-          <h5 class="card-title text-center">{event.name}</h5>
-          <h6 class="card-subtitle mb-2 text-muted text-center">
-            Fecha: {event.date}
-          </h6>
-          <h6 class="card-subtitle mb-2 text-muted text-center">
-            Lugar: {event.location}
-          </h6>
-          <h6 class="card-subtitle mb-2 text-muted text-center">
-            Asistentes: {event.attendees || 0}/{event.max_attendees}
-          </h6>
-        </div>
-      </div>
-    {/each}
-
     <!-- Add event card-->
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div
@@ -432,6 +330,40 @@
         </div>
       </div>
     </div>
+    {#each events as event}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div
+        class="col-12 col-md-6 col-lg-4 col-xl-3 event-card mb-4"
+        on:click={() => {
+          openEventModal(event);
+        }}
+      >
+        <div class="card p-3" style="height: 100%;">
+          <div class="d-flex justify-content-center p-2">
+            <img
+              src={ API_URL + "/img/"+ $availableCareers.find((c) => c.name == event.career)
+                .img_bg }
+              class="img-thumbnail limg-fluid p-4 "
+              alt="..."
+              style="background-color:{$availableCareers.find(
+                (c) => c.name == event.career
+              ).color }"
+            />
+          </div>
+          <h5 class="card-title text-center">{event.name}</h5>
+          <h6 class="card-subtitle mb-2 text-muted text-center">
+            Fecha: {event.date}
+          </h6>
+          <h6 class="card-subtitle mb-2 text-muted text-center">
+            Lugar: {event.location}
+          </h6>
+          <h6 class="card-subtitle mb-2 text-muted text-center">
+            Asistentes: {event.attendees || 0}/{event.max_attendees}
+          </h6>
+        </div>
+      </div>
+    {/each}
+
   </div>
 </div>
 
@@ -556,7 +488,7 @@
           </div>
 
           <!--Descripción del evento (text area)-->
-          <div class="input-group mb-3 col-12">
+          <!--<div class="input-group mb-3 col-12">
             <span class="input-group-text" id="basic-addon1"
               ><i class="bi bi-card-text"></i></span
             >
@@ -567,7 +499,7 @@
               aria-label="eventDescription"
               aria-describedby="basic-addon1"
             ></textarea>
-          </div>
+          </div>-->
 
           <!--Cupo máximo de asistentes-->
           <div class="input-group mb-3 col-6">
@@ -589,14 +521,20 @@
             <span class="input-group-text" id="basic-addon1"
               ><i class="bi bi-book"></i></span
             >
-            <input
-              bind:value={selectedEvent.career}
-              type="text"
-              class="form-control"
-              placeholder="Carrera"
+            <!--select de availablre careers-->
+            <select
+              class="form-select"
               aria-label="eventCareer"
-              aria-describedby="basic-addon1"
-            />
+              bind:value={selectedEvent.career}
+            >
+              {#each $availableCareers as career, index}
+                {#if index == 0}
+                  <option selected>{career.name}</option>
+                {:else}
+                  <option>{career.name}</option>
+                {/if}
+              {/each}
+            </select>
           </div>
 
           <!--Exponente del evento-->
