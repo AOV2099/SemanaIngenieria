@@ -25,13 +25,15 @@ const { v4: uuidv4 } = require("uuid");
 const { log } = require("console");
 
 const app = express();
-// Middleware para servir archivos estáticos (Svelte)
-app.use(express.static("public"));
+// Middleware para servir archivos estáticos
+app.use(express.static("public")); // Sirve archivos estáticos desde /app/public
+
+// Servir imágenes desde la carpeta /app/public/img
+app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
+
 //uso de json
 app.use(express.json());
 
-//return images from /img
-app.use('/img', express.static(path.join(__dirname, 'svelte', 'public', 'img')));
 
 
 app.use(
