@@ -4126,32 +4126,32 @@ var availableCareers = writable([
     {
         name: "División de las Ciencias Físico-Matemáticas y de las Ingenierías",
         color: "#3f51b5",
-        img_bg: "DIV-blanco.svg"
+        img_bg: "DIV-Blanco.svg"
     },
     {
         name: "Ingeniería Civil",
         color: "#e91e63",
-        img_bg: "ICI-blanco.svg"
+        img_bg: "ICI-Blanco.svg"
     },
     {
         name: "Ingeniería en Computación",
         color: "#f44336",
-        img_bg: "ICO-blanco.svg"
+        img_bg: "ICO-Blanco.svg"
     },
     {
         name: "Ingeniería Eléctrica-Electrónica",
         color: "#03a9f4",
-        img_bg: "IEE-blanco.svg"
+        img_bg: "IEE-Blanco.svg"
     },
     {
         name: "Ingeniería Industrial",
         color: "#9c27b0",
-        img_bg: "IID-blanco.svg"
+        img_bg: "IID-Blanco.svg"
     },
     {
         name: "Ingeniería Mecánica",
         color: "#009688",
-        img_bg: "IMC-blanco.svg"
+        img_bg: "IMC-Blanco.svg"
     },
 ]);
 
