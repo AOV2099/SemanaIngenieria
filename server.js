@@ -30,6 +30,10 @@ app.use(express.static("public"));
 //uso de json
 app.use(express.json());
 
+//return images from /img
+app.use('/img', express.static(path.join(__dirname, 'svelte', 'public', 'img')));
+
+
 app.use(
   cors({
     origin: "*", // Permite todos los orígenes
@@ -213,14 +217,17 @@ app.get("/global.css", (req, res) => {
   res.sendFile(fullPath);
 });
 
+
+
+
 //get images
-app.get("/img/:img_name", async (req, res) => {
+/*app.get("/img/:img_name", async (req, res) => {
   const imgName = req.params.img_name;
   const imgPath = path.join(__dirname, "svelte", "public", "img", imgName);
   res.sendFile
   (imgPath);
 
-});
+});*/
 
 
 app.get("/build/qr-scanner-worker.min*.js", (req, res) => {
