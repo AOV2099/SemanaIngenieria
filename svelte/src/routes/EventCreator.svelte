@@ -341,7 +341,7 @@
         <div class="card p-3" style="height: 100%;">
           <div class="d-flex justify-content-center p-2">
             <img
-              src={ API_URL + "/img/"+ $availableCareers.find((c) => c.name == event.career)
+              src={ API_URL + "/img/" + $availableCareers.find((c) => c.name == event.career)
                 .img_bg }
               class="img-thumbnail limg-fluid p-4 "
               alt="..."

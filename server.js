@@ -28,9 +28,6 @@ const app = express();
 // Middleware para servir archivos estáticos
 app.use(express.static("public")); // Sirve archivos estáticos desde /app/public
 
-// Servir imágenes desde la carpeta /app/public/img
-app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
-
 //uso de json
 app.use(express.json());
 
@@ -213,6 +210,7 @@ app.get("/build/bundle.js", (req, res) => {
   res.sendFile(fullPath);
 });
 
+
 app.get("/global.css", (req, res) => {
   const fullPath = path.join(__dirname, "svelte", "public", "global.css");
   //console.log("Full path to bundle: ", fullPath);
@@ -220,6 +218,17 @@ app.get("/global.css", (req, res) => {
 });
 
 
+app.get("/img/:imgid", (req, res) => {
+  const imgid = req.params.imgid;
+  const fullPath = path.join(
+    __dirname,
+    "svelte",
+    "public",
+    `${imgid}`
+  );
+  //console.log("Full path to bundle: ", fullPath);
+  res.sendFile(fullPath);
+});
 
 
 //get images

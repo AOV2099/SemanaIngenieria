@@ -32,7 +32,7 @@
     const careerCatalog = $availableCareers.find((career) => career.name === event.career);
     if (careerCatalog) {
       cardStyleData = careerCatalog;
-      cardStyleData.img = API_URL + "/img/"+ cardStyleData.img_bg;
+      cardStyleData.img = API_URL + "/"+ cardStyleData.img_bg;
       console.log("Career found", event.career);
       console.log("Career data", cardStyleData);
     } else{
