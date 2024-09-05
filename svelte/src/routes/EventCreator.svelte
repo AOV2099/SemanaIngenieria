@@ -143,7 +143,6 @@
   }
 
   async function saveEvent(eventToSave) {
-
     if (eventToSave) {
       selectedEvent = eventToSave;
     }
@@ -162,8 +161,6 @@
       !selectedEvent.exponent ||
       !selectedEvent.status
     ) {
-    
-
       toast.error("Por favor llena todos los campos", {
         duration: 3000,
         position: "bottom-right",
@@ -484,13 +481,11 @@
             Asistentes: {event.attendees || 0}/{event.max_attendees}
           </h6>
 
-          {#if event.status ==="Activo"}
-          <span class="badge rounded-pill bg-success">Activo</span>
+          {#if event.status === "Activo"}
+            <span class="badge rounded-pill bg-success">Activo</span>
           {:else}
-          <span class="badge rounded-pill bg-danger">Inactivo</span>
-
+            <span class="badge rounded-pill bg-danger">Inactivo</span>
           {/if}
-
         </div>
       </div>
     {/each}
