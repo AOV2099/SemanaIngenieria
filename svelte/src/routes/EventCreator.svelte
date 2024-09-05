@@ -7,9 +7,93 @@
 
   let selectedEvent = {};
 
+  function downloadEventsAsCsv() {
+    console.log("downloading events as csv");
+    const csvFileTitles =
+      "Nombre, Id, Fecha, Hora de inicio, Hora de fin, Lugar, Cupo máximo, Carrera, Ponente, Maximo de asistentes\n";
+    const csvFileData = events
+      .map((event) => {
+        return `${event.name}, ${event.id}, ${event.date}, ${event.start_time}, ${event.end_time}, ${event.location}, ${event.max_attendees}, ${event.career}, ${event.exponent}, ${event.max_attendees}\n`;
+      })
+      .join("");
+
+    const csvFile = csvFileTitles + csvFileData;
+    const blob = new Blob([csvFile], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "EventosSI.csv";
+    document.body.appendChild(a); // Agrega el enlace al cuerpo del documento
+    a.click(); // Simula un clic en el enlace para iniciar la descarga
+    document.body.removeChild(a); // Elimina el enlace del cuerpo del documento
+    window.URL.revokeObjectURL(url); // Limpia la URL del objeto
+  }
+
+  async function uploadEventsCsv() {
+    const fileInput = document.getElementById("upload-file");
+    const file = fileInput.files[0];
+
+    if (!file) {
+      toast.error("Por favor seleccione un archivo", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function (event) {
+      const text = event.target.result;
+      const data = parseCsv(text);
+      /*for (event of data) {
+       
+        console.log(event);
+      saveEvent(event);
+      }*/
+
+      await Promise.all(
+        data.map(async (event) => {
+          console.log("Event to parse: ", event);
+          let newEvent = {
+            name: event.Nombre,
+            date: event.Fecha,
+            start_time: event["Hora de inicio"],
+            end_time: event["Hora de fin"],
+            location: event.Lugar,
+            max_attendees: event["Cupo máximo"],
+            career: event.Carrera,
+            exponent: event.Ponente,
+            status: "Activo",
+          };
+          console.log("New event: ", newEvent);
+
+          await saveEvent(newEvent);
+        })
+      );
+    };
+    reader.readAsText(file);
+  }
+
+  function parseCsv(csv) {
+    const lines = csv.split("\n");
+    const headers = lines[0].split(",");
+    const result = [];
+    for (let i = 1; i < lines.length; i++) {
+      const obj = {};
+      const currentline = lines[i].split(",");
+      if (currentline.length === headers.length) {
+        for (let j = 0; j < headers.length; j++) {
+          obj[headers[j].trim()] = currentline[j].trim();
+        }
+        result.push(obj);
+      }
+    }
+    return result;
+  }
+
   async function getEvents() {
     try {
-      const res = await fetch(`${API_URL}/api/eventos`, {
+      const res = await fetch(`${API_URL}/api/eventos_admin`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -58,8 +142,12 @@
     modal.show();
   }
 
-  async function saveEvent() {
-    console.log(selectedEvent);
+  async function saveEvent(eventToSave) {
+
+    if (eventToSave) {
+      selectedEvent = eventToSave;
+    }
+    console.log("Event to save: ", selectedEvent);
 
     //Check that all fields are filled
     if (
@@ -74,6 +162,8 @@
       !selectedEvent.exponent ||
       !selectedEvent.status
     ) {
+    
+
       toast.error("Por favor llena todos los campos", {
         duration: 3000,
         position: "bottom-right",
@@ -181,6 +271,18 @@
 
   onMount(async () => {
     await getEvents();
+    document
+      .getElementById("upload-btn")
+      .addEventListener("click", function () {
+        document.getElementById("upload-file").click(); // Abre el diálogo para seleccionar el archivo
+      });
+
+    document
+      .getElementById("upload-file")
+      .addEventListener("change", async function () {
+        // Aquí va tu lógica para manejar el archivo seleccionado
+        await uploadEventsCsv();
+      });
   });
 </script>
 
@@ -197,10 +299,30 @@
       />
       Administrador de Eventos
     </a>
-    <button id="upload-file" class="btn btn-success">
-      <i class="bi bi-arrow-up-circle"></i>
-      Subir CSV
-    </button>
+
+    <div>
+      <button class="btn btn-success" id="upload-btn">
+        <i class="bi bi-arrow-up-circle"></i>
+        Subir CSV
+      </button>
+      <input
+        type="file"
+        id="upload-file"
+        style="display: none;"
+        accept=".csv"
+      />
+
+      <!--descargar csv-->
+      <button
+        class="btn btn-primary"
+        on:click={() => {
+          downloadEventsAsCsv();
+        }}
+      >
+        <i class="bi bi-arrow-down-circle"></i>
+        Descargar CSV
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -341,13 +463,14 @@
         <div class="card p-3" style="height: 100%;">
           <div class="d-flex justify-content-center p-2">
             <img
-              src={ API_URL + "/img/" + $availableCareers.find((c) => c.name == event.career)
-                .img_bg }
-              class="img-thumbnail limg-fluid p-4 "
+              src={API_URL +
+                "/img/" +
+                $availableCareers.find((c) => c.name == event.career).img_bg}
+              class="img-thumbnail limg-fluid p-4"
               alt="..."
               style="background-color:{$availableCareers.find(
                 (c) => c.name == event.career
-              ).color }"
+              ).color}"
             />
           </div>
           <h5 class="card-title text-center">{event.name}</h5>
@@ -363,7 +486,6 @@
         </div>
       </div>
     {/each}
-
   </div>
 </div>
 

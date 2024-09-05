@@ -254,6 +254,7 @@ app.get("/api/eventos", async (req, res) => {
   console.log("GET /api/eventos ...");
   //ibtener json de redis
   try {
+    let allowedEvents = [];
     const eventos = await redisClient.json.get(KEY_EVENTS);
 
     eventos.forEach((evento) => {
@@ -262,6 +263,30 @@ app.get("/api/eventos", async (req, res) => {
       }
       //retornar unicamente el numero de asistentes por seguridad
       evento.attendees = evento.attendees.length;
+      //si los eventos no estan activos no se muestran
+      console.log(evento.status);
+      if (evento.status === "Activo") {
+        allowedEvents.push(evento);
+      }
+    });
+
+
+    res.status(200).json(allowedEvents);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/api/eventos_admin", async (req, res) => {
+  console.log("GET /api/eventos ...");
+  //ibtener json de redis
+  try {
+    const eventos = await redisClient.json.get(KEY_EVENTS);
+
+    eventos.forEach((evento) => {
+      if (!evento.attendees) {
+        evento.attendees = [];
+      }
     });
 
     res.status(200).json(eventos);
