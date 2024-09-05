@@ -483,6 +483,14 @@
           <h6 class="card-subtitle mb-2 text-muted text-center">
             Asistentes: {event.attendees || 0}/{event.max_attendees}
           </h6>
+
+          {#if event.status ==="Activo"}
+          <span class="badge rounded-pill bg-success">Activo</span>
+          {:else}
+          <span class="badge rounded-pill bg-danger">Inactivo</span>
+
+          {/if}
+
         </div>
       </div>
     {/each}
