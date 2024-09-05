@@ -101,6 +101,11 @@
       });
       if (res.ok) {
         const data = await res.json();
+        //contar los asistentes de cada evento en la nueva propuedad ateendees_num
+        data.forEach((event) => {
+          event.attendees_num = event.attendees.length;
+        });
+
         events = data;
       } else {
         throw new Error("Error en la solicitud");
@@ -478,7 +483,7 @@
             Lugar: {event.location}
           </h6>
           <h6 class="card-subtitle mb-2 text-muted text-center">
-            Asistentes: {event.attendees || 0}/{event.max_attendees}
+            Asistentes: {event.attendees_num }/{event.max_attendees}
           </h6>
 
           {#if event.status === "Activo"}
