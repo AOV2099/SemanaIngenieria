@@ -16,7 +16,7 @@
       "Nombre, Fecha, Hora de inicio, Hora de fin, Lugar, Cupo máximo, Carrera, Ponente\n";
     const csvFileData = events
       .map((event) => {
-        return `${event.name}, ${event.date}, ${event.start_time}, ${event.end_time}, ${event.location}, ${event.max_attendees}, ${event.career}, ${event.exponent}\n`;
+        return `${event.name},${event.date},${event.start_time},${event.end_time},${event.location},${event.max_attendees},${event.career},${event.exponent}\n`;
       })
       .join("");
 
