@@ -8,11 +8,17 @@
 
   let selectedEvent = {};
 
+  let eventModal;
+  let attendeesModal;
+
   function downloadEventsAsCsv() {
-    const csvFileTitles = "Nombre, Fecha, Hora de inicio, Hora de fin, Lugar, Descripción, Cupo máximo, Carrera, Ponente\n";
-    const csvFileData = events.map(event => {
-        return `${event.name}, ${event.date}, ${event.start_time}, ${event.end_time}, ${event.location}, ${event.description}, ${event.max_attendees}, ${event.career}, ${event.exponent}\n`;
-    }).join("");
+    const csvFileTitles =
+      "Nombre, Fecha, Hora de inicio, Hora de fin, Lugar, Cupo máximo, Carrera, Ponente\n";
+    const csvFileData = events
+      .map((event) => {
+        return `${event.name}, ${event.date}, ${event.start_time}, ${event.end_time}, ${event.location}, ${event.max_attendees}, ${event.career}, ${event.exponent}\n`;
+      })
+      .join("");
 
     const csvFile = csvFileTitles + csvFileData;
     const blob = new Blob([csvFile], { type: "text/csv;charset=utf-8;" });
@@ -24,8 +30,7 @@
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-}
-
+  }
 
   async function uploadEventsCsv() {
     const fileInput = document.getElementById("upload-file");
@@ -144,11 +149,7 @@
     }
 
     //open modal
-    const modal = new bootstrap.Modal(document.getElementById("eventModal"), {
-      keyboard: false,
-    });
-
-    modal.show();
+    eventModal.show();
   }
 
   async function saveEvent(eventToSave) {
@@ -289,7 +290,24 @@
         // Aquí va tu lógica para manejar el archivo seleccionado
         await uploadEventsCsv();
       });
+
+    eventModal = new bootstrap.Modal(document.getElementById("eventModal"), {
+      keyboard: false,
+    });
+
+    attendeesModal = new bootstrap.Modal(
+      document.getElementById("atendeesModal"),
+      {
+        keyboard: false,
+      }
+    );
   });
+
+  function toggleToAttendeesModal(event) {
+    console.log("Event to show attendees: ", event);
+    eventModal.hide();
+    attendeesModal.show();
+  }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -471,7 +489,7 @@
             <img
               src={API_URL +
                 "/img/" +
-                ($availableCareers.find((c) => c.name == event.career).img_bg) }
+                $availableCareers.find((c) => c.name == event.career).img_bg}
               class="img-thumbnail limg-fluid p-4"
               alt="..."
               style="background-color:{$availableCareers.find(
@@ -717,15 +735,104 @@
           {/if}
         </div>
 
+        <div>
+          {#if selectedEvent.id}
+            <button
+              type="button"
+              class="btn btn-success"
+              on:click={() => {
+                toggleToAttendeesModal(selectedEvent);
+              }}
+            >
+              Ver asistentes
+            </button>
+          {/if}
+          <button
+            type="button"
+            class="btn btn-primary"
+            on:click={() => {
+              saveEvent();
+            }}
+          >
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Modal de asistentencias-->
+
+<div
+  class="modal fade"
+  id="atendeesModal"
+  tabindex="-1"
+  aria-labelledby="atendeeModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="atendeeModalLabel">{selectedEvent.name}</h5>
         <button
           type="button"
-          class="btn btn-primary"
-          on:click={() => {
-            saveEvent();
-          }}
-        >
-          Guardar
-        </button>
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        {#if selectedEvent.attendees && selectedEvent.attendees.length > 0}
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cuenta</th>
+                <th scope="col">Faltante</th>
+                <th scope="col">Asistente</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each selectedEvent.attendees as attendee, index}
+                <tr>
+                  <th scope="row">{index + 1}</th>
+                  <td class="">{attendee}</td>
+                  <!-- revisar si el atendee esta en la lista de visitantes-->
+                  {#if selectedEvent.visits.includes(attendee)}
+                    <td></td>
+                    <td class="text-success"
+                      ><i class="bi bi-circle-fill"></i></td
+                    >
+                  {:else}
+                    <td class="text-danger"><i class="bi bi-circle-fill"></i></td>
+                    <td></td>
+                  {/if}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        {:else}
+          <div class="d-flex ustify-content-center">
+            No hay asistentes para este evento
+          </div>
+        {/if}
+      </div>
+      <div class="modal-footer justify-content-end">
+        <div>
+          <!--aceptar-->
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            on:click={() => {
+              attendeesModal.hide();
+              eventModal.show();
+            }}
+          >
+            Aceptar
+          </button>
+        </div>
       </div>
     </div>
   </div>

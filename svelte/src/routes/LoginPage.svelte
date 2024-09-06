@@ -11,7 +11,7 @@
   async function login() {
 	//verify thar boleta is a 9 digit number
 	if (!/^\d{9}$/.test(boleta)) {
-		toast.error("Por favor, ingrese un número de boleta válido");
+		toast.error("Por favor, ingrese un número de cuenta válido");
 		return;
 	}
 	//save boleta in cookie by name "userId" for 4 hours
