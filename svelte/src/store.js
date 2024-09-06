@@ -54,6 +54,11 @@ export var availableCareers = writable([
         color: "#009688",
         img_bg: "IMC-Blanco.svg"
     },
+    {
+        name:"default",
+        color:"#8bc34a",
+        img_bg:"default.png"
+    }
 ]);
 
 export async function generateQR(stringData) {

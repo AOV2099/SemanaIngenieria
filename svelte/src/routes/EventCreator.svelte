@@ -2,32 +2,30 @@
   import toast from "svelte-french-toast";
   import { API_URL, availableCareers } from "../store";
   import { onMount } from "svelte";
+  import { v4 as uuidv4 } from "uuid";
 
   let events = [];
 
   let selectedEvent = {};
 
   function downloadEventsAsCsv() {
-    console.log("downloading events as csv");
-    const csvFileTitles =
-      "Nombre, Id, Fecha, Hora de inicio, Hora de fin, Lugar, Cupo máximo, Carrera, Ponente, Maximo de asistentes\n";
-    const csvFileData = events
-      .map((event) => {
-        return `${event.name}, ${event.id}, ${event.date}, ${event.start_time}, ${event.end_time}, ${event.location}, ${event.max_attendees}, ${event.career}, ${event.exponent}, ${event.max_attendees}\n`;
-      })
-      .join("");
+    const csvFileTitles = "Nombre, Fecha, Hora de inicio, Hora de fin, Lugar, Descripción, Cupo máximo, Carrera, Ponente\n";
+    const csvFileData = events.map(event => {
+        return `${event.name}, ${event.date}, ${event.start_time}, ${event.end_time}, ${event.location}, ${event.description}, ${event.max_attendees}, ${event.career}, ${event.exponent}\n`;
+    }).join("");
 
     const csvFile = csvFileTitles + csvFileData;
-    const blob = new Blob([csvFile], { type: "text/csv" });
+    const blob = new Blob([csvFile], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "EventosSI.csv";
-    document.body.appendChild(a); // Agrega el enlace al cuerpo del documento
-    a.click(); // Simula un clic en el enlace para iniciar la descarga
-    document.body.removeChild(a); // Elimina el enlace del cuerpo del documento
-    window.URL.revokeObjectURL(url); // Limpia la URL del objeto
-  }
+    a.download = "Eventos.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
 
   async function uploadEventsCsv() {
     const fileInput = document.getElementById("upload-file");
@@ -104,6 +102,12 @@
         //contar los asistentes de cada evento en la nueva propuedad ateendees_num
         data.forEach((event) => {
           event.attendees_num = event.attendees.length;
+          //check if career is available
+          if (
+            !$availableCareers.find((career) => career.name === event.career)
+          ) {
+            event.career = "default";
+          }
         });
 
         events = data;
@@ -378,7 +382,7 @@
             class="text-white
                     "
           >
-            Total: {events.reduce((acc, e) => acc + e.attendees, 0)}
+            Total: {events.reduce((acc, e) => acc + e.attendees.length, 0)}
           </h6>
         </div>
       </div>
@@ -467,7 +471,7 @@
             <img
               src={API_URL +
                 "/img/" +
-                $availableCareers.find((c) => c.name == event.career).img_bg}
+                ($availableCareers.find((c) => c.name == event.career).img_bg) }
               class="img-thumbnail limg-fluid p-4"
               alt="..."
               style="background-color:{$availableCareers.find(
@@ -483,7 +487,7 @@
             Lugar: {event.location}
           </h6>
           <h6 class="card-subtitle mb-2 text-muted text-center">
-            Asistentes: {event.attendees_num }/{event.max_attendees}
+            Asistentes: {event.attendees_num}/{event.max_attendees}
           </h6>
 
           {#if event.status === "Activo"}
