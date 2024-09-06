@@ -48,34 +48,33 @@
     reader.onload = async function (event) {
       const text = event.target.result;
       const data = parseCsv(text);
-      /*for (event of data) {
-       
-        console.log(event);
-      saveEvent(event);
-      }*/
 
-      await Promise.all(
-        data.map(async (event) => {
-          console.log("Event to parse: ", event);
-          let newEvent = {
-            name: event.Nombre,
-            date: event.Fecha,
-            start_time: event["Hora de inicio"],
-            end_time: event["Hora de fin"],
-            location: event.Lugar,
-            max_attendees: event["Cupo máximo"],
-            career: event.Carrera,
-            exponent: event.Ponente,
-            status: "Activo",
-          };
-          console.log("New event: ", newEvent);
+      console.log("# of events to parse: ", data.length);
+      for (const event of data) {
+        console.log("Event to parse: ", event);
+        let newEvent = {
+          name: event.Nombre,
+          date: event.Fecha,
+          start_time: event["Hora de inicio"],
+          end_time: event["Hora de fin"],
+          location: event.Lugar,
+          max_attendees: event["Cupo máximo"],
+          career: event.Carrera,
+          exponent: event.Ponente,
+          status: "Activo",
+        };
+        console.log("New event: ", newEvent);
 
-          await saveEvent(newEvent);
-        })
-      );
+        try {
+          //const result = await saveEvent(newEvent);
+        } catch (error) {
+          console.error("Error saving event:", error);
+        }
+      }
     };
     reader.readAsText(file);
-  }
+}
+
 
   function parseCsv(csv) {
     const lines = csv.split("\n");

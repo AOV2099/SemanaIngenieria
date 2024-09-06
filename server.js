@@ -300,9 +300,12 @@ app.post("/api/evento", async (req, res) => {
   console.log("POST /api/evento");
   const evento = req.body;
   try {
+    console.log("Agregando evento:", evento);
     if (!isJsonEventCorrect(evento)) {
       res.status(400).json({ error: "Cuerpo de evento inválido" });
       return;
+    }else{
+      console.log("cuerpo valido");
     }
     evento.id = uuidv4(); // Asegúrate de importar uuidv4 de 'uuid'
     const exists = await redisClient.exists(KEY_EVENTS);

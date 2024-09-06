@@ -327,7 +327,7 @@
   .main-card-container {
     border-radius: 12px;
     margin: 8px;
-    max-height: 300px;
+
     padding: 18px;
     position: relative; /* Esta línea es importante para que funcione el posicionamiento absoluto de la imagen */
   }
