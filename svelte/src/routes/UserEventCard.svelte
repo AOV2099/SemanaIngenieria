@@ -40,19 +40,25 @@
     }
   }
 
+
+
   export let color;
   export let userId;
   export let isSuscribed = false;
+console.log("event", event);
 
   const nombreDia = new Date(event.date).toLocaleDateString("es-ES", {
     weekday: "long",
+    timeZone: "UTC",
   });
   const numeroDia = new Date(event.date).toLocaleDateString("es-ES", {
     day: "numeric",
+    timeZone: "UTC",
   });
 
   const nombreMes = new Date(event.date).toLocaleDateString("es-ES", {
     month: "long",
+    timeZone: "UTC",
   });
 
   async function generateQR() {

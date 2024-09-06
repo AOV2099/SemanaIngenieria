@@ -43,13 +43,14 @@
       });
       return;
     }
-
     const reader = new FileReader();
     reader.onload = async function (event) {
       const text = event.target.result;
+      console.log("Text to parse: ", text);
       const data = parseCsv(text);
+      console.log("--------------------");
 
-      console.log("# of events to parse: ", data.length);
+      console.log("# parsed events: ", data.length);
       for (const event of data) {
         console.log("Event to parse: ", event);
         let newEvent = {
@@ -66,7 +67,8 @@
         console.log("New event: ", newEvent);
 
         try {
-          //const result = await saveEvent(newEvent);
+          const result = await saveEvent(newEvent);
+          console.log(event.Nombre);
         } catch (error) {
           console.error("Error saving event:", error);
         }
@@ -76,22 +78,48 @@
 }
 
 
-  function parseCsv(csv) {
-    const lines = csv.split("\n");
-    const headers = lines[0].split(",");
-    const result = [];
-    for (let i = 1; i < lines.length; i++) {
-      const obj = {};
-      const currentline = lines[i].split(",");
-      if (currentline.length === headers.length) {
-        for (let j = 0; j < headers.length; j++) {
-          obj[headers[j].trim()] = currentline[j].trim();
-        }
-        result.push(obj);
-      }
+function parseCsv(csv) {
+  const lines = csv.split("\n").map(line => line.trim()).filter(line => line);
+  const headers = parseCsvLine(lines[0]);
+  const result = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const currentline = parseCsvLine(lines[i]);
+    if (currentline.length === headers.length) {
+      const obj = headers.reduce((acc, header, index) => {
+        acc[header] = currentline[index];
+        return acc;
+      }, {});
+      result.push(obj);
+    } else {
+      console.error(`Mismatch in columns in line ${i}: Expected ${headers.length}, but found ${currentline.length}`);
     }
-    return result;
   }
+  return result;
+}
+
+function parseCsvLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let char of line) {
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  if (current !== '') {
+    result.push(current.trim());
+  }
+  return result;
+}
+
+
 
   async function getEvents() {
     try {
@@ -187,6 +215,7 @@
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
           },
+  
           body: JSON.stringify(selectedEvent),
         });
 

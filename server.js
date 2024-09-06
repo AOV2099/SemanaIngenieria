@@ -308,6 +308,7 @@ app.post("/api/evento", async (req, res) => {
       console.log("cuerpo valido");
     }
     evento.id = uuidv4(); // Asegúrate de importar uuidv4 de 'uuid'
+    evento.visits = [];
     const exists = await redisClient.exists(KEY_EVENTS);
 
     if (!exists) {
@@ -337,6 +338,12 @@ app.put("/api/evento", async (req, res) => {
       res.status(404).json({ error: "Evento no encontrado" });
       return;
     }
+    //Check if event.visits exists, create it if not
+    if (!eventos[index].visits) {
+      eventos[index].visits = [];
+    }
+
+          
     //actualizar evento sin borrar info previa
     for (const key in evento) {
       eventos[index][key] = evento[key];

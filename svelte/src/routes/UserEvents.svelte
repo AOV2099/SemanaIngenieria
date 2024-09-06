@@ -112,10 +112,12 @@
   <nav class="navbar navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <a class="navbar-brand" href="#"
+      <a
+        class="navbar-brand"
+        href="#"
         on:click={() => {
           //prevent default
-            event.preventDefault();
+          event.preventDefault();
         }}
       >
         <img
@@ -141,17 +143,20 @@
   </nav>
 </div>
 
-<div id="main-container" class="row" style="paddding-top: 48px; padding-bottom: 48px; margin-top: 48px;">
+<div
+  id="main-container"
+  class="row"
+  style="paddding-top: 48px; padding-bottom: 48px; margin-top: 48px;"
+>
   {#each events as event, index}
-  <div class="col-sm-12 col-md-6 col-lg-6">
-
+    <div class="col-sm-12 col-md-6 col-lg-6">
       <UserEventCard
         {event}
         color={colors[index % colors.length]}
         {userId}
         isSuscribed={suscribedEvents.includes(event.id)}
       />
-  </div>
+    </div>
   {/each}
 </div>
 
@@ -183,13 +188,16 @@
           <span class="badge bg-primary"
             >{new Date($userModalData.event.date).toLocaleDateString("es-ES", {
               weekday: "long",
+              timeZone: "UTC",
             })}
             {new Date($userModalData.event.date).toLocaleDateString("es-ES", {
               day: "numeric",
+              timeZone: "UTC",
             })} de {new Date($userModalData.event.date).toLocaleDateString(
               "es-ES",
               {
                 month: "long",
+                timeZone: "UTC",
               }
             )}</span
           >
