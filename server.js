@@ -63,6 +63,25 @@ const redisClient = redis.createClient({
   },
 });
 
+async function triggerBgSave() {
+  try {
+    // Comprobar si existen las claves
+    const eventsExists = await redisClient.exists(KEY_EVENTS);
+    const attendeesExists = await redisClient.exists(KEY_ATTENDEES);
+
+    if (eventsExists && attendeesExists) {
+      console.log("Las claves existen, iniciando BGSAVE en Redis...");
+      await redisClient.sendCommand(['BGSAVE']);
+      console.log("BGSAVE iniciado correctamente");
+    } else {
+      console.log("No se encontraron todas las claves requeridas, no se ejecuta BGSAVE.");
+    }
+  } catch (error) {
+    console.error("Error al intentar ejecutar BGSAVE:", error);
+  }
+}
+
+
 async function connectRedis() {
   console.log("Connecting to Redis...");
 
@@ -549,5 +568,7 @@ app.get("*", (req, res) => {
 
 https.createServer(httpsOptions, app).listen(APP_PORT, async () => {
   await connectRedis();
+  triggerBgSave();
+  setInterval(triggerBgSave, 1800000); // Cada 30 minutos
   console.log("HTTPS server running on port" + APP_PORT);
 });
