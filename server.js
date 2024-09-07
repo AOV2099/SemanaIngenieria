@@ -4,6 +4,7 @@ const express = require("express");
 const path = require("path");
 const { fileURLToPath } = require("url");
 const cors = require("cors");
+const { exec } = require("child_process"); // Importar exec correctamente
 
 const APP_PORT = process.env.APP_PORT || 3000;
 const REDIS_HOST = process.env.REDIS_HOST || "localhost"; // Cambié REDIS_PORT a REDIS_HOST aquí
@@ -20,6 +21,7 @@ console.log("REDIS PORT", REDIS_PORT); // Cambié REDIS_HOST a REDIS_PORT aquí
 
 //redis
 const redis = require("redis");
+let reconnectInterval = null;
 //uuid
 const { v4: uuidv4 } = require("uuid");
 const { log } = require("console");
@@ -30,8 +32,6 @@ app.use(express.static("public")); // Sirve archivos estáticos desde /app/publi
 
 //uso de json
 app.use(express.json());
-
-
 
 app.use(
   cors({
@@ -63,58 +63,135 @@ const redisClient = redis.createClient({
   },
 });
 
+async function reconnectRedis() {
+  try {
+    if (!redisClient.isOpen) {
+      console.log("Intentando reconectar a Redis...");
+      await redisClient.connect();
+      console.log("Conectado nuevamente a Redis.");
+
+      // Detener el intervalo inmediatamente después de reconectar
+      if (reconnectInterval) {
+        clearInterval(reconnectInterval);
+        reconnectInterval = null; // Asegurarse de que se limpie el intervalo
+        console.log("Reconexión exitosa, intervalo detenido.");
+      }
+    } else {
+      console.log("Redis ya está conectado, no es necesario reconectar.");
+    }
+  } catch (error) {
+    console.error("Error al intentar reconectar a Redis:", error);
+  }
+}
+
+// Escuchar eventos de Redis
+redisClient.on("error", (error) => {
+  console.error("Error en Redis:", error);
+});
+
+redisClient.on("end", () => {
+  console.log("Conexión a Redis finalizada.");
+
+  // Solo iniciar el intervalo si no hay uno activo
+  if (!reconnectInterval) {
+    reconnectInterval = setInterval(async () => {
+      try {
+        await reconnectRedis();
+      } catch (error) {
+        console.error(
+          "No se pudo reconectar a Redis, intentando nuevamente en 5 segundos..."
+        );
+      }
+    }, 5000); // Reintentar cada 5 segundos
+  }
+});
+
+redisClient.on("ready", () => {
+  console.log("Redis listo para aceptar conexiones.");
+});
+
+redisClient.on("connect", () => {
+  console.log("Redis conectado.");
+});
+
+
+
+async function reloadLastBackup() {
+  try {
+    console.log("Reiniciando el contenedor de Redis para cargar el último respaldo...");
+
+    const exec = require('child_process').exec;
+    // Comando para reiniciar el contenedor Redis (asegúrate de reemplazar 'redis-container' con el nombre correcto de tu contenedor)
+    const restartCmd = 'docker restart redis-server';
+
+    exec(restartCmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error("Error al intentar reiniciar el contenedor Redis:", err);
+        return;
+      }
+      console.log("Contenedor de Redis reiniciado correctamente.");
+
+      // Intentar reconectar después del reinicio
+      setTimeout(async () => {
+        try {
+          await redisClient.connect();
+          console.log("Reconectado a Redis después del reinicio del contenedor.");
+        } catch (reconnectError) {
+          console.error("Error al intentar reconectar a Redis:", reconnectError);
+        }
+      }, 5000); // Esperar 5 segundos antes de intentar reconectar
+    });
+  } catch (error) {
+    console.error("Error al intentar reiniciar el contenedor Redis:", error);
+  }
+}
+
+
+
 async function triggerBgSave() {
   try {
-    // Comprobar si existen las claves
-    const eventsExists = await redisClient.exists(KEY_EVENTS);
-    const attendeesExists = await redisClient.exists(KEY_ATTENDEES);
+    const eventsExists = await redisClient.exists("UNAM_EVENTOS");
+    const attendeesExists = await redisClient.exists("SI_ALUMNOS");
 
     if (eventsExists && attendeesExists) {
       console.log("Las claves existen, iniciando BGSAVE en Redis...");
-      await redisClient.sendCommand(['BGSAVE']);
+      await redisClient.sendCommand(["BGSAVE"]);
       console.log("BGSAVE iniciado correctamente");
     } else {
-      console.log("No se encontraron todas las claves requeridas, no se ejecuta BGSAVE.");
+      console.log(
+        "No se encontraron todas las claves requeridas, reiniciando Redis y cargando el respaldo..."
+      );
+      await reloadLastBackup();
     }
   } catch (error) {
-    console.error("Error al intentar ejecutar BGSAVE:", error);
+    console.error(
+      "Error al intentar ejecutar BGSAVE o cargar el respaldo:",
+      error
+    );
   }
 }
 
 
 async function connectRedis() {
-  console.log("Connecting to Redis...");
-
-  try {
-    await redisClient.connect();
-    console.log(
-      `Connected to Redis at ${redisClient.options.socket.host}:${redisClient.options.socket.port}`
-    );
-  } catch (error) {
-    console.error("Failed to connect to Redis:", error);
-  }
-
+  console.log("Conectando a Redis...");
+  await reconnectRedis(); // Intentar reconectar si falla
   redisClient.on("end", () => {
-    console.log("Redis connection ended");
-  });
-
-  redisClient.on("reconnecting", () => {
-    console.log("Redis reconnecting...");
+    console.log("Conexión a Redis finalizada");
+    reconnectRedis(); // Reintentar reconectar si se pierde la conexión
   });
 
   redisClient.on("ready", () => {
-    console.log("Redis ready");
+    console.log("Redis listo");
   });
 
   redisClient.on("connect", () => {
-    //print redis connection data
-    console.log("redis client:", redisClient.host, redisClient.port);
-
-    console.log("Redis connected");
+    console.log(
+      `Redis conectado: ${redisClient.options.socket.host}:${redisClient.options.socket.port}`
+    );
   });
 
   redisClient.on("error", (error) => {
-    console.error(error);
+    console.error("Error en Redis:", error);
   });
 }
 
@@ -229,27 +306,18 @@ app.get("/build/bundle.js", (req, res) => {
   res.sendFile(fullPath);
 });
 
-
 app.get("/global.css", (req, res) => {
   const fullPath = path.join(__dirname, "svelte", "public", "global.css");
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
-
 app.get("/img/:imgid", (req, res) => {
   const imgid = req.params.imgid;
-  const fullPath = path.join(
-    __dirname,
-    "svelte",
-    "public",
-    "img",
-    `${imgid}`
-  );
+  const fullPath = path.join(__dirname, "svelte", "public", "img", `${imgid}`);
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
-
 
 //get images
 /*app.get("/img/:img_name", async (req, res) => {
@@ -259,7 +327,6 @@ app.get("/img/:imgid", (req, res) => {
   (imgPath);
 
 });*/
-
 
 app.get("/build/qr-scanner-worker.min*.js", (req, res) => {
   const fileName = req.path.split("/").pop(); // Obtiene el nombre del archivo desde la URL
@@ -288,7 +355,6 @@ app.get("/api/eventos", async (req, res) => {
         allowedEvents.push(evento);
       }
     });
-
 
     res.status(200).json(allowedEvents);
   } catch (error) {
@@ -323,7 +389,7 @@ app.post("/api/evento", async (req, res) => {
     if (!isJsonEventCorrect(evento)) {
       res.status(400).json({ error: "Cuerpo de evento inválido" });
       return;
-    }else{
+    } else {
       console.log("cuerpo valido");
     }
     evento.id = uuidv4(); // Asegúrate de importar uuidv4 de 'uuid'
@@ -362,11 +428,9 @@ app.put("/api/evento", async (req, res) => {
       eventos[index].visits = [];
     }
 
-          
     //actualizar evento sin borrar info previa
     for (const key in evento) {
       eventos[index][key] = evento[key];
-
     }
 
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
@@ -521,7 +585,7 @@ app.post("/api/evento/visit", async (req, res) => {
 
   console.log("idEvento", idEvento);
   console.log("idAsistente", idAsistente);
-  
+
   try {
     const eventos = await redisClient.json.get(KEY_EVENTS);
     const index = eventos.findIndex((e) => e.id === idEvento);
@@ -537,7 +601,11 @@ app.post("/api/evento/visit", async (req, res) => {
 
     // Verificar si el asistente ya está inscrito
     if (evento.visits.includes(idAsistente)) {
-      res.status(400).json({ error: "Visita ya registrada para este evento de: " + idAsistente });
+      res
+        .status(400)
+        .json({
+          error: "Visita ya registrada para este evento de: " + idAsistente,
+        });
       return;
     }
 
@@ -551,12 +619,16 @@ app.post("/api/evento/visit", async (req, res) => {
     evento.visits.push(idAsistente);
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
 
-    res.status(200).json({ message: "Visita registrada correctamente para: " + idAsistente, ok: true});
+    res
+      .status(200)
+      .json({
+        message: "Visita registrada correctamente para: " + idAsistente,
+        ok: true,
+      });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 // Asegúrate de que cualquier otra ruta no específica devuelva tu archivo HTML principal de Svelte
 // Rutas de API y otros manejadores específicos aquí
@@ -569,6 +641,7 @@ app.get("*", (req, res) => {
 https.createServer(httpsOptions, app).listen(APP_PORT, async () => {
   await connectRedis();
   triggerBgSave();
-  setInterval(triggerBgSave, 1800000); // Cada 30 minutos
+  //5 minutos
+  setInterval(triggerBgSave, 1000 * 60 * 1); // 5 minutos
   console.log("HTTPS server running on port" + APP_PORT);
 });
