@@ -122,7 +122,7 @@ async function reloadLastBackup() {
 
     const exec = require('child_process').exec;
     // Comando para reiniciar el contenedor Redis (asegúrate de reemplazar 'redis-container' con el nombre correcto de tu contenedor)
-    const restartCmd = 'docker restart redis-stack";
+    const restartCmd = 'docker restart redis-stack';
 
     exec(restartCmd, (err, stdout, stderr) => {
       if (err) {
