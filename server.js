@@ -118,33 +118,29 @@ redisClient.on("connect", () => {
 
 async function reloadLastBackup() {
   try {
-    console.log("Reiniciando el contenedor de Redis para cargar el último respaldo...");
+    console.log("Reiniciando Redis para cargar el último respaldo...");
 
-    const exec = require('child_process').exec;
-    // Comando para reiniciar el contenedor Redis (asegúrate de reemplazar 'redis-container' con el nombre correcto de tu contenedor)
-    const restartCmd = 'docker restart redis-stack';
+    // Enviar comando SHUTDOWN NOSAVE para apagar Redis y forzar una recarga de datos
+    await redisClient.sendCommand(['SHUTDOWN', 'NOSAVE']);
 
-    exec(restartCmd, (err, stdout, stderr) => {
-      if (err) {
-        console.error("Error al intentar reiniciar el contenedor Redis:", err);
-        return;
+    console.log("Redis ha sido apagado, se recargará con el respaldo.");
+
+    // Intentar reconectar después del reinicio
+    setTimeout(async () => {
+      try {
+        console.log("Intentando reconectar a Redis después del reinicio...");
+        await redisClient.connect();
+        console.log("Reconectado a Redis después del reinicio.");
+      } catch (reconnectError) {
+        console.error("Error al intentar reconectar a Redis:", reconnectError);
       }
-      console.log("Contenedor de Redis reiniciado correctamente.");
+    }, 5000); // Esperar 5 segundos antes de intentar reconectar
 
-      // Intentar reconectar después del reinicio
-      setTimeout(async () => {
-        try {
-          await redisClient.connect();
-          console.log("Reconectado a Redis después del reinicio del contenedor.");
-        } catch (reconnectError) {
-          console.error("Error al intentar reconectar a Redis:", reconnectError);
-        }
-      }, 5000); // Esperar 5 segundos antes de intentar reconectar
-    });
   } catch (error) {
-    console.error("Error al intentar reiniciar el contenedor Redis:", error);
+    console.error("Error al intentar reiniciar Redis:", error);
   }
 }
+
 
 
 
