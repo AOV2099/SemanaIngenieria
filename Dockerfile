@@ -47,6 +47,7 @@ ENV REDIS_PORT=6379
 ENV APP_PORT=3000
 ENV APP_MODE=1
 ENV API_URL=https://13.58.164.15:3000
+ENV REDIS_PASSWORD=perritoencuatro
 
 # Exponer el puerto que la aplicación usará
 EXPOSE 3000
