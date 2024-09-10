@@ -29,6 +29,10 @@ RUN npm install
 COPY svelte/ ./
 RUN npm run build
 
+# Eliminar cualquier directorio o archivo no necesario para el runtime
+# Aquí asumimos que /frontend/public no contiene subcarpetas src
+RUN rm -rf src node_modules
+
 # Construir la imagen final con ambos resultados
 FROM node:20.3.0-slim
 
