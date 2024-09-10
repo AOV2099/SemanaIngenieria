@@ -18,5 +18,8 @@
     "qr-scanner": "^1.4.2",
     "redis": "^4.6.15",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "rollup-plugin-terser": "^7.0.2"
   }
 }

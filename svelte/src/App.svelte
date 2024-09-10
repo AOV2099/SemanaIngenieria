@@ -10,8 +10,8 @@
 
 <Router>
       <Route path="/login" component={LoginPage} />
-      <Route path="/scanner" component={Scanner} />
-      <Route path="/create" component={EventCreator} />
+      <Route path="/scanner-event-qr" component={Scanner} />
+      <Route path="/create-event-admin" component={EventCreator} />
       <Route path="/events" component={UserEvents} />
 
   </Router>
