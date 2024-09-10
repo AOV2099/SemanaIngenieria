@@ -28,7 +28,7 @@ const { log } = require("console");
 
 const app = express();
 // Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "svelte", "public")));
 
 //uso de json
 app.use(express.json());
@@ -273,26 +273,26 @@ const httpsOptions = {
 };
 
 app.get("/build/bundle.css", (req, res) => {
-  const fullPath = path.join(__dirname, "public", "build", "bundle.css");
+  const fullPath = path.join(__dirname, "svelte", "public", "build", "bundle.css");
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
 app.get("/build/bundle.js", (req, res) => {
-  const fullPath = path.join(__dirname, "public", "build", "bundle.js");
+  const fullPath = path.join(__dirname, "svelte", "public", "build", "bundle.js");
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
 app.get("/global.css", (req, res) => {
-  const fullPath = path.join(__dirname, "public", "global.css");
+  const fullPath = path.join(__dirname, "svelte", "public", "global.css");
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
 app.get("/img/:imgid", (req, res) => {
   const imgid = req.params.imgid;
-  const fullPath = path.join(__dirname, "public", "img", `${imgid}`);
+  const fullPath = path.join(__dirname, "svelte", "public", "img", `${imgid}`);
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
@@ -308,7 +308,7 @@ app.get("/img/:imgid", (req, res) => {
 
 app.get("/build/qr-scanner-worker.min*.js", (req, res) => {
   const fileName = req.path.split("/").pop(); // Obtiene el nombre del archivo desde la URL
-  const fullPath = path.join(__dirname, "public", "build", fileName);
+  const fullPath = path.join(__dirname, "svelte", "public", "build", fileName);
   console.log("Full path to QR Scanner Worker: ", fullPath);
   res.sendFile(fullPath);
 });
@@ -609,7 +609,7 @@ app.post("/api/evento/visit", async (req, res) => {
 
 // Luego al final, tu capturador para SPA
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "svelte", "public", "index.html"));
 });
 
 https.createServer(httpsOptions, app).listen(APP_PORT, async () => {
