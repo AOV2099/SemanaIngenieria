@@ -28,7 +28,7 @@ const { log } = require("console");
 
 const app = express();
 // Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public", "build")));
 
 //uso de json
 app.use(express.json());
