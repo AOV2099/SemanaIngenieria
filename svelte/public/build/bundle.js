@@ -13356,12 +13356,18 @@ function create_default_slot(ctx) {
 		});
 
 	route1 = new Route({
-			props: { path: "/scanner", component: Scanner },
+			props: {
+				path: "/scanner-event-qr",
+				component: Scanner
+			},
 			$$inline: true
 		});
 
 	route2 = new Route({
-			props: { path: "/create", component: EventCreator },
+			props: {
+				path: "/create-event-admin",
+				component: EventCreator
+			},
 			$$inline: true
 		});
 
