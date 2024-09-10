@@ -115,14 +115,12 @@ redisClient.on("connect", () => {
   console.log("Redis conectado.");
 });
 
-
-
 async function reloadLastBackup() {
   try {
     console.log("Reiniciando Redis para cargar el último respaldo...");
 
     // Enviar comando SHUTDOWN NOSAVE para apagar Redis y forzar una recarga de datos
-    await redisClient.sendCommand(['SHUTDOWN', 'NOSAVE']);
+    await redisClient.sendCommand(["SHUTDOWN", "NOSAVE"]);
 
     console.log("Redis ha sido apagado, se recargará con el respaldo.");
 
@@ -136,14 +134,10 @@ async function reloadLastBackup() {
         console.error("Error al intentar reconectar a Redis:", reconnectError);
       }
     }, 5000); // Esperar 5 segundos antes de intentar reconectar
-
   } catch (error) {
     console.error("Error al intentar reiniciar Redis:", error);
   }
 }
-
-
-
 
 async function triggerBgSave() {
   try {
@@ -167,7 +161,6 @@ async function triggerBgSave() {
     );
   }
 }
-
 
 async function connectRedis() {
   console.log("Conectando a Redis...");
@@ -280,38 +273,26 @@ const httpsOptions = {
 };
 
 app.get("/build/bundle.css", (req, res) => {
-  const fullPath = path.join(
-    __dirname,
-    "svelte",
-    "public",
-    "build",
-    "bundle.css"
-  );
+  const fullPath = path.join(__dirname, "public", "build", "bundle.css");
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
 app.get("/build/bundle.js", (req, res) => {
-  const fullPath = path.join(
-    __dirname,
-    "svelte",
-    "public",
-    "build",
-    "bundle.js"
-  );
+  const fullPath = path.join(__dirname, "public", "build", "bundle.js");
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
 app.get("/global.css", (req, res) => {
-  const fullPath = path.join(__dirname, "svelte", "public", "global.css");
+  const fullPath = path.join(__dirname, "public", "global.css");
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
 
 app.get("/img/:imgid", (req, res) => {
   const imgid = req.params.imgid;
-  const fullPath = path.join(__dirname, "svelte", "public", "img", `${imgid}`);
+  const fullPath = path.join(__dirname, "public", "img", `${imgid}`);
   //console.log("Full path to bundle: ", fullPath);
   res.sendFile(fullPath);
 });
@@ -327,7 +308,7 @@ app.get("/img/:imgid", (req, res) => {
 
 app.get("/build/qr-scanner-worker.min*.js", (req, res) => {
   const fileName = req.path.split("/").pop(); // Obtiene el nombre del archivo desde la URL
-  const fullPath = path.join(__dirname, "svelte", "public", "build", fileName);
+  const fullPath = path.join(__dirname, "public", "build", fileName);
   console.log("Full path to QR Scanner Worker: ", fullPath);
   res.sendFile(fullPath);
 });
@@ -598,11 +579,9 @@ app.post("/api/evento/visit", async (req, res) => {
 
     // Verificar si el asistente ya está inscrito
     if (evento.visits.includes(idAsistente)) {
-      res
-        .status(400)
-        .json({
-          error: "Visita ya registrada para este evento de: " + idAsistente,
-        });
+      res.status(400).json({
+        error: "Visita ya registrada para este evento de: " + idAsistente,
+      });
       return;
     }
 
@@ -616,12 +595,10 @@ app.post("/api/evento/visit", async (req, res) => {
     evento.visits.push(idAsistente);
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
 
-    res
-      .status(200)
-      .json({
-        message: "Visita registrada correctamente para: " + idAsistente,
-        ok: true,
-      });
+    res.status(200).json({
+      message: "Visita registrada correctamente para: " + idAsistente,
+      ok: true,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -631,8 +608,8 @@ app.post("/api/evento/visit", async (req, res) => {
 // Rutas de API y otros manejadores específicos aquí
 
 // Luego al final, tu capturador para SPA
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 https.createServer(httpsOptions, app).listen(APP_PORT, async () => {
