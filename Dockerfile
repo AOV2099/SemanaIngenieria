@@ -30,7 +30,7 @@ COPY svelte/ ./
 RUN npm run build
 
 # Eliminar cualquier directorio o archivo no necesario para el runtime
-# Aquí asumimos que /frontend/public no contiene subcarpetas src
+# Elimina los directorios src y node_modules que no son necesarios en producción
 RUN rm -rf src node_modules
 
 # Construir la imagen final con ambos resultados
