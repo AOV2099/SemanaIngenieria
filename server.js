@@ -632,7 +632,7 @@ app.post("/api/evento/visit", async (req, res) => {
 
 // Luego al final, tu capturador para SPA
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "svelte", "public", "index.html"));
+  res.sendFile(path.join(__dirname, "build", "public", "index.html"));
 });
 
 https.createServer(httpsOptions, app).listen(APP_PORT, async () => {

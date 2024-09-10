@@ -29,8 +29,8 @@ RUN npm install
 COPY svelte/ ./
 RUN npm run build
 
-# Eliminar directorios y archivos no necesarios para la producción
-RUN rm -rf node_modules src
+# Limpiar directorios no necesarios
+RUN rm -rf src node_modules
 
 # Construir la imagen final con ambos resultados
 FROM node:20.3.0-slim
