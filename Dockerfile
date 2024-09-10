@@ -19,7 +19,7 @@ COPY . .
 FROM node:20.3.0-slim AS frontend
 
 # Definir el directorio de trabajo para el frontend
-WORKDIR /svelte
+WORKDIR /frontend
 
 # Copiar y instalar dependencias del frontend
 COPY svelte/package*.json ./
@@ -36,7 +36,7 @@ FROM node:20.3.0-slim
 COPY --from=backend /app /app
 
 # Copiar los archivos compilados del frontend al backend (suponiendo que se sirvan desde /public)
-COPY --from=frontend /svelte/public /app/public
+COPY --from=frontend /frontend/public /app/public
 
 # Definir el directorio de trabajo para el contenedor final
 WORKDIR /app
