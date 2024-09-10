@@ -29,10 +29,6 @@ RUN npm install
 COPY svelte/ ./
 RUN npm run build
 
-# Eliminar cualquier directorio o archivo no necesario para el runtime
-# Elimina los directorios src y node_modules que no son necesarios en producción
-RUN rm -rf src node_modules
-
 # Construir la imagen final con ambos resultados
 FROM node:20.3.0-slim
 
@@ -40,6 +36,7 @@ FROM node:20.3.0-slim
 COPY --from=backend /app /app
 
 # Copiar los archivos compilados del frontend al backend (suponiendo que se sirvan desde /public)
+# Asegurarse de que sólo se copie el directorio public y no otros archivos o directorios no necesarios
 COPY --from=frontend /frontend/public /app/public
 
 # Definir el directorio de trabajo para el contenedor final
