@@ -445,9 +445,12 @@ app.post("/api/evento/atendees/suscribe", async (req, res) => {
   const idAsistente = req.body.user_id;
 
   try {
+    await redisClient.watch(KEY_EVENTS); // Observar cambios en KEY_EVENTS
+
     const eventos = await redisClient.json.get(KEY_EVENTS);
     const index = eventos.findIndex((e) => e.id === idEvento);
     if (index === -1) {
+      redisClient.unwatch(); // Dejar de observar si no se encuentra el evento
       res.status(404).json({ error: "Evento no encontrado" });
       return;
     }
@@ -457,40 +460,31 @@ app.post("/api/evento/atendees/suscribe", async (req, res) => {
       evento.attendees = [];
     }
 
-    // Verificar si el asistente ya está inscrito
-    if (evento.attendees.includes(idAsistente)) {
-      //console.log("Ya inscrito", idAsistente);
-      res.status(400).json({ error: "Ya estás inscrito a este evento" });
+    if (evento.attendees.includes(idAsistente) || evento.attendees.length >= evento.max_attendees) {
+      redisClient.unwatch(); // Dejar de observar si ya está inscrito o si no hay cupo
+      res.status(400).json({ error: "No se puede inscribir al evento" });
       return;
     }
 
-    // Verificar cupo disponible
-    if (evento.attendees.length >= evento.max_attendees) {
-      //console.log("Evento lleno", idAsistente);
-      res.status(400).json({ error: "Evento lleno" });
-      return;
-    }
-
-    // Añadir asistente al evento
     evento.attendees.push(idAsistente);
-    await redisClient.json.set(KEY_EVENTS, "$", eventos);
+
+    const multi = redisClient.multi(); // Iniciar una transacción
+    multi.json.set(KEY_EVENTS, "$", eventos);
+    await multi.exec(); // Ejecutar la transacción
 
     // Manejar la inscripción del asistente a sus eventos
     let attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
     let attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
-
     attendee.events.push(idEvento);
-    await redisClient.hSet(
-      KEY_ATTENDEES,
-      idAsistente,
-      JSON.stringify(attendee)
-    );
+    await redisClient.hSet(KEY_ATTENDEES, idAsistente, JSON.stringify(attendee));
 
     res.status(200).json({ message: "Inscrito correctamente", ok: true });
   } catch (error) {
+    console.error("Error inscribiendo al evento:", error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 //desinscribirse de un evento
 app.post("/api/evento/atendees/unsuscribe", async (req, res) => {
