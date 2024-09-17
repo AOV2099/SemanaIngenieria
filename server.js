@@ -26,6 +26,7 @@ let reconnectInterval = null;
 //uuid
 const { v4: uuidv4 } = require("uuid");
 const { log } = require("console");
+const { triggerAsyncId } = require("async_hooks");
 
 const app = express();
 // Middleware para servir archivos estáticos
@@ -612,7 +613,7 @@ app.get("/api/report/csv", async (req, res) => {
           const eventDate = evento.date;
           const eventTime = evento.start_time;
 
-          console.log("Event name:", eventName);
+          //console.log("Event name:", eventName);
 
           // Asegurarse de que evento.attendees y evento.visits sean arreglos
           const attendees = Array.isArray(evento.attendees) ? evento.attendees : [];
@@ -620,9 +621,10 @@ app.get("/api/report/csv", async (req, res) => {
 
           // Obtener datos de asistentes
           for (let attendeeId of attendees) {
+            try {
               const attendeeData = await redisClient.hGet(KEY_ATTENDEES, attendeeId);
-              console.log("Cuenta:", attendeeId);
-              console.log(visits);
+              //console.log("Cuenta:", attendeeId);
+              //console.log(visits);
 
               reportData.push({
                   account_number: attendeeId,  
@@ -631,6 +633,12 @@ app.get("/api/report/csv", async (req, res) => {
                   event_time: eventTime,
                   attended: visits.includes(attendeeId) ? 'Yes' : 'No'
               });
+              
+            } catch (error) {
+              console.log("Error en gneración de reporte:" + error);
+              console.log("Evento:" + eventName);
+              console.log("Cuenta:" + attendeeId);
+            }
           }
       }
 
