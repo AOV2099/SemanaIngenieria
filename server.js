@@ -5,6 +5,7 @@ const path = require("path");
 const { fileURLToPath } = require("url");
 const cors = require("cors");
 const { exec } = require("child_process"); // Importar exec correctamente
+const { Parser } = require('json2csv');
 
 const APP_PORT = process.env.APP_PORT || 3000;
 const REDIS_HOST = process.env.REDIS_HOST || "localhost"; // Cambié REDIS_PORT a REDIS_HOST aquí
@@ -595,6 +596,55 @@ app.post("/api/evento/visit", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+//csv de visitas
+
+app.get("/api/report/csv", async (req, res) => {
+  try {
+      // Obtener todos los eventos
+      const eventos = await redisClient.json.get(KEY_EVENTS) || [];
+      let reportData = [];
+
+      for (let evento of eventos) {
+          const eventName = evento.name;
+          const eventDate = evento.date;
+          const eventTime = evento.start_time;
+
+          console.log("Event name:", eventName);
+
+          // Asegurarse de que evento.attendees y evento.visits sean arreglos
+          const attendees = Array.isArray(evento.attendees) ? evento.attendees : [];
+          const visits = Array.isArray(evento.visits) ? evento.visits : [];
+
+          // Obtener datos de asistentes
+          for (let attendeeId of attendees) {
+              const attendeeData = await redisClient.hGet(KEY_ATTENDEES, attendeeId);
+              console.log("Cuenta:", attendeeId);
+              console.log(visits);
+
+              reportData.push({
+                  account_number: attendeeId,  
+                  event_name: eventName,
+                  event_date: eventDate,
+                  event_time: eventTime,
+                  attended: visits.includes(attendeeId) ? 'Yes' : 'No'
+              });
+          }
+      }
+
+      // Configuración para json2csv
+      const fields = ['account_number', 'event_name', 'event_date', 'event_time', 'attended'];
+      const json2csvParser = new Parser({ fields });
+      const csv = json2csvParser.parse(reportData);
+
+      res.header('Content-Type', 'text/csv');
+      res.attachment('report.csv');
+      res.send(csv);
+  } catch (error) {
+      console.error("Failed to generate report:", error);
+      res.status(500).json({ error: "Failed to generate report" });
   }
 });
 
