@@ -6,6 +6,7 @@ const { fileURLToPath } = require("url");
 const cors = require("cors");
 const { exec } = require("child_process"); // Importar exec correctamente
 const { Parser } = require('json2csv');
+const moment = require('moment');
 
 const APP_PORT = process.env.APP_PORT || 3000;
 const REDIS_HOST = process.env.REDIS_HOST || "localhost"; // Cambié REDIS_PORT a REDIS_HOST aquí
@@ -612,8 +613,11 @@ app.get("/api/report/csv", async (req, res) => {
           const eventName = evento.name;
           const eventDate = evento.date;
           const eventTime = evento.start_time;
+          const eventEndTime = evento.end_time;
 
-          //console.log("Event name:", eventName);
+          // Calcular la duración total del evento en horas
+          const duration = moment.duration(moment(eventEndTime, "HH:mm").diff(moment(eventTime, "HH:mm")));
+          const totalEventTime = duration.asHours(); // Duración en horas, con decimales
 
           // Asegurarse de que evento.attendees y evento.visits sean arreglos
           const attendees = Array.isArray(evento.attendees) ? evento.attendees : [];
@@ -621,29 +625,23 @@ app.get("/api/report/csv", async (req, res) => {
 
           // Obtener datos de asistentes
           for (let attendeeId of attendees) {
-            try {
               const attendeeData = await redisClient.hGet(KEY_ATTENDEES, attendeeId);
-              //console.log("Cuenta:", attendeeId);
-              //console.log(visits);
+              const attendee = JSON.parse(attendeeData || '{}'); // Asegurarse de que siempre sea un objeto
 
               reportData.push({
-                  account_number: attendeeId,  
+                  account_number: attendee.account_number,  // Asumiendo que existe este campo
                   event_name: eventName,
                   event_date: eventDate,
                   event_time: eventTime,
+                  event_time_end: eventEndTime,
+                  total_event_time: totalEventTime.toFixed(2),  // Redondeo a dos decimales
                   attended: visits.includes(attendeeId) ? 'Yes' : 'No'
               });
-              
-            } catch (error) {
-              console.log("Error en gneración de reporte:" + error);
-              console.log("Evento:" + eventName);
-              console.log("Cuenta:" + attendeeId);
-            }
           }
       }
 
       // Configuración para json2csv
-      const fields = ['account_number', 'event_name', 'event_date', 'event_time', 'attended'];
+      const fields = ['account_number', 'event_name', 'event_date', 'event_time', 'event_time_end', 'total_event_time', 'attended'];
       const json2csvParser = new Parser({ fields });
       const csv = json2csvParser.parse(reportData);
 
@@ -655,7 +653,6 @@ app.get("/api/report/csv", async (req, res) => {
       res.status(500).json({ error: "Failed to generate report" });
   }
 });
-
 // Asegúrate de que cualquier otra ruta no específica devuelva tu archivo HTML principal de Svelte
 // Rutas de API y otros manejadores específicos aquí
 
