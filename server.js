@@ -612,12 +612,12 @@ app.get("/api/report/csv", async (req, res) => {
       for (let evento of eventos) {
           const eventName = evento.name;
           const eventDate = evento.date;
-          const eventTime = evento.start_time;
+          const eventStartTime = evento.start_time;
           const eventEndTime = evento.end_time;
 
           // Calcular la duración total del evento en horas
-          const duration = moment.duration(moment(eventEndTime, "HH:mm").diff(moment(eventTime, "HH:mm")));
-          const totalEventTime = duration.asHours(); // Duración en horas, con decimales
+          const duration = moment.duration(moment(eventEndTime, "HH:mm").diff(moment(eventStartTime, "HH:mm")));
+          const totalEventTime = duration.asHours(); // Duración en horas con decimal
 
           // Asegurarse de que evento.attendees y evento.visits sean arreglos
           const attendees = Array.isArray(evento.attendees) ? evento.attendees : [];
@@ -625,18 +625,22 @@ app.get("/api/report/csv", async (req, res) => {
 
           // Obtener datos de asistentes
           for (let attendeeId of attendees) {
-              const attendeeData = await redisClient.hGet(KEY_ATTENDEES, attendeeId);
-              const attendee = JSON.parse(attendeeData || '{}'); // Asegurarse de que siempre sea un objeto
-
-              reportData.push({
-                  account_number: attendee.account_number,  // Asumiendo que existe este campo
-                  event_name: eventName,
-                  event_date: eventDate,
-                  event_time: eventTime,
-                  event_time_end: eventEndTime,
-                  total_event_time: totalEventTime.toFixed(2),  // Redondeo a dos decimales
-                  attended: visits.includes(attendeeId) ? 'Yes' : 'No'
-              });
+              try {
+                  const attendeeData = await redisClient.hGet(KEY_ATTENDEES, attendeeId);
+                  reportData.push({
+                      account_number: attendeeId,
+                      event_name: eventName,
+                      event_date: eventDate,
+                      event_time: eventStartTime,
+                      event_time_end: eventEndTime,
+                      total_event_time: totalEventTime.toFixed(2), // Formatear a dos decimales
+                      attended: visits.includes(attendeeId) ? 'Yes' : 'No'
+                  });
+              } catch (error) {
+                  console.log("Error en generación de reporte: " + error);
+                  console.log("Evento: " + eventName);
+                  console.log("Cuenta: " + attendeeId);
+              }
           }
       }
 
