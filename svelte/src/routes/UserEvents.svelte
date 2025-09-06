@@ -127,7 +127,7 @@
           height="25"
           class="d-inline-block align-text-top"
         />
-        Semana de la ingenería
+        Semana de la ingenería 2025
       </a>
       <button
         class="btn btn-secondary transparent"
@@ -143,21 +143,28 @@
   </nav>
 </div>
 
-<div
-  id="main-container"
-  class="row"
-  style="paddding-top: 48px; padding-bottom: 48px; margin-top: 48px;"
->
-  {#each events as event, index}
-    <div class="col-sm-12 col-md-6 col-lg-6">
-      <UserEventCard
-        {event}
-        color={colors[index % colors.length]}
-        {userId}
-        isSuscribed={suscribedEvents.includes(event.id)}
-      />
-    </div>
-  {/each}
+<div id="main-container" style="paddding-top: 48px; padding-bottom: 48px; ">
+  <div
+    class="row"
+    style="
+overflow: auto; 
+overflow-x: hidden; 
+padding-top: 56px; 
+line-height: 0.9; 
+height: 100%; 
+width: 100%;"
+  >
+    {#each events as event, index}
+      <div class="col-sm-12 col-md-6 col-lg-6" style="margin-top: 16px;">
+        <UserEventCard
+          {event}
+          color={colors[index % colors.length]}
+          {userId}
+          isSuscribed={suscribedEvents.includes(event.id)}
+        />
+      </div>
+    {/each}
+  </div>
 </div>
 
 <!-- Modal -->
@@ -234,12 +241,8 @@
 <!--background-color: #212121;-->
 <style>
   #main-container {
-    height: 100%;
-    padding: 8px;
-    line-height: 0.9;
-    overflow: auto;
+    height: 100vh;
     background-color: #212121;
-    overflow-x: hidden;
   }
 
   .transparent {

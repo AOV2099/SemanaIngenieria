@@ -2,6 +2,9 @@ import { writable } from "svelte/store";
 
 export var test = writable("Hello, world!");
 export const API_URL = `${window.location.origin}`;
+
+export const adminToken = writable("");
+
 export var userModalData = writable({
     event: {
         id: "-1",
@@ -90,4 +93,33 @@ export function openDetailModal() {
     }
   );
   detailModal.show();
+}
+
+
+  export async function testManagerLogin(user, pass) {
+  try {
+    let res = await fetch(`/api/admin/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: user,
+        password: pass,
+      }),
+    });
+
+    if (res.ok) {
+      let data = await res.json();
+      document.cookie = `adminToken=${data.token}; max-age=86400; path=/`;
+      adminToken.set(data.token);  // guarda en store
+      navigate("/admin");
+    } else {
+      toast.error("Credenciales inválidas");
+      navigate("/login");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Error: " + error.message);
+  }
 }

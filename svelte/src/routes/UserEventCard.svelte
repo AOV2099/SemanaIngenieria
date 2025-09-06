@@ -185,8 +185,11 @@ console.log("event", event);
   }}
 > -->
 <div
-  class="main-card-container shadow"
-  style="background-color: {cardStyleData.color}; overflow: hidden; position: relative;"
+  class="main-card-container shadow h-100"
+  style="background-color: {cardStyleData.color}; 
+  overflow: hidden; 
+  position: relative;
+  "
 >
   <img
     src={cardStyleData.img}
@@ -237,7 +240,7 @@ console.log("event", event);
   <div class="d-flex justify-content-between">
     <p class="event-info" style="font-weight: 700; margin-top:8px">
       <span style="font-weight: 300;"> Asistentes: </span>
-      {event.attendees || 0} / {event.max_attendees}
+      { event.attendees || 0} / {event.max_attendees}
     </p>
 
     <button
@@ -332,7 +335,6 @@ console.log("event", event);
 
   .main-card-container {
     border-radius: 12px;
-    margin: 8px;
 
     padding: 18px;
     position: relative; /* Esta línea es importante para que funcione el posicionamiento absoluto de la imagen */

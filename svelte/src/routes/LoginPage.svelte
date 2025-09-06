@@ -2,22 +2,59 @@
   import { onMount } from "svelte";
   import { toast } from "svelte-french-toast";
   import { navigate } from "svelte-routing";
+  import { adminToken } from "../store";
 
   onMount(() => {
-    selectedPage.set("LOGIN_PAGE");
+    //selectedPage.set("LOGIN_PAGE");
   });
   let boleta = "";
 
   async function login() {
-	//verify thar boleta is a 9 digit number
-	if (!/^\d{9}$/.test(boleta)) {
-		toast.error("Por favor, ingrese un número de cuenta válido");
-		return;
-	}
-	//save boleta in cookie by name "userId" for 4 hours
-	document.cookie = `userId=${boleta}; max-age=14400; path=/`;
-	navigate("/events"); 
+    //verify thar boleta is a 9 digit number
+    if (/^\d{9}$/.test(boleta)) {
+      document.cookie = `userId=${boleta}; max-age=14400; path=/`;
+      navigate("/events");
+    } else {
+      //revisar si se peude dividir la boleta por una coma
+      if (boleta.includes(",")) {
+        let parts = boleta.split(",");
+        if (parts.length === 2) {
+          testManagerLogin(parts[0].trim(), parts[1].trim());
+        }
+      }
+
+      toast.error("Por favor, ingrese un número de cuenta válido");
+    }
   }
+
+  async function testManagerLogin(user, pass) {
+  try {
+    let res = await fetch(`/api/admin/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: user,
+        password: pass,
+      }),
+    });
+
+    if (res.ok) {
+      let data = await res.json();
+      document.cookie = `adminToken=${data.token}; max-age=86400; path=/`;
+      adminToken.set(data.token);  // guarda en store
+      navigate("/admin");
+    } else {
+      toast.error("Credenciales inválidas");
+      navigate("/login");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Error: " + error.message);
+  }
+}
+
 </script>
 
 <body>
@@ -42,14 +79,13 @@
               >
                 <div class="card-body p-5 text-center">
                   <div class="mb-md-5 mt-md-4 pb-5">
-                    <h2 class="fw-bold mb-2 text-uppercase">Semanana</h2>
+                    <h2 class="fw-bold mb-2 text-uppercase">Semana</h2>
                     <h4 class="fw-bold mb-2 text-uppercase">
                       de la Ingeniería
                     </h4>
+                    <h4 class="fw-bold mb-2 text-uppercase">2025</h4>
 
-					<br>
-
-					<hr>
+                    <hr />
                     <div class="form-outline form-white mb-4">
                       <!--<label class="form-label" for="typeEmailX">Username</label>-->
                       <label class="form-label" for="username"
@@ -70,7 +106,9 @@
 
                       <button
                         class="btn btn-success btn-lg px-5"
-                        on:click={()=>{login()}}>Ingresar</button
+                        on:click={() => {
+                          login();
+                        }}>Ingresar</button
                       >
                       <!--<button
                             class="btn btn-success btn-lg px-5"
@@ -85,7 +123,7 @@
                     </div>
                   </div>
                   <div class="d-flex justify-content-center">
-                    <p class="text-secondary">version 0.0.1</p>
+                    <p class="text-secondary">versión 1.0.2</p>
                   </div>
                 </div>
               </div>

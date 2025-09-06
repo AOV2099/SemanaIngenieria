@@ -1,71 +1,110 @@
+// server.js — Semana Ingeniería (corregido)
 const fs = require("fs");
 const https = require("https");
 const express = require("express");
 const path = require("path");
-const { fileURLToPath } = require("url");
 const cors = require("cors");
-const { exec } = require("child_process"); // Importar exec correctamente
-const { Parser } = require('json2csv');
-const moment = require('moment');
+const { Parser } = require("json2csv");
+const moment = require("moment");
+const redis = require("redis");
+const { v4: uuidv4 } = require("uuid");
 
+// ---- Config ----
 const APP_PORT = process.env.APP_PORT || 3000;
-const REDIS_HOST = process.env.REDIS_HOST || "localhost"; // Cambié REDIS_PORT a REDIS_HOST aquí
+const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
-const APP_MODE = process.env.APP_MODE || "0"; // Cambié REDIS_PORT a APP_MODE aquí
-const redisURL = `redis://${process.env.REDIS_HOST || "127.0.0.1"}:${
-  process.env.REDIS_PORT || 6379
-}`;
+const APP_MODE = process.env.APP_MODE || "0";
+
+const ADMIN_USER = process.env.ADMIN_USER || "admin";
+const ADMIN_PASS = process.env.ADMIN_PASS || "password";
 
 console.log("APP MODE", APP_MODE);
 console.log("APP PORT", APP_PORT);
 console.log("REDIS HOST", REDIS_HOST);
-console.log("REDIS PORT", REDIS_PORT); // Cambié REDIS_HOST a REDIS_PORT aquí
+console.log("REDIS PORT", REDIS_PORT);
 
-//redis
-const redis = require("redis");
-let reconnectInterval = null;
-//uuid
-const { v4: uuidv4 } = require("uuid");
-const { log } = require("console");
-const { triggerAsyncId } = require("async_hooks");
+// ---- Constantes de claves ----
+const KEY_EVENTS = "si:eventos";
+const KEY_ATTENDEES = "si:alumnos";
+const KEY_ADMIN_TOKENS = "si:tokens";
+const ADMIN_TOKEN_TTL_SECONDS = 8 * 60 * 60; // 8 horas = 28800 segundos
 
+// ---- App ----
 const app = express();
-// Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
-
-//uso de json
 app.use(express.json());
-
 app.use(
   cors({
-    origin: "*", // Permite todos los orígenes
-    methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
-    credentials: true, // Permite cookies de origen cruzado
+    origin: "*",
+    methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH", "OPTIONS"],
+    credentials: true,
   })
 );
 
-const KEY_EVENTS = "UNAM_EVENTOS";
-const KEY_ATTENDEES = "SI_ALUMNOS";
+// --- Crear admin token (con expiración automática) ---
+async function createAdminToken(meta = {}) {
+  const token = uuidv4();
+  const key = KEY_ADMIN_TOKENS + token;
+  const payload = {
+    createdAt: Date.now(),
+    ...meta,
+  };
+  try {
+    await redisClient.set(key, JSON.stringify(payload), {
+      EX: ADMIN_TOKEN_TTL_SECONDS,
+      NX: true,
+    });
+    console.log("Admin token creado:", token);
+    return {
+      token,
+      expiresIn: ADMIN_TOKEN_TTL_SECONDS,
+      expiresAt: Date.now() + ADMIN_TOKEN_TTL_SECONDS * 1000,
+    };
+  } catch (error) {
+    console.error("Error creando admin token:", error);
+    return null;
+  }
+}
 
-let cert;
-let key;
+// --- Verificar admin token ---
+async function checkAdminToken(token) {
+  if (!token) return false;
+  const key = KEY_ADMIN_TOKENS + token;
+  const val = await redisClient.get(key);
+  return !!val;
+}
 
-// Conexión a Redis
-/*const redisClient = redis.createClient({
-  host: REDIS_HOST, // Utiliza 'localhost' si REDIS_HOST no está definido
-  port: REDIS_PORT, // Utiliza 6379 si REDIS_PORT no está definido
-});*/
-/*const redisClient = redis.createClient({
-  url: redisURL
-});*/
+// --- Invalidar admin token (antes de que caduque solo) ---
+async function invalidateAdminToken(token) {
+  if (!token) return false;
+  const key = KEY_ADMIN_TOKENS + token;
+  await redisClient.del(key);
+  console.log("Admin token invalidado:", token);
+  return true;
+}
 
+// --- Middleware: requiere token admin válido ---
+async function requireAdmin(req, res, next) {
+  try {
+    const auth = req.headers["authorization"] || "";
+    const token = auth.startsWith("Bearer ")
+      ? auth.slice(7).trim()
+      : auth.trim();
+    const ok = await checkAdminToken(token);
+    if (!ok) return res.status(401).json({ error: "Unauthorized" });
+    // opcional: req.admin = { token }
+    next();
+  } catch (error) {
+    res.status(500).json({ error: "Auth error" });
+  }
+}
+
+// ---- Redis (con reconexión) ----
 const redisClient = redis.createClient({
-  socket: {
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: process.env.REDIS_PORT || 6379,
-  },
+  socket: { host: REDIS_HOST, port: REDIS_PORT },
   password: process.env.REDIS_PASSWORD || "",
 });
+let reconnectInterval = null;
 
 async function reconnectRedis() {
   try {
@@ -73,366 +112,214 @@ async function reconnectRedis() {
       console.log("Intentando reconectar a Redis...");
       await redisClient.connect();
       console.log("Conectado nuevamente a Redis.");
-
-      // Detener el intervalo inmediatamente después de reconectar
       if (reconnectInterval) {
         clearInterval(reconnectInterval);
-        reconnectInterval = null; // Asegurarse de que se limpie el intervalo
-        console.log("Reconexión exitosa, intervalo detenido.");
+        reconnectInterval = null;
       }
-    } else {
-      console.log("Redis ya está conectado, no es necesario reconectar.");
     }
   } catch (error) {
     console.error("Error al intentar reconectar a Redis:", error);
   }
 }
 
-// Escuchar eventos de Redis
-redisClient.on("error", (error) => {
-  console.error("Error en Redis:", error);
-});
-
+redisClient.on("error", (error) => console.error("Error en Redis:", error));
 redisClient.on("end", () => {
   console.log("Conexión a Redis finalizada.");
-
-  // Solo iniciar el intervalo si no hay uno activo
   if (!reconnectInterval) {
-    reconnectInterval = setInterval(async () => {
-      try {
-        await reconnectRedis();
-      } catch (error) {
-        console.error(
-          "No se pudo reconectar a Redis, intentando nuevamente en 5 segundos..."
-        );
-      }
-    }, 5000); // Reintentar cada 5 segundos
+    reconnectInterval = setInterval(reconnectRedis, 5000);
   }
 });
-
-redisClient.on("ready", () => {
-  console.log("Redis listo para aceptar conexiones.");
-});
-
+redisClient.on("ready", () =>
+  console.log("Redis listo para aceptar conexiones.")
+);
 redisClient.on("connect", () => {
-  console.log("Redis conectado.");
+  console.log(`Redis conectado: ${REDIS_HOST}:${REDIS_PORT}`);
 });
-
-async function reloadLastBackup() {
-  try {
-    console.log("Reiniciando Redis para cargar el último respaldo...");
-
-    // Enviar comando SHUTDOWN NOSAVE para apagar Redis y forzar una recarga de datos
-    await redisClient.sendCommand(["SHUTDOWN", "NOSAVE"]);
-
-    console.log("Redis ha sido apagado, se recargará con el respaldo.");
-
-    // Intentar reconectar después del reinicio
-    setTimeout(async () => {
-      try {
-        console.log("Intentando reconectar a Redis después del reinicio...");
-        await redisClient.connect();
-        console.log("Reconectado a Redis después del reinicio.");
-      } catch (reconnectError) {
-        console.error("Error al intentar reconectar a Redis:", reconnectError);
-      }
-    }, 5000); // Esperar 5 segundos antes de intentar reconectar
-  } catch (error) {
-    console.error("Error al intentar reiniciar Redis:", error);
-  }
-}
-
-async function triggerBgSave() {
-  try {
-    const eventsExists = await redisClient.exists("UNAM_EVENTOS");
-    const attendeesExists = await redisClient.exists("SI_ALUMNOS");
-
-    if (eventsExists && attendeesExists) {
-      console.log("Las claves existen, iniciando BGSAVE en Redis...");
-      await redisClient.sendCommand(["BGSAVE"]);
-      console.log("BGSAVE iniciado correctamente");
-    } else {
-      console.log(
-        "No se encontraron todas las claves requeridas, reiniciando Redis y cargando el respaldo..."
-      );
-      await reloadLastBackup();
-    }
-  } catch (error) {
-    console.error(
-      "Error al intentar ejecutar BGSAVE o cargar el respaldo:",
-      error
-    );
-  }
-}
 
 async function connectRedis() {
   console.log("Conectando a Redis...");
-  await reconnectRedis(); // Intentar reconectar si falla
+  await reconnectRedis();
   redisClient.on("end", () => {
     console.log("Conexión a Redis finalizada");
-    reconnectRedis(); // Reintentar reconectar si se pierde la conexión
-  });
-
-  redisClient.on("ready", () => {
-    console.log("Redis listo");
-  });
-
-  redisClient.on("connect", () => {
-    console.log(
-      `Redis conectado: ${redisClient.options.socket.host}:${redisClient.options.socket.port}`
-    );
-  });
-
-  redisClient.on("error", (error) => {
-    console.error("Error en Redis:", error);
+    reconnectRedis();
   });
 }
 
-function isJsonEventCorrect(event) {
-  //console.log(event);
-  //validar que el evento tenga los campos necesarios
-  /*if (
-    //event.id && sin id
-    event.name &&
-    event.date &&
-    event.start_time &&
-    event.end_time &&
-    event.location &&
-    event.description &&
-    event.attendees &&
-    event.max_attendees &&
-    event.career &&
-    event.exponent &&
-    event.status &&
-    event.img
-  ) {
-    return true;
-  }
-  return false;*/
+// ---- Bootstrap de datos ----
+async function verifyRedisKeys() {
+  try {
+    const eventsExists = await redisClient.exists(KEY_EVENTS);
+    const attendeesExists = await redisClient.exists(KEY_ATTENDEES);
 
-  if (!event.name) {
-    console.log("name");
-    return false;
+    if (eventsExists && attendeesExists) {
+      console.log("Las claves existen.");
+      return;
+    }
+
+    console.log("No se encontraron todas las claves requeridas, creando...");
+    const testEvent = {
+      id: uuidv4(),
+      name: "La Oportunidad ante la Adversidad, desarrolla sin miedos tus habilidades en administración (sin usar TikTok)",
+      date: "2024-09-12",
+      start_time: "16:00:00",
+      end_time: "17:00:00",
+      location: "Auditorio del Centro Tecnológico Aragón",
+      max_attendees: "200", // puede venir como string desde el seed
+      career: "Ingeniería en Computación",
+      exponent: "Ing. Juan Carlos",
+      status: "Activo",
+      attendees: [],
+      visits: [],
+    };
+    await redisClient.json.set(KEY_EVENTS, "$", [testEvent]);
+    console.log("Clave de eventos creada con un evento de prueba.");
+
+    await redisClient.hSet(
+      KEY_ATTENDEES,
+      "init",
+      JSON.stringify({ events: [] })
+    );
+  } catch (error) {
+    console.error("Error al verificar claves.", error);
   }
-  if (!event.date) {
-    console.log("date");
-    return false;
-  }
-  if (!event.start_time) {
-    console.log("start_time");
-    return false;
-  }
-  if (!event.end_time) {
-    console.log("end_time");
-    return false;
-  }
-  if (!event.location) {
-    console.log("location");
-    return false;
-  }
-  /*if (!event.description) {
-    console.log("description");
-    return false;
-  }*/
-  if (!event.max_attendees) {
-    console.log("max_attendees");
-    return false;
-  }
-  if (!event.career) {
-    console.log("career");
-    return false;
-  }
-  if (!event.exponent) {
-    console.log("exponent");
-    return false;
-  }
-  if (!event.status) {
-    console.log("status");
-    return false;
-  }
-  /*if (!event.img) {
-    console.log("img");
-    return false;
-  }*/
+}
+
+// ---- Utilidades ----
+function isJsonEventCorrect(event) {
+  if (!event.name) return false;
+  if (!event.date) return false;
+  if (!event.start_time) return false;
+  if (!event.end_time) return false;
+  if (!event.location) return false;
+  if (!event.max_attendees) return false;
+  if (!event.career) return false;
+  if (!event.exponent) return false;
+  if (!event.status) return false;
   return true;
 }
 
-// Intenta leer los archivos de certificado y clave
+function isActiveStatus(status) {
+  return (status || "").trim().toLowerCase() === "activo";
+}
+
+// ---- HTTPS (certs de mkcert) ----
+let cert, key;
 try {
   cert = fs.readFileSync("./localhost.pem", "utf8");
   key = fs.readFileSync("./localhost-key.pem", "utf8");
-
-  console.log("Successfully read cert and key files:");
-  console.log("Certificate:", cert.substring(0, 100) + "...");
-  console.log("Key:", key.substring(0, 100) + "...");
+  console.log("Cert y key leídos correctamente.");
 } catch (error) {
-  console.error("Failed to read cert or key files:", error);
+  console.error("No fue posible leer cert o key:", error);
 }
+const httpsOptions = { key, cert };
 
-// Rutas para tus certificados generados con mkcert
-const httpsOptions = {
-  key: key,
-  cert: cert,
-};
-
+// ---- Assets Svelte ----
 app.get("/build/bundle.css", (req, res) => {
-  const fullPath = path.join(__dirname, "svelte", "public", "build", "bundle.css");
-  //console.log("Full path to bundle: ", fullPath);
-  res.sendFile(fullPath);
+  res.sendFile(path.join(__dirname, "svelte", "public", "build", "bundle.css"));
 });
-
 app.get("/build/bundle.js", (req, res) => {
-  const fullPath = path.join(__dirname, "svelte", "public", "build", "bundle.js");
-  //console.log("Full path to bundle: ", fullPath);
-  res.sendFile(fullPath);
+  res.sendFile(path.join(__dirname, "svelte", "public", "build", "bundle.js"));
 });
-
 app.get("/global.css", (req, res) => {
-  const fullPath = path.join(__dirname, "svelte", "public", "global.css");
-  //console.log("Full path to bundle: ", fullPath);
-  res.sendFile(fullPath);
+  res.sendFile(path.join(__dirname, "svelte", "public", "global.css"));
 });
-
 app.get("/img/:imgid", (req, res) => {
-  const imgid = req.params.imgid;
-  const fullPath = path.join(__dirname, "svelte", "public", "img", `${imgid}`);
-  //console.log("Full path to bundle: ", fullPath);
-  res.sendFile(fullPath);
+  res.sendFile(
+    path.join(__dirname, "svelte", "public", "img", `${req.params.imgid}`)
+  );
 });
-
-//get images
-/*app.get("/img/:img_name", async (req, res) => {
-  const imgName = req.params.img_name;
-  const imgPath = path.join(__dirname, "svelte", "public", "img", imgName);
-  res.sendFile
-  (imgPath);
-
-});*/
-
 app.get("/build/qr-scanner-worker.min*.js", (req, res) => {
-  const fileName = req.path.split("/").pop(); // Obtiene el nombre del archivo desde la URL
-  const fullPath = path.join(__dirname, "svelte", "public", "build", fileName);
-  console.log("Full path to QR Scanner Worker: ", fullPath);
-  res.sendFile(fullPath);
+  const fileName = req.path.split("/").pop();
+  res.sendFile(path.join(__dirname, "svelte", "public", "build", fileName));
 });
 
-//get eventos from redis
+// ---- API de eventos ----
+
+// Públicos (solo Activo) — no muta arrays internos; expone attendees como count
 app.get("/api/eventos", async (req, res) => {
-  console.log("GET /api/eventos ...");
-  //ibtener json de redis
   try {
-    let allowedEvents = [];
-    const eventos = await redisClient.json.get(KEY_EVENTS);
-
-    eventos.forEach((evento) => {
-      if (!evento.attendees) {
-        evento.attendees = [];
-      }
-      //retornar unicamente el numero de asistentes por seguridad
-      evento.attendees = evento.attendees.length;
-      //si los eventos no estan activos no se muestran
-      console.log(evento.status);
-      if (evento.status === "Activo") {
-        allowedEvents.push(evento);
-      }
-    });
-
+    const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
+    const allowedEvents = eventos
+      .filter((e) => isActiveStatus(e.status))
+      .map((e) => ({
+        ...e,
+        attendees: Array.isArray(e.attendees) ? e.attendees.length : 0,
+      }));
     res.status(200).json(allowedEvents);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.get("/api/eventos_admin", async (req, res) => {
-  console.log("GET /api/eventos ...");
-  //ibtener json de redis
+// Admin (sin filtro)
+app.get("/api/eventos_admin", requireAdmin, async (req, res) => {
   try {
-    const eventos = await redisClient.json.get(KEY_EVENTS);
-
-    eventos.forEach((evento) => {
-      if (!evento.attendees) {
-        evento.attendees = [];
-      }
+    const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
+    eventos.forEach((ev) => {
+      if (!Array.isArray(ev.attendees)) ev.attendees = [];
+      if (!Array.isArray(ev.visits)) ev.visits = [];
     });
-
     res.status(200).json(eventos);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-
-// Agregar evento a Redis
-app.post("/api/evento", async (req, res) => {
-  console.log("POST /api/evento");
+// Crear evento
+app.post("/api/evento", requireAdmin, async (req, res) => {
   const evento = req.body;
   try {
-    console.log("Agregando evento:", evento);
     if (!isJsonEventCorrect(evento)) {
-      res.status(400).json({ error: "Cuerpo de evento inválido" });
-      return;
-    } else {
-      console.log("cuerpo valido");
+      return res.status(400).json({ error: "Cuerpo de evento inválido" });
     }
-    evento.id = uuidv4(); // Asegúrate de importar uuidv4 de 'uuid'
-    evento.visits = [];
+    evento.id = uuidv4();
+    if (!Array.isArray(evento.attendees)) evento.attendees = [];
+    if (!Array.isArray(evento.visits)) evento.visits = [];
+
     const exists = await redisClient.exists(KEY_EVENTS);
-
     if (!exists) {
-      await redisClient.json.set(KEY_EVENTS, "$", [evento]); // Guarda un nuevo array si no existe
+      await redisClient.json.set(KEY_EVENTS, "$", [evento]);
     } else {
-      await redisClient.json.arrAppend(KEY_EVENTS, "$", evento); // Añade al array existente
+      await redisClient.json.arrAppend(KEY_EVENTS, "$", evento);
     }
-
     res.status(200).send("Evento agregado correctamente");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-//update evento
-app.put("/api/evento", async (req, res) => {
-  console.log("PUT /api/evento");
+// Actualizar evento (merge)
+app.put("/api/evento", requireAdmin, async (req, res) => {
   const evento = req.body;
   try {
     if (!isJsonEventCorrect(evento)) {
-      res.status(400).json({ error: "Cuerpo de evento inválido" });
-      return;
+      return res.status(400).json({ error: "Cuerpo de evento inválido" });
     }
     const eventos = await redisClient.json.get(KEY_EVENTS);
     const index = eventos.findIndex((e) => e.id === evento.id);
-    if (index === -1) {
-      res.status(404).json({ error: "Evento no encontrado" });
-      return;
-    }
-    //Check if event.visits exists, create it if not
-    if (!eventos[index].visits) {
-      eventos[index].visits = [];
-    }
+    if (index === -1)
+      return res.status(404).json({ error: "Evento no encontrado" });
 
-    //actualizar evento sin borrar info previa
-    for (const key in evento) {
-      eventos[index][key] = evento[key];
-    }
+    if (!Array.isArray(eventos[index].visits)) eventos[index].visits = [];
+    if (!Array.isArray(eventos[index].attendees)) eventos[index].attendees = [];
+
+    Object.assign(eventos[index], evento);
 
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
     res.status(200).send("Evento actualizado correctamente");
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-//delete evento
-app.delete("/api/evento/:id", async (req, res) => {
-  console.log("DELETE /api/evento");
+// Eliminar evento
+app.delete("/api/evento/:id", requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
     const eventos = await redisClient.json.get(KEY_EVENTS);
     const index = eventos.findIndex((e) => e.id === id);
-    if (index === -1) {
-      res.status(404).json({ error: "Evento no encontrado" });
-      return;
-    }
+    if (index === -1)
+      return res.status(404).json({ error: "Evento no encontrado" });
+
     eventos.splice(index, 1);
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
     res.status(200).send("Evento eliminado correctamente");
@@ -441,87 +328,146 @@ app.delete("/api/evento/:id", async (req, res) => {
   }
 });
 
-// Inscribirse a eventos (idAsistente, idEvento)
-app.post("/api/evento/atendees/suscribe", async (req, res) => {
-  console.log("POST /api/evento/atendees/suscribe");
+// Construye un momento con fecha y hora, validando ambos formatos HH:mm y HH:mm:ss.
+function makeDateTime(dateStr, timeStr) {
+  // intenta con segundos y sin segundos
+  let m = moment(`${dateStr} ${timeStr}`, "YYYY-MM-DD HH:mm:ss", true);
+  if (!m.isValid())
+    m = moment(`${dateStr} ${timeStr}`, "YYYY-MM-DD HH:mm", true);
+  return m;
+}
+
+// Regla de traslape: [startA, endA) con [startB, endB)
+// Hay traslape si startA < endB y endA > startB
+function intervalsOverlap(startA, endA, startB, endB) {
+  return startA.isBefore(endB) && endA.isAfter(startB);
+}
+
+// ---- Inscripción / Desinscripción (nuevas rutas limpias) ----
+const MAX_ALLOWED_EVENTS = 5;
+
+async function handlerSubscribe(req, res) {
   const idEvento = req.body.event_id;
   const idAsistente = req.body.user_id;
 
   try {
-    await redisClient.watch(KEY_EVENTS); // Observar cambios en KEY_EVENTS
-
+    await redisClient.watch(KEY_EVENTS);
     const eventos = await redisClient.json.get(KEY_EVENTS);
     const index = eventos.findIndex((e) => e.id === idEvento);
     if (index === -1) {
-      redisClient.unwatch(); // Dejar de observar si no se encuentra el evento
-      res.status(404).json({ error: "Evento no encontrado" });
-      return;
+      await redisClient.unwatch();
+      return res.status(404).json({ error: "Evento no encontrado" });
     }
+
     const evento = eventos[index];
+    if (!Array.isArray(evento.attendees)) evento.attendees = [];
 
-    if (!evento.attendees) {
-      evento.attendees = [];
+    // Validar cupo del evento
+    const max = Number(evento.max_attendees ?? 0);
+    if (
+      evento.attendees.includes(idAsistente) ||
+      (max > 0 && evento.attendees.length >= max)
+    ) {
+      await redisClient.unwatch();
+      return res.status(400).json({ error: "No se puede inscribir al evento" });
     }
 
-    if (evento.attendees.includes(idAsistente) || evento.attendees.length >= evento.max_attendees) {
-      redisClient.unwatch(); // Dejar de observar si ya está inscrito o si no hay cupo
-      res.status(400).json({ error: "No se puede inscribir al evento" });
-      return;
-    }
-
-    evento.attendees.push(idAsistente);
-
-    const multi = redisClient.multi(); // Iniciar una transacción
-    multi.json.set(KEY_EVENTS, "$", eventos);
-    await multi.exec(); // Ejecutar la transacción
-
-    // Manejar la inscripción del asistente a sus eventos
+    // Traer eventos del asistente
     let attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
     let attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
+
+    // Límite máximo por usuario
+    if (attendee.events.length >= MAX_ALLOWED_EVENTS) {
+      await redisClient.unwatch();
+      return res
+        .status(400)
+        .json({ error: `Ya estás inscrito en ${MAX_ALLOWED_EVENTS} eventos.` });
+    }
+
+    // --- Validación de traslape de horarios ---
+    // Solo comparamos con eventos que existan todavía en la lista
+    const newStart = makeDateTime(evento.date, evento.start_time);
+    const newEnd = makeDateTime(evento.date, evento.end_time);
+
+    if (!newStart.isValid() || !newEnd.isValid() || !newEnd.isAfter(newStart)) {
+      await redisClient.unwatch();
+      return res
+        .status(400)
+        .json({ error: "Horario inválido para el evento nuevo." });
+    }
+
+    // Buscar conflictos con los eventos a los que ya está inscrito el usuario
+    const conflict = attendee.events
+      .map((evId) => eventos.find((e) => e.id === evId))
+      .filter(Boolean)
+      .find((e) => {
+        // Si la fecha es diferente, no hay conflicto
+        if ((e.date || "").trim() !== (evento.date || "").trim()) return false;
+
+        const s = makeDateTime(e.date, e.start_time);
+        const t = makeDateTime(e.date, e.end_time);
+        if (!s.isValid() || !t.isValid() || !t.isAfter(s)) return false;
+
+        return intervalsOverlap(newStart, newEnd, s, t);
+      });
+
+    if (conflict) {
+      await redisClient.unwatch();
+      return res.status(400).json({
+        error: "Conflicto de horario con otro evento inscrito.",
+        conflict_with: {
+          id: conflict.id,
+          name: conflict.name,
+          date: conflict.date,
+          start_time: conflict.start_time,
+          end_time: conflict.end_time,
+        },
+      });
+    }
+    // --- Fin validación de traslape ---
+
+    // Registrar inscripción (transacción)
+    evento.attendees.push(idAsistente);
+    const multi = redisClient.multi();
+    multi.json.set(KEY_EVENTS, "$", eventos);
+    await multi.exec();
+
     attendee.events.push(idEvento);
-    await redisClient.hSet(KEY_ATTENDEES, idAsistente, JSON.stringify(attendee));
+    await redisClient.hSet(
+      KEY_ATTENDEES,
+      idAsistente,
+      JSON.stringify(attendee)
+    );
 
     res.status(200).json({ message: "Inscrito correctamente", ok: true });
   } catch (error) {
     console.error("Error inscribiendo al evento:", error);
     res.status(500).json({ error: error.message });
   }
-});
+}
 
-
-//desinscribirse de un evento
-app.post("/api/evento/atendees/unsuscribe", async (req, res) => {
-  console.log("POST /api/evento/atendees/unsuscribe");
+async function handlerUnsubscribe(req, res) {
   const idEvento = req.body.event_id;
   const idAsistente = req.body.user_id;
 
   try {
     const eventos = await redisClient.json.get(KEY_EVENTS);
     const index = eventos.findIndex((e) => e.id === idEvento);
-    if (index === -1) {
-      res.status(404).json({ error: "Evento no encontrado" });
-      return;
-    }
+    if (index === -1)
+      return res.status(404).json({ error: "Evento no encontrado" });
+
     const evento = eventos[index];
+    if (!Array.isArray(evento.attendees)) evento.attendees = [];
 
-    if (!evento.attendees) {
-      evento.attendees = [];
-    }
-
-    // Verificar si el asistente ya está inscrito
     if (!evento.attendees.includes(idAsistente)) {
-      res.status(400).json({ error: "No estás inscrito a este evento" });
-      return;
+      return res.status(400).json({ error: "No estás inscrito a este evento" });
     }
 
-    // Eliminar asistente del evento
     evento.attendees = evento.attendees.filter((id) => id !== idAsistente);
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
 
-    // Manejar la inscripción del asistente a sus eventos
     let attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
     let attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
-
     attendee.events = attendee.events.filter((id) => id !== idEvento);
     await redisClient.hSet(
       KEY_ATTENDEES,
@@ -533,67 +479,64 @@ app.post("/api/evento/atendees/unsuscribe", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+}
 
-//obtener lista de eventos inscritos por usuario
-app.get("/api/evento/atendee/:id", async (req, res) => {
+// Rutas nuevas
+app.post("/api/evento/attendees/subscribe", handlerSubscribe);
+app.post("/api/evento/attendees/unsubscribe", handlerUnsubscribe);
+
+// Alias retro-compatibles (deprecados)
+app.post("/api/evento/atendees/suscribe", handlerSubscribe);
+app.post("/api/evento/atendees/unsuscribe", handlerUnsubscribe);
+
+// ---- Listar eventos por usuario ----
+async function handlerEventsByAttendee(req, res) {
   try {
-    console.log("GET /api/evento/atendee/:id");
     const idAsistente = req.params.id;
     const attendees = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
-    //console.log(attendees);
-    if (!attendees) {
-      res.status(404).json({ error: "Usuario no encontrado" });
-      return;
-    }
+    if (!attendees)
+      return res.status(404).json({ error: "Usuario no encontrado" });
     res.status(200).json(JSON.parse(attendees).events);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+}
 
-//refistrar visitas
+app.get("/api/evento/attendee/:id", handlerEventsByAttendee);
+// Alias retro-compatibles
+app.get("/api/evento/atendee/:id", handlerEventsByAttendee);
+
+// ---- Registrar visita ----
 app.post("/api/evento/visit", async (req, res) => {
-  console.log("POST /api/evento/visit");
   const idEvento = req.body.event_id;
   const idAsistente = req.body.user_id;
-
-  console.log("idEvento", idEvento);
-  console.log("idAsistente", idAsistente);
 
   try {
     const eventos = await redisClient.json.get(KEY_EVENTS);
     const index = eventos.findIndex((e) => e.id === idEvento);
-    if (index === -1) {
-      res.status(404).json({ error: "Evento no encontrado" });
-      return;
-    }
+    if (index === -1)
+      return res.status(404).json({ error: "Evento no encontrado" });
+
     const evento = eventos[index];
+    if (!Array.isArray(evento.visits)) evento.visits = [];
+    if (!Array.isArray(evento.attendees)) evento.attendees = [];
 
-    if (!evento.visits) {
-      evento.visits = [];
-    }
-
-    // Verificar si el asistente ya está inscrito
     if (evento.visits.includes(idAsistente)) {
-      res.status(400).json({
-        error: "Visita ya registrada para este evento de: " + idAsistente,
+      return res.status(400).json({
+        error: `Visita ya registrada para: ${idAsistente}`,
       });
-      return;
     }
-
-    // verificamos que el usuario esté inscrito al evento
     if (!evento.attendees.includes(idAsistente)) {
-      res.status(400).json({ error: "El usuario no está inscrito al evento" });
-      return;
+      return res.status(400).json({
+        error: `El usuario ${idAsistente} no está inscrito al evento`,
+      });
     }
 
-    // Añadir asistente al evento
     evento.visits.push(idAsistente);
     await redisClient.json.set(KEY_EVENTS, "$", eventos);
 
     res.status(200).json({
-      message: "Visita registrada correctamente para: " + idAsistente,
+      message: `Visita registrada correctamente para: ${idAsistente}`,
       ok: true,
     });
   } catch (error) {
@@ -601,74 +544,124 @@ app.post("/api/evento/visit", async (req, res) => {
   }
 });
 
-//csv de visitas
-
-app.get("/api/report/csv", async (req, res) => {
+// ---- Reporte CSV ----
+app.get("/api/report/csv", requireAdmin, async (req, res) => {
   try {
-      // Obtener todos los eventos
-      const eventos = await redisClient.json.get(KEY_EVENTS) || [];
-      let reportData = [];
+    const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
+    let reportData = [];
 
-      for (let evento of eventos) {
-          const eventName = evento.name;
-          const eventDate = evento.date;
-          const eventStartTime = evento.start_time;
-          const eventEndTime = evento.end_time;
+    for (let evento of eventos) {
+      const eventName = evento.name;
+      const eventDate = evento.date;
+      const eventStartTime = evento.start_time;
+      const eventEndTime = evento.end_time;
 
-          // Calcular la duración total del evento en horas
-          const duration = moment.duration(moment(eventEndTime, "HH:mm").diff(moment(eventStartTime, "HH:mm")));
-          const totalEventTime = duration.asHours(); // Duración en horas con decimal
+      const duration = moment.duration(
+        moment(eventEndTime, "HH:mm").diff(moment(eventStartTime, "HH:mm"))
+      );
+      const totalEventTime = duration.asHours();
 
-          // Asegurarse de que evento.attendees y evento.visits sean arreglos
-          const attendees = Array.isArray(evento.attendees) ? evento.attendees : [];
-          const visits = Array.isArray(evento.visits) ? evento.visits : [];
+      const attendees = Array.isArray(evento.attendees) ? evento.attendees : [];
+      const visits = Array.isArray(evento.visits) ? evento.visits : [];
 
-          // Obtener datos de asistentes
-          for (let attendeeId of attendees) {
-              try {
-                  const attendeeData = await redisClient.hGet(KEY_ATTENDEES, attendeeId);
-                  reportData.push({
-                      account_number: attendeeId,
-                      event_name: eventName,
-                      event_date: eventDate,
-                      event_time: eventStartTime,
-                      event_time_end: eventEndTime,
-                      total_event_time: totalEventTime.toFixed(2), // Formatear a dos decimales
-                      attended: visits.includes(attendeeId) ? 'Yes' : 'No'
-                  });
-              } catch (error) {
-                  console.log("Error en generación de reporte: " + error);
-                  console.log("Evento: " + eventName);
-                  console.log("Cuenta: " + attendeeId);
-              }
-          }
+      for (let attendeeId of attendees) {
+        try {
+          await redisClient.hGet(KEY_ATTENDEES, attendeeId); // se puede usar para enriquecer
+          reportData.push({
+            account_number: attendeeId,
+            event_name: eventName,
+            event_date: eventDate,
+            event_time: eventStartTime,
+            event_time_end: eventEndTime,
+            total_event_time: totalEventTime.toFixed(2),
+            attended: visits.includes(attendeeId) ? "Yes" : "No",
+          });
+        } catch (error) {
+          console.log("Error en generación de reporte: " + error);
+          console.log("Evento: " + eventName);
+          console.log("Cuenta: " + attendeeId);
+        }
       }
+    }
 
-      // Configuración para json2csv
-      const fields = ['account_number', 'event_name', 'event_date', 'event_time', 'event_time_end', 'total_event_time', 'attended'];
-      const json2csvParser = new Parser({ fields });
-      const csv = json2csvParser.parse(reportData);
+    const fields = [
+      "account_number",
+      "event_name",
+      "event_date",
+      "event_time",
+      "event_time_end",
+      "total_event_time",
+      "attended",
+    ];
+    const json2csvParser = new Parser({ fields });
+    const csv = json2csvParser.parse(reportData);
 
-      res.header('Content-Type', 'text/csv');
-      res.attachment('report.csv');
-      res.send(csv);
+    res.header("Content-Type", "text/csv");
+    res.attachment("report.csv");
+    res.send(csv);
   } catch (error) {
-      console.error("Failed to generate report:", error);
-      res.status(500).json({ error: "Failed to generate report" });
+    console.error("Failed to generate report:", error);
+    res.status(500).json({ error: "Failed to generate report" });
   }
 });
-// Asegúrate de que cualquier otra ruta no específica devuelva tu archivo HTML principal de Svelte
-// Rutas de API y otros manejadores específicos aquí
 
-// Luego al final, tu capturador para SPA
+// --- Manager login ---
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      const issued = await createAdminToken({ issuedFor: username });
+      if (!issued)
+        return res.status(500).json({ error: "No se pudo crear token" });
+      // Devuelve token y metadatos de expiración
+      return res.status(200).json({
+        message: "Login successful",
+        ok: true,
+        token: issued.token,
+        expiresIn: issued.expiresIn, // en segundos
+        expiresAt: issued.expiresAt, // epoch ms
+      });
+    } else {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Manager logout ---
+app.post("/api/admin/logout", async (req, res) => {
+  try {
+    const auth = req.headers["authorization"] || "";
+    const token = auth.startsWith("Bearer ")
+      ? auth.slice(7).trim()
+      : auth.trim();
+    if (!token) return res.status(400).json({ error: "Token requerido" });
+    await invalidateAdminToken(token);
+    res.status(200).json({ ok: true, message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/api/admin/ping", requireAdmin, async (req, res) => {
+  // Opcional: si quieres “sliding session”, aquí puedes refreshAdminToken(token)
+  return res.status(200).json({ ok: true });
+});
+
+// ---- 404 JSON para rutas API desconocidas ----
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "Unknown API route", path: req.originalUrl });
+});
+
+// ---- Catch-all para la SPA ----
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "svelte", "public", "index.html"));
 });
 
+// ---- Inicio del servidor ----
 https.createServer(httpsOptions, app).listen(APP_PORT, async () => {
   await connectRedis();
-  triggerBgSave();
-  //5 minutos
-  setInterval(triggerBgSave, 1000 * 60 * 1); // 5 minutos
-  console.log("HTTPS server running on port" + APP_PORT);
+  await verifyRedisKeys();
+  console.log("HTTPS server running on port " + APP_PORT);
 });
