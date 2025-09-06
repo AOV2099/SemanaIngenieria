@@ -143,19 +143,27 @@
   </nav>
 </div>
 
-<div id="main-container" style="paddding-top: 48px; padding-bottom: 48px; ">
+<div id="main-container" style="paddding-top: 48px;">
   <div
     class="row"
     style="
 overflow: auto; 
 overflow-x: hidden; 
 padding-top: 56px; 
+padding-bottom: 18px;
 line-height: 0.9; 
 height: 100%; 
-width: 100%;"
+padding-left: 16px;
+padding-right: 16px;
+"
   >
     {#each events as event, index}
-      <div class="col-sm-12 col-md-6 col-lg-6" style="margin-top: 16px;">
+      <div
+        class="col-sm-12 col-md-6 col-lg-6"
+        style="
+      margin-top: 16px; 
+      "
+      >
         <UserEventCard
           {event}
           color={colors[index % colors.length]}
@@ -243,6 +251,7 @@ width: 100%;"
   #main-container {
     height: 100vh;
     background-color: #212121;
+    overflow-y: hidden;
   }
 
   .transparent {

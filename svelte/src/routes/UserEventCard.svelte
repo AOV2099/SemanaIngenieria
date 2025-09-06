@@ -335,7 +335,6 @@ console.log("event", event);
 
   .main-card-container {
     border-radius: 12px;
-
     padding: 18px;
     position: relative; /* Esta línea es importante para que funcione el posicionamiento absoluto de la imagen */
   }
