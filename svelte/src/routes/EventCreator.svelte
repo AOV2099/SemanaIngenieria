@@ -8,8 +8,9 @@
   let events = [];
   let selectedEvent = {};
 
-  // Único modal (crear/editar)
+  // Únicos modales (crear/editar y asistentes)
   let eventModal;
+  let attendeesModal;
 
   // 🔎 buscador global
   let searchQuery = "";
@@ -91,6 +92,41 @@
     }
     return inst;
   }
+
+  // --- Cambiar entre modales ---
+  function openAttendeesModalFor(ev = selectedEvent) {
+    selectedEvent = { ...ev };
+    const editInst = getModalInstance(eventModal);
+    const attInst = getModalInstance(attendeesModal);
+    if (editInst) {
+      const onHidden = () => {
+        eventModal.removeEventListener("hidden.bs.modal", onHidden);
+        attInst?.show();
+      };
+      eventModal.addEventListener("hidden.bs.modal", onHidden, { once: true });
+      editInst.hide();
+    } else {
+      attInst?.show();
+    }
+  }
+
+  function backToEditorModal() {
+    const attInst = getModalInstance(attendeesModal);
+    const editInst = getModalInstance(eventModal);
+    if (attInst) {
+      const onHidden = () => {
+        attendeesModal.removeEventListener("hidden.bs.modal", onHidden);
+        editInst?.show();
+      };
+      attendeesModal.addEventListener("hidden.bs.modal", onHidden, {
+        once: true,
+      });
+      attInst.hide();
+    } else {
+      editInst?.show();
+    }
+  }
+
   // --- CSV: abrir picker + manejar selección ---
   function triggerCsvPicker() {
     csvInput?.click();
@@ -471,6 +507,13 @@
         hardResetBodyScroll
       );
     }
+    if (attendeesModal) {
+      attendeesModal.addEventListener("hidden.bs.modal", hardResetBodyScroll);
+      attendeesModal.addEventListener(
+        "hidePrevented.bs.modal",
+        hardResetBodyScroll
+      );
+    }
 
     if ("ResizeObserver" in window) {
       ro = new ResizeObserver(() => {
@@ -683,6 +726,7 @@
         <h5 class="modal-title" id="eventModalLabel">
           {selectedEvent?.id ? "Editar evento" : "Crear evento"}
         </h5>
+
         <button
           type="button"
           class="btn-close"
@@ -826,15 +870,30 @@
       </div>
       <div class="modal-footer">
         {#if selectedEvent.id}
-          <button class="btn btn-primary inline-btn" on:click={saveEvent}>
-            <i class="bi bi-save"></i><span>Guardar cambios</span>
-          </button>
-          <button
-            class="btn btn-secondary inline-btn"
-            on:click={closeEventModal}
-          >
-            <i class="bi bi-x-circle"></i><span>Cerrar</span>
-          </button>
+          <div class="justify-content-between w-100 d-flex">
+            <div>
+              <button
+                type="button"
+                class="btn btn-outline-primary me-2"
+                on:click={() => openAttendeesModalFor(selectedEvent)}
+                title="Ver inscritos y asistencias"
+              >
+                <i class="bi bi-people-check"></i> Asistencias
+              </button>
+            </div>
+
+            <div>
+              <button class="btn btn-primary inline-btn" on:click={saveEvent}>
+                <i class="bi bi-save"></i><span>Guardar cambios</span>
+              </button>
+              <button
+                class="btn btn-secondary inline-btn"
+                on:click={closeEventModal}
+              >
+                <i class="bi bi-x-circle"></i><span>Cerrar</span>
+              </button>
+            </div>
+          </div>
         {:else}
           <button class="btn btn-success inline-btn" on:click={saveEvent}>
             <i class="bi bi-check2-circle"></i><span>Crear</span>
@@ -846,6 +905,99 @@
             <i class="bi bi-x-circle"></i><span>Cancelar</span>
           </button>
         {/if}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: INSCRITOS / ASISTENCIAS -->
+<div
+  class="modal fade"
+  id="attendeesModal"
+  tabindex="-1"
+  aria-labelledby="attendeesModalLabel"
+  aria-hidden="true"
+  bind:this={attendeesModal}
+>
+  <div
+    class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+  >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="attendeesModalLabel">
+          Inscritos — {selectedEvent?.name || "Evento"}
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-info">
+            {selectedEvent?.attendees?.length || 0} inscritos
+          </span>
+          <span class="badge bg-success">
+            {selectedEvent?.visits?.length || 0} asistencias
+          </span>
+
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close"
+            on:click={() => getModalInstance(attendeesModal)?.hide()}
+          ></button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        {#if selectedEvent?.attendees && selectedEvent.attendees.length > 0}
+          <div class="table-responsive small">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width:56px;">#</th>
+                  <th>Número de cuenta / ID</th>
+                  <th style="width:160px;">Asistencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                {#each selectedEvent.attendees as acc, i}
+                  <tr>
+                    <td class="text-muted">{i + 1}</td>
+                    <td><code>{acc}</code></td>
+                    <td>
+                      {#if selectedEvent?.visits && selectedEvent.visits.includes(acc)}
+                        <span
+                          class="badge bg-success d-inline-flex align-items-center gap-1"
+                        >
+                          <i class="bi bi-check2-circle"></i> Asistió
+                        </span>
+                      {:else}
+                        <span
+                          class="badge bg-secondary d-inline-flex align-items-center gap-1"
+                        >
+                          <i class="bi bi-clock"></i> Pendiente
+                        </span>
+                      {/if}
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+        {:else}
+          <div class="text-muted">Aún no hay inscritos.</div>
+        {/if}
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-secondary inline-btn"
+          on:click={backToEditorModal}
+        >
+          <i class="bi bi-arrow-left"></i><span>Volver a edición</span>
+        </button>
+        <button
+          class="btn btn-outline-dark inline-btn"
+          on:click={() => getModalInstance(attendeesModal)?.hide()}
+        >
+          <i class="bi bi-x-circle"></i><span>Cerrar</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1026,5 +1178,12 @@
       rgba(255, 255, 255, 0.24),
       rgba(255, 255, 255, 0.12)
     );
+  }
+
+  /* toquecito para los IDs en la tabla */
+  .table code {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.25rem;
   }
 </style>
