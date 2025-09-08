@@ -893,6 +893,7 @@
                 <i class="bi bi-x-circle"></i><span>Cerrar</span>
               </button>
             </div>
+            
           </div>
         {:else}
           <button class="btn btn-success inline-btn" on:click={saveEvent}>
