@@ -1,26 +1,13 @@
 <script>
   import { onMount } from "svelte";
-  import UserEventCard from "./UserEventCard.svelte";
-  import { API_URL, userModalData } from "../store";
+  import qrCode from "qrcode";
+  import html2canvas from "html2canvas";
   import toast from "svelte-french-toast";
 
-  let events = [];
-  let suscribedEvents = [];
   let userId;
-  //lista de colores flat material
-  const colors = [
-    "#f44336",
-    "#e91e63",
-    "#9c27b0",
-    "#673ab7",
-    "#3f51b5",
-    "#2196f3",
-    "#03a9f4",
-    "#00bcd4",
-    "#009688",
-    "#4caf50",
-    "#8bc34a",
-  ];
+  let qrBase64 = "";
+  let captureArea;
+  let isExportingImage = false;
 
   //get user id from cookie
   function getUserId() {
@@ -44,51 +31,103 @@
     }
   }
 
-  //fetch events
-  async function getEvents() {
+  async function generateUserQr() {
     try {
-      const res = await fetch(`${API_URL}/api/eventos`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      if (!userId) return;
+      qrBase64 = await qrCode.toDataURL(String(userId), {
+        errorCorrectionLevel: "H",
+        type: "image/jpeg",
+        quality: 0.3,
+        margin: 1,
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
         },
       });
-      if (res.ok) {
-        const data = await res.json();
-        events = data;
-      } else {
-        throw new Error("Error en la solicitud");
-      }
     } catch (error) {
       console.log(error);
+      toast.error("No se pudo generar tu QR");
     }
   }
 
-  //get suscribed events
-  async function getSuscribedEvents() {
-    try {
-      const res = await fetch(`${API_URL}/api/evento/atendee/${userId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("res", res);
-      if (res.status === 200) {
-        const data = await res.json();
-        suscribedEvents = data;
-      } else {
-        toast.error(res.error.message);
-        throw new Error("Error en la solicitud");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  function downloadQrImage() {
+    if (!qrBase64 || !captureArea) return;
 
-  async function refreshEvents() {
-    await getEvents();
-    await getSuscribedEvents();
+    const run = async () => {
+      isExportingImage = true;
+      try {
+        const fileName = `credencial-asistencia-${userId || "usuario"}.jpg`;
+
+        const canvas = await html2canvas(captureArea, {
+          backgroundColor: "#212121",
+          useCORS: true,
+          scale: Math.min(3, window.devicePixelRatio || 2),
+          logging: false,
+        });
+
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("No se pudo crear imagen"))),
+            "image/jpeg",
+            0.95,
+          );
+        });
+
+        const file = new File([blob], fileName, { type: "image/jpeg" });
+
+        // iOS/Android moderno: compartir/guardar archivo desde hoja nativa
+        if (
+          navigator.share &&
+          navigator.canShare &&
+          navigator.canShare({ files: [file] })
+        ) {
+          await navigator.share({
+            files: [file],
+            title: "QR de asistencia",
+            text: "Guardar en Fotos",
+          });
+          return;
+        }
+
+        // Fallback web desktop/android
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Fallback Safari iPhone (a veces ignora download)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+          const w = window.open("");
+          if (w) {
+            w.document.write(`
+              <html><head><title>Guardar QR</title></head>
+              <body style="margin:0;display:flex;align-items:center;justify-content:center;background:#111;">
+                <img src="${dataUrl}" style="max-width:100%;height:auto;" alt="Credencial" />
+              </body></html>
+            `);
+            w.document.close();
+            toast("En iPhone: mantén presionada la imagen y elige 'Guardar en Fotos'", {
+              icon: "📷",
+            });
+          }
+        } else {
+          toast.success("QR descargado");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("No se pudo guardar el QR");
+      } finally {
+        isExportingImage = false;
+      }
+    };
+
+    run();
   }
 
   function logout() {
@@ -98,12 +137,7 @@
 
   onMount(async () => {
     getUserId();
-    await getSuscribedEvents();
-    await getEvents();
-
-    setInterval(async () => {
-      await refreshEvents();
-    }, 60000); //refresh every minute
+    await generateUserQr();
   });
 </script>
 
@@ -111,15 +145,7 @@
   <!--navbar-->
   <nav class="navbar navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-      <!-- svelte-ignore a11y-missing-attribute -->
-      <a
-        class="navbar-brand"
-        href="#"
-        on:click={() => {
-          //prevent default
-          event.preventDefault();
-        }}
-      >
+      <div class="navbar-brand">
         <img
           src="https://propiedadintelectual.unam.mx/assets/img/unamblanco.png"
           alt=""
@@ -127,8 +153,8 @@
           height="25"
           class="d-inline-block align-text-top"
         />
-        Semana de la ingenería 2025
-      </a>
+        TEST DE ASISTENCIA
+      </div>
       <button
         class="btn btn-secondary transparent"
         type="button"
@@ -143,105 +169,27 @@
   </nav>
 </div>
 
-<div id="main-container" style="paddding-top: 48px;">
-  <div
-    class="row"
-    style="
-overflow: auto; 
-overflow-x: hidden; 
-padding-top: 56px; 
-padding-bottom: 18px;
-line-height: 0.9; 
-height: 100%; 
-padding-left: 16px;
-padding-right: 16px;
-"
-  >
-    {#each events as event, index}
-      <div
-        class="col-sm-12 col-md-6 col-lg-6"
-        style="
-      margin-top: 16px; 
-      "
-      >
-        <UserEventCard
-          {event}
-          color={colors[index % colors.length]}
-          {userId}
-          isSuscribed={suscribedEvents.includes(event.id)}
-        />
-      </div>
-    {/each}
-  </div>
-</div>
+<div id="main-container" bind:this={captureArea}>
+  <div class="qr-wrapper">
+    <div class="qr-card shadow-lg">
+      <h5 class="mb-2">Tu código de asistencia</h5>
+      <p class="mb-3 text-muted">Número de cuenta: <strong>{userId}</strong></p>
 
-<!-- Modal -->
-<div
-  class="modal fade"
-  id="detail-modal"
-  tabindex="-1"
-  aria-labelledby="detail-modalLabel"
-  aria-hidden="true"
->
-  <div
-    class="modal-dialog modal-dialog modal-dialog-centered modal-dialog-scrollable"
-  >
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="detail-modalLabel">
-          {$userModalData.event.name}
-        </h1>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body">
-        <div class="">
-          <span class="badge bg-primary"
-            >{new Date($userModalData.event.date).toLocaleDateString("es-ES", {
-              weekday: "long",
-              timeZone: "UTC",
-            })}
-            {new Date($userModalData.event.date).toLocaleDateString("es-ES", {
-              day: "numeric",
-              timeZone: "UTC",
-            })} de {new Date($userModalData.event.date).toLocaleDateString(
-              "es-ES",
-              {
-                month: "long",
-                timeZone: "UTC",
-              }
-            )}</span
-          >
-          <span class="badge bg-success"
-            >{$userModalData.event.start_time} - {$userModalData.event.end_time}
-            hrs.</span
-          >
-          <span class="badge bg-secondary">{$userModalData.event.location}</span
-          >
+      {#if qrBase64}
+        <img class="qr-image" src={qrBase64} alt="QR de asistencia" />
 
-          <span class="badge bg-info"
-            >{$userModalData.event.attendees} / {$userModalData.event
-              .max_attendees}</span
-          >
-          <span class="badge bg-warning">{$userModalData.event.career}</span>
-
-          <span class="badge bg-danger">{$userModalData.event.exponent}</span>
+        <div class="d-grid gap-2 mt-3" data-html2canvas-ignore="true">
+          {#if !isExportingImage}
+            <button class="btn btn-dark" on:click={downloadQrImage}>
+              <i class="bi bi-download"></i> Descargar QR
+            </button>
+          {:else}
+            <div class="text-muted">Convirtiendo a imagen...</div>
+          {/if}
         </div>
-        <hr />
-
-        <div id="qr-container">
-          <img class="w-100" src={$userModalData.qrBase64} alt="QR" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-          >Cerrar</button
-        >
-      </div>
+      {:else}
+        <div class="text-muted">Generando QR...</div>
+      {/if}
     </div>
   </div>
 </div>
@@ -264,5 +212,28 @@ padding-right: 16px;
     background-color: transparent;
     border: none;
     color: white;
+  }
+
+  .qr-wrapper {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+  }
+
+  .qr-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    min-width: min(92vw, 420px);
+    text-align: center;
+  }
+
+  .qr-image {
+    width: min(70vw, 320px);
+    height: min(70vw, 320px);
+    object-fit: contain;
+    border-radius: 10px;
   }
 </style>

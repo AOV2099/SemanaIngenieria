@@ -19,6 +19,7 @@
   let csvInput;
 
   let token = "";
+  let attendanceToggleLoading = {};
 
   // --- utils cookies ---
   function deleteCookie(name) {
@@ -29,7 +30,7 @@
   async function logout() {
     try {
       // intenta cerrar sesión en el server
-      const res = await fetch(`${API_URL}/api/admin/logout`, {
+      const res = await fetch(`${$API_URL}/api/admin/logout`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -55,10 +56,10 @@
     const bs = typeof window !== "undefined" ? window.bootstrap : null;
     if (!bs || !bs.Modal) {
       console.error(
-        "Bootstrap Modal no está disponible (¿cargaste bootstrap.bundle.min.js?)"
+        "Bootstrap Modal no está disponible (¿cargaste bootstrap.bundle.min.js?)",
       );
       toast.error(
-        "No se encontró Bootstrap Modal. Carga bootstrap.bundle.min.js"
+        "No se encontró Bootstrap Modal. Carga bootstrap.bundle.min.js",
       );
       return null;
     }
@@ -218,7 +219,7 @@
           ev.max_attendees &&
           ev.career &&
           ev.exponent &&
-          ev.status
+          ev.status,
       );
 
       if (!valid.length) {
@@ -235,15 +236,15 @@
         const slice = valid.slice(i, i + chunk);
         const results = await Promise.allSettled(
           slice.map((body) =>
-            fetch(`${API_URL}/api/evento`, {
+            fetch(`${$API_URL}/api/evento`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
               body: JSON.stringify(body),
-            })
-          )
+            }),
+          ),
         );
         results.forEach((r) => {
           if (r.status === "fulfilled" && r.value.ok) created++;
@@ -256,7 +257,7 @@
       } else if (created > 0) {
         toast(
           (t) => `Importación parcial: ${created} creados, ${failed} con error`,
-          { icon: "⚠️" }
+          { icon: "⚠️" },
         );
       } else {
         toast.error("No se pudo crear ningún evento");
@@ -303,8 +304,10 @@
 
   // --- API eventos ---
   async function fetchEvents() {
+    console.log("obteniendo eventos");
+
     try {
-      const res = await fetch(`${API_URL}/api/eventos_admin`, {
+      const res = await fetch(`${$API_URL}/api/eventos_admin`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -314,9 +317,17 @@
       if (res.ok) {
         const data = await res.json();
         data.forEach((event) => {
-          if (!Array.isArray(event.attendees)) event.attendees = [];
-          if (!Array.isArray(event.visits)) event.visits = [];
-          event.attendees_num = event.attendees.length;
+          if (event.is_subject) {
+            if (!Array.isArray(event.suscribed)) event.suscribed = [];
+            if (!event.attendance || typeof event.attendance !== "object") {
+              event.attendance = {};
+            }
+            event.attendees_num = event.suscribed.length;
+          } else {
+            if (!Array.isArray(event.attendees)) event.attendees = [];
+            if (!Array.isArray(event.visits)) event.visits = [];
+            event.attendees_num = event.attendees.length;
+          }
           if (
             !$availableCareers.find((career) => career.name === event.career)
           ) {
@@ -343,13 +354,13 @@
   }
 
   async function saveEvent() {
-    if (!selectedEvent.name || !selectedEvent.date) {
+    if (!selectedEvent.name || (!selectedEvent.date && !selectedEvent.is_subject )) {
       toast.error("Nombre y fecha son obligatorios");
       return;
     }
     if (selectedEvent.id) {
       try {
-        const res = await fetch(`${API_URL}/api/evento`, {
+        const res = await fetch(`${$API_URL}/api/evento`, {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -370,7 +381,7 @@
         // El server asigna id internamente; no mandes id aquí
         const body = { ...selectedEvent };
         delete body.id;
-        const res = await fetch(`${API_URL}/api/evento`, {
+        const res = await fetch(`${$API_URL}/api/evento`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -398,7 +409,7 @@
     e?.stopPropagation?.();
     if (!confirm(`¿Eliminar el evento "${ev.name}"?`)) return;
     try {
-      const res = await fetch(`${API_URL}/api/evento/${ev.id}`, {
+      const res = await fetch(`${$API_URL}/api/evento/${ev.id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -423,7 +434,7 @@
         ...event,
         status: event.status === "Activo" ? "Inactivo" : "Activo",
       };
-      const res = await fetch(`${API_URL}/api/evento`, {
+      const res = await fetch(`${$API_URL}/api/evento`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -443,6 +454,7 @@
   function startNewEvent() {
     selectedEvent = {
       // id lo pone el server al crear
+      is_subject: false,
       name: "",
       date: "",
       start_time: "",
@@ -476,6 +488,19 @@
     reader.readAsDataURL(file);
   }
 
+  function displayDate(dateValue) {
+    if (!dateValue) return "Sin fecha asignada";
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return "Sin fecha asignada";
+    return dateValue;
+  }
+
+  function displayTime(timeValue) {
+    const t = (timeValue || "").trim();
+    if (!t) return "Sin hora asignada";
+    return t;
+  }
+
   // --- Clipping robusto ---
   let ro; // ResizeObserver
   function ensureCardClipping() {
@@ -492,26 +517,28 @@
   }
 
   onMount(async () => {
-    const tk = await requireAdminOrRedirect(API_URL, navigate, toast);
+    const tk = await requireAdminOrRedirect($API_URL, navigate, toast);
     if (!tk) return; // ⬅️ importante: corta aquí si no hay sesión válida
     token = tk;
 
     // limpia estado de scroll por si quedó colgado
     hardResetBodyScroll();
 
+    await fetchEvents();
+
     await tick();
     if (eventModal) {
       eventModal.addEventListener("hidden.bs.modal", hardResetBodyScroll);
       eventModal.addEventListener(
         "hidePrevented.bs.modal",
-        hardResetBodyScroll
+        hardResetBodyScroll,
       );
     }
     if (attendeesModal) {
       attendeesModal.addEventListener("hidden.bs.modal", hardResetBodyScroll);
       attendeesModal.addEventListener(
         "hidePrevented.bs.modal",
-        hardResetBodyScroll
+        hardResetBodyScroll,
       );
     }
 
@@ -525,7 +552,6 @@
       });
     }
 
-    fetchEvents();
     window.addEventListener("resize", ensureCardClipping);
   });
 
@@ -547,6 +573,119 @@
       (ev.exponent || "").toLowerCase().includes(q)
     );
   });
+
+  // --- Helpers de asistencias en materias ---
+  function normalizeSubjectSuscribed(subject) {
+    const list = Array.isArray(subject?.suscribed) ? subject.suscribed : [];
+    return list
+      .map((item) => {
+        if (item && typeof item === "object") {
+          return {
+            id: String(item.id || "").trim(),
+            name: String(item.name || "").trim() || "Sin nombre",
+          };
+        }
+        const id = String(item || "").trim();
+        return { id, name: "Sin nombre" };
+      })
+      .filter((x) => x.id);
+  }
+
+  function getSubjectAttendanceDates(subject) {
+    const attendance =
+      subject?.attendance && typeof subject.attendance === "object"
+        ? subject.attendance
+        : {};
+    return Object.keys(attendance).sort();
+  }
+
+  function isSubjectPresentOnDate(subject, studentId, date) {
+    const attendance =
+      subject?.attendance && typeof subject.attendance === "object"
+        ? subject.attendance
+        : {};
+    const ids = Array.isArray(attendance[date]) ? attendance[date] : [];
+    return ids.map((x) => String(x)).includes(String(studentId));
+  }
+
+  function getSubjectAttendanceTotal(subject) {
+    const dates = getSubjectAttendanceDates(subject);
+    return dates.reduce((acc, date) => {
+      const ids = Array.isArray(subject?.attendance?.[date])
+        ? subject.attendance[date]
+        : [];
+      return acc + ids.length;
+    }, 0);
+  }
+
+  function attendanceCellKey(studentId, date) {
+    return `${String(studentId)}__${String(date)}`;
+  }
+
+  function isAttendanceCellLoading(studentId, date) {
+    return !!attendanceToggleLoading[attendanceCellKey(studentId, date)];
+  }
+
+  async function toggleSubjectAttendance(studentId, date) {
+    if (!selectedEvent?.id || !selectedEvent?.is_subject) return;
+
+    const key = attendanceCellKey(studentId, date);
+    attendanceToggleLoading = { ...attendanceToggleLoading, [key]: true };
+
+    try {
+      const res = await fetch(`${$API_URL}/api/evento/subject/attendance`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          event_id: selectedEvent.id,
+          user_id: String(studentId),
+          date,
+        }),
+      });
+
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(result?.error || "No se pudo actualizar asistencia");
+      }
+
+      const attendance =
+        selectedEvent?.attendance && typeof selectedEvent.attendance === "object"
+          ? { ...selectedEvent.attendance }
+          : {};
+
+      const day = Array.isArray(attendance[date])
+        ? attendance[date].map((x) => String(x))
+        : [];
+
+      const uid = String(studentId);
+      let nextDay = day;
+
+      if (result.present) {
+        if (!day.includes(uid)) nextDay = [...day, uid];
+      } else {
+        nextDay = day.filter((x) => x !== uid);
+      }
+
+      if (nextDay.length > 0) attendance[date] = nextDay;
+      else delete attendance[date];
+
+      selectedEvent = {
+        ...selectedEvent,
+        attendance,
+      };
+
+      toast.success(result.message || "Asistencia actualizada");
+    } catch (error) {
+      toast.error(error.message || "No se pudo actualizar asistencia");
+    } finally {
+      const next = { ...attendanceToggleLoading };
+      delete next[key];
+      attendanceToggleLoading = next;
+    }
+  }
 </script>
 
 <!-- NAVBAR PRINCIPAL -->
@@ -562,8 +701,8 @@
       Administrador de Eventos
     </a>
 
-    <div class="d-flex align-items-center gap-2">
-      <div class="input-group input-group-sm" style="min-width: 260px;">
+    <div class="d-flex align-items-center gap-2 admin-toolbar">
+      <div class="input-group input-group-sm admin-search-wrap">
         <span class="input-group-text bg-secondary text-white border-0"
           ><i class="bi bi-search"></i></span
         >
@@ -615,7 +754,7 @@
   </div>
 </nav>
 
-<div class="container" style="margin-top: 92px">
+<div class="container admin-content">
   <!-- ✅ Una sola row, sin row anidada -->
   <div class="row">
     {#each filteredEvents as event}
@@ -627,7 +766,7 @@
         <div
           class="main-card-container shadow h-100"
           style="background-color: {$availableCareers.find(
-            (c) => c.name == event.career
+            (c) => c.name == event.career,
           ).color}"
         >
           <!-- NAVBAR DE CARD: SOLO BOTONES (mac-like) -->
@@ -682,10 +821,10 @@
           <!-- CONTENIDO -->
           <div class="content">
             <div class="d-flex justify-content-between flex-wrap gap-2">
-              <div class="info-box">{event.date}</div>
+              <div class="info-box">{displayDate(event.date)}</div>
               <div class="d-flex gap-2">
-                <div class="info-box">{event.start_time}</div>
-                <div class="info-box">{event.end_time}</div>
+                <div class="info-box">{displayTime(event.start_time)}</div>
+                <div class="info-box">{displayTime(event.end_time)}</div>
               </div>
             </div>
 
@@ -737,6 +876,28 @@
       <div class="modal-body">
         <div class="row g-3">
           <div class="col-12">
+            <label class="form-label">Es materia </label>
+            <!--checkbox-->
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="isMateriaSwitch"
+                bind:checked={selectedEvent.is_subject}
+                disabled={!!selectedEvent.id}
+              />
+              <label class="form-check-label" for="isMateriaSwitch">
+                {selectedEvent.is_subject ? "Sí" : "No"}
+              </label>
+            </div>
+            {#if selectedEvent.id}
+              <small class="text-muted">
+                El tipo de evento solo se puede definir al crear.
+              </small>
+            {/if}
+          </div>
+
+          <div class="col-12">
             <label class="form-label">Nombre del evento</label>
             <div class="input-group">
               <span class="input-group-text"
@@ -750,43 +911,48 @@
               />
             </div>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Fecha</label>
-            <div class="input-group">
-              <span class="input-group-text"
-                ><i class="bi bi-calendar-event"></i></span
-              >
-              <input
-                bind:value={selectedEvent.date}
-                type="date"
-                class="form-control"
-              />
+          <!-- ocultar en caso de ser materia -->
+
+          {#if !selectedEvent.is_subject}
+            <div class="col-md-6">
+              <label class="form-label">Fecha</label>
+              <div class="input-group">
+                <span class="input-group-text"
+                  ><i class="bi bi-calendar-event"></i></span
+                >
+                <input
+                  bind:value={selectedEvent.date}
+                  type="date"
+                  class="form-control"
+                />
+              </div>
             </div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Hora de inicio</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-clock"></i></span>
-              <input
-                bind:value={selectedEvent.start_time}
-                type="time"
-                class="form-control"
-              />
+            <div class="col-md-6">
+              <label class="form-label">Hora de inicio</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-clock"></i></span
+                >
+                <input
+                  bind:value={selectedEvent.start_time}
+                  type="time"
+                  class="form-control"
+                />
+              </div>
             </div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Hora de fin</label>
-            <div class="input-group">
-              <span class="input-group-text"
-                ><i class="bi bi-clock-history"></i></span
-              >
-              <input
-                bind:value={selectedEvent.end_time}
-                type="time"
-                class="form-control"
-              />
+            <div class="col-md-6">
+              <label class="form-label">Hora de fin</label>
+              <div class="input-group">
+                <span class="input-group-text"
+                  ><i class="bi bi-clock-history"></i></span
+                >
+                <input
+                  bind:value={selectedEvent.end_time}
+                  type="time"
+                  class="form-control"
+                />
+              </div>
             </div>
-          </div>
+          {/if}
           <div class="col-md-6">
             <label class="form-label">Lugar</label>
             <div class="input-group">
@@ -893,7 +1059,6 @@
                 <i class="bi bi-x-circle"></i><span>Cerrar</span>
               </button>
             </div>
-            
           </div>
         {:else}
           <button class="btn btn-success inline-btn" on:click={saveEvent}>
@@ -930,10 +1095,16 @@
         </h5>
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-info">
-            {selectedEvent?.attendees?.length || 0} inscritos
+            {selectedEvent?.is_subject
+              ? normalizeSubjectSuscribed(selectedEvent).length
+              : selectedEvent?.attendees?.length || 0}
+            inscritos
           </span>
           <span class="badge bg-success">
-            {selectedEvent?.visits?.length || 0} asistencias
+            {selectedEvent?.is_subject
+              ? getSubjectAttendanceTotal(selectedEvent)
+              : selectedEvent?.visits?.length || 0}
+            asistencias
           </span>
 
           <button
@@ -946,7 +1117,80 @@
       </div>
 
       <div class="modal-body">
-        {#if selectedEvent?.attendees && selectedEvent.attendees.length > 0}
+        {#if selectedEvent?.is_subject}
+          {@const subjectRows = normalizeSubjectSuscribed(selectedEvent)}
+          {@const subjectDates = getSubjectAttendanceDates(selectedEvent)}
+
+          {#if subjectRows.length > 0}
+            <div class="table-responsive small">
+              <table class="table table-sm table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th style="width:56px;">#</th>
+                    <th style="min-width: 220px;">Alumno</th>
+                    {#if subjectDates.length > 0}
+                      {#each subjectDates as dt}
+                        <th class="text-center" style="min-width: 130px;">{dt}</th>
+                      {/each}
+                    {:else}
+                      <th class="text-muted">Sin días con asistencias aún</th>
+                    {/if}
+                  </tr>
+                </thead>
+                <tbody>
+                  {#each subjectRows as student, i}
+                    <tr>
+                      <td class="text-muted">{i + 1}</td>
+                      <td>
+                        <div class="fw-semibold">{student.name}</div>
+                        <code>{student.id}</code>
+                      </td>
+
+                      {#if subjectDates.length > 0}
+                        {#each subjectDates as dt}
+                          <td class="text-center">
+                            {#if isAttendanceCellLoading(student.id, dt)}
+                              <button class="btn btn-sm btn-outline-secondary" disabled>
+                                Actualizando...
+                              </button>
+                            {:else}
+                              <button
+                                class="btn btn-sm attendance-toggle-btn"
+                                class:btn-success={isSubjectPresentOnDate(
+                                  selectedEvent,
+                                  student.id,
+                                  dt,
+                                )}
+                                class:btn-outline-secondary={!isSubjectPresentOnDate(
+                                  selectedEvent,
+                                  student.id,
+                                  dt,
+                                )}
+                                on:click={() =>
+                                  toggleSubjectAttendance(student.id, dt)}
+                                title="Marcar / desmarcar asistencia"
+                              >
+                                {#if isSubjectPresentOnDate(selectedEvent, student.id, dt)}
+                                  <i class="bi bi-check2-circle"></i> Asistió
+                                {:else}
+                                  <i class="bi bi-dash-circle"></i> Pendiente
+                                {/if}
+                              </button>
+                            {/if}
+                          </td>
+                        {/each}
+                      {:else}
+                        <td class="text-muted">Sin registros</td>
+                      {/if}
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            </div>
+          {:else}
+            <div class="text-muted">Aún no hay alumnos en suscribed.</div>
+          {/if}
+        {:else if selectedEvent?.attendees && selectedEvent.attendees.length > 0}
           <div class="table-responsive small">
             <table class="table table-sm table-hover align-middle mb-0">
               <thead>
@@ -1013,6 +1257,19 @@
     border-radius: 12px;
   }
 
+  .admin-content {
+    margin-top: 92px;
+  }
+
+  .admin-toolbar {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .admin-search-wrap {
+    min-width: 260px;
+  }
+
   .main-card-container {
     border-radius: 12px;
     padding: 18px 18px 16px;
@@ -1038,6 +1295,54 @@
     align-items: center;
     gap: 0.4rem;
     white-space: nowrap;
+  }
+
+  @media (max-width: 992px) {
+    :global(.navbar.fixed-top .container-fluid) {
+      row-gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    .admin-toolbar {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .admin-search-wrap {
+      width: 100%;
+      min-width: 0;
+      order: 1;
+    }
+
+    .admin-toolbar .inline-btn {
+      order: 2;
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+
+    .admin-content {
+      margin-top: 150px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .navbar-brand {
+      font-size: 0.95rem;
+    }
+
+    .navbar-brand img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .admin-toolbar .inline-btn {
+      flex: 1 1 calc(50% - 0.4rem);
+      min-height: 36px;
+    }
+
+    .admin-content {
+      margin-top: 170px;
+    }
   }
 
   /* Evita "salto" de navbar fija cuando body recibe padding-right */
@@ -1186,5 +1491,9 @@
     background: rgba(0, 0, 0, 0.04);
     padding: 0.15rem 0.35rem;
     border-radius: 0.25rem;
+  }
+
+  .attendance-toggle-btn {
+    min-width: 110px;
   }
 </style>

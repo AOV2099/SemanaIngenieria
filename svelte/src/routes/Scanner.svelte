@@ -11,6 +11,9 @@
   let cameras = [];
   let currentCameraIndex = 0;
   let currentCameraLabel = "";
+  let scannerEvents = [];
+  let selectedEventId = "";
+  let selectedEventType = 0;
 
   let lastAlertTime = 0;
 
@@ -43,6 +46,55 @@
     centerAlert({ icon: "error", title: "", text: msg });
   const centerWarn = (msg) =>
     centerAlert({ icon: "warning", title: "", text: msg });
+
+  function formatEventDate(dateValue) {
+    if (!dateValue) return "sin fecha asignada";
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return "sin fecha asignada";
+    return d.toLocaleDateString("es-ES", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+  }
+
+  function formatEventTime(startTime, endTime) {
+    const start = (startTime || "").trim();
+    const end = (endTime || "").trim();
+    if (!start || !end) return "sin hora asignada";
+    return `${start} - ${end}`;
+  }
+
+  async function loadScannerEvents() {
+    try {
+      const res = await fetch(`${$API_URL}/api/eventos`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) throw new Error("No se pudieron obtener eventos");
+
+      const data = await res.json();
+      scannerEvents = Array.isArray(data) ? data : [];
+
+      if (scannerEvents.length > 0 && !selectedEventId) {
+        selectedEventId = scannerEvents[0].id;
+        selectedEventType = scannerEvents[0].is_subject ? 1 : 0;
+      }
+    } catch (error) {
+      console.error(error);
+      centerError("No se pudieron cargar eventos para escaneo");
+    }
+  }
+
+  function handleEventChange(event) {
+    const selectedId = event.target.value;
+    selectedEventId = selectedId;
+    const selected = scannerEvents.find((ev) => ev.id === selectedId);
+    selectedEventType = selected?.is_subject ? 1 : 0;
+  }
 
   // --- Funciones de cámara/escáner ---
   function selectCamera(cameraId) {
@@ -103,21 +155,32 @@
   // --- Registrar visita ---
   async function registerVisit(qrReading) {
     try {
-      let userId = -1;
-      let eventId = "";
-      const parts = (qrReading || "").split("-");
+      if (!selectedEventId) {
+        return centerWarn("Selecciona un evento o materia antes de escanear");
+      }
 
-      if (parts.length < 2) {
+      const raw = (qrReading || "").trim();
+      if (!raw) {
         return centerError("QR inválido");
       }
 
-      userId = parts[0];
-      eventId = parts.slice(1).join("-");
+      // Nuevo paradigma: el QR del alumno solo contiene su número de cuenta.
+      // Compatibilidad opcional con QR antiguo: si trae guiones, usamos solo el primer bloque.
+      const userId = raw.includes("-") ? raw.split("-")[0].trim() : raw;
 
-      const res = await fetch(`${API_URL}/api/evento/visit`, {
+      if (!userId) {
+        return centerError("QR inválido");
+      }
+
+      const res = await fetch(`${$API_URL}/api/evento/visit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, event_id: eventId }),
+        body: JSON.stringify({
+          user_id: userId,
+          event_id: selectedEventId,
+          qr_type: selectedEventType,
+          attendance_date: new Date().toISOString().slice(0, 10),
+        }),
       });
 
       const result = await res.json();
@@ -133,6 +196,8 @@
   }
 
   onMount(() => {
+    loadScannerEvents();
+
     QrScanner.listCameras(true)
       .then((foundCameras) => {
         cameras = foundCameras;
@@ -156,7 +221,7 @@
 
 <nav class="navbar navbar-dark bg-primary shadow-lg">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">
+    <div class="navbar-brand">
       <img
         src="https://propiedadintelectual.unam.mx/assets/img/unamblanco.png"
         alt=""
@@ -164,9 +229,27 @@
         height="24"
         class="d-inline-block align-text-top"
       />
-      Semana de la ingeniería
-    </a>
-    <form class="d-flex">
+      ASISTENNCIA
+    </div>
+
+    <div class="d-flex align-items-center gap-2 scanner-controls">
+      <select
+        class="form-select form-select-sm"
+        style="min-width: 380px;"
+        bind:value={selectedEventId}
+        on:change={handleEventChange}
+      >
+        {#if scannerEvents.length === 0}
+          <option value="">Sin eventos disponibles</option>
+        {:else}
+          {#each scannerEvents as ev}
+            <option value={ev.id}>
+              <!--{(ev.is_subject ? "[MATERIA]" : "[EVENTO]")} {ev.name} — {formatEventDate(ev.date)} — {formatEventTime(ev.start_time, ev.end_time)}-->
+            {ev.name} 
+          {/each}
+        {/if}
+      </select>
+
       <button
         class="btn btn-secondary"
         type="button"
@@ -177,13 +260,15 @@
       >
         <i class="bi bi-camera-video-fill"></i>
       </button>
-    </form>
+    </div>
   </div>
 </nav>
 
 <div class="d-flex justify-content-center align-items-center">
   <div class="video-container shadow-lg">
-    <video bind:this={videoElement} playsinline></video>
+    <video bind:this={videoElement} playsinline>
+      <track kind="captions" />
+    </video>
   </div>
 </div>
 
@@ -206,9 +291,18 @@
           {#each cameras as camera}
             <div
               class="card mb-3 shadow-sm camera-card"
+              role="button"
+              tabindex="0"
               on:click={() => {
                 selectCamera(camera.id);
                 document.getElementById("cameraModal").click();
+              }}
+              on:keydown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  selectCamera(camera.id);
+                  document.getElementById("cameraModal").click();
+                }
               }}
             >
               <div class="row g-0">

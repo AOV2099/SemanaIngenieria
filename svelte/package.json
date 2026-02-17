@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
+    "html2canvas": "^1.4.1",
     "html5-qrcode": "^2.3.8",
     "instascan": "^1.0.0",
     "qr-scanner": "^1.4.2",

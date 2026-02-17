@@ -47,22 +47,38 @@
   export let isSuscribed = false;
 console.log("event", event);
 
-  const nombreDia = new Date(event.date).toLocaleDateString("es-ES", {
-    weekday: "long",
-    timeZone: "UTC",
-  });
-  const numeroDia = new Date(event.date).toLocaleDateString("es-ES", {
-    day: "numeric",
-    timeZone: "UTC",
-  });
+  function formatEventDate(dateValue) {
+    if (!dateValue) return "Sin fecha asignada";
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return "Sin fecha asignada";
 
-  const nombreMes = new Date(event.date).toLocaleDateString("es-ES", {
-    month: "long",
-    timeZone: "UTC",
-  });
+    const nombreDia = d.toLocaleDateString("es-ES", {
+      weekday: "long",
+      timeZone: "UTC",
+    });
+    const numeroDia = d.toLocaleDateString("es-ES", {
+      day: "numeric",
+      timeZone: "UTC",
+    });
+    const nombreMes = d.toLocaleDateString("es-ES", {
+      month: "long",
+      timeZone: "UTC",
+    });
+
+    return `${nombreDia.toUpperCase()} ${numeroDia.toUpperCase()} DE ${nombreMes.toUpperCase()}`;
+  }
+
+  function formatEventTimeRange(startTime, endTime) {
+    const start = (startTime || "").trim();
+    const end = (endTime || "").trim();
+    if (!start || !end) return "Sin hora asignada";
+    return `${start} - ${end} hrs.`;
+  }
 
   async function generateQR() {
-    const qr = await qrCode.toDataURL(userId + "-" + event.id, {
+    const eventTypeFlag = event.is_subject ? 1 : 0;
+    const qrPayload = `${userId}-${event.id}-${eventTypeFlag}`;
+    const qr = await qrCode.toDataURL(qrPayload, {
       errorCorrectionLevel: "H",
       type: "image/jpeg",
       quality: 0.3,
@@ -103,7 +119,7 @@ console.log("event", event);
 
   async function incribirEvento() {
     try {
-      const res = await fetch(`${API_URL}/api/evento/atendees/suscribe`, {
+      const res = await fetch(`${$API_URL}/api/evento/atendees/suscribe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,6 +127,7 @@ console.log("event", event);
         body: JSON.stringify({
           event_id: event.id,
           user_id: userId,
+          is_subject: event.is_subject || false,
         }),
       });
       let response = await res.json();
@@ -138,7 +155,7 @@ console.log("event", event);
 
   async function unsuscribeEvent() {
     try {
-      const res = await fetch(`${API_URL}/api/evento/atendees/unsuscribe`, {
+      const res = await fetch(`${$API_URL}/api/evento/atendees/unsuscribe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -216,12 +233,11 @@ console.log("event", event);
     <!--fecha de evento-->
     <div class="d-flex justify-content-between">
       <div class="info-box">
-        {nombreDia.toUpperCase()}
-        {numeroDia.toUpperCase()}
+        {formatEventDate(event.date)}
       </div>
 
       <div class="info-box">
-        {event.start_time} - {event.end_time} hrs.
+        {formatEventTimeRange(event.start_time, event.end_time)}
       </div>
     </div>
 

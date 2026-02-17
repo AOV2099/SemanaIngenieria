@@ -18,6 +18,12 @@ const APP_MODE = process.env.APP_MODE || "0";
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASS = process.env.ADMIN_PASS || "password";
 
+// Wallet links opcionales (usar {{ACCOUNT_ID}} como placeholder)
+const APPLE_WALLET_PASS_URL_TEMPLATE =
+  process.env.APPLE_WALLET_PASS_URL_TEMPLATE || "";
+const GOOGLE_WALLET_SAVE_URL_TEMPLATE =
+  process.env.GOOGLE_WALLET_SAVE_URL_TEMPLATE || "";
+
 console.log("APP MODE", APP_MODE);
 console.log("APP PORT", APP_PORT);
 console.log("REDIS HOST", REDIS_HOST);
@@ -27,6 +33,8 @@ console.log("REDIS PORT", REDIS_PORT);
 const KEY_EVENTS = "si:eventos";
 const KEY_ATTENDEES = "si:alumnos";
 const KEY_ADMIN_TOKENS = "si:tokens";
+const KEY_MATERIAS = "si:materias";
+const KEY_PROFESORES = "si:profesores";
 const ADMIN_TOKEN_TTL_SECONDS = 8 * 60 * 60; // 8 horas = 28800 segundos
 
 // ---- App ----
@@ -38,7 +46,7 @@ app.use(
     origin: "*",
     methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH", "OPTIONS"],
     credentials: true,
-  })
+  }),
 );
 
 // --- Crear admin token (con expiración automática) ---
@@ -130,7 +138,7 @@ redisClient.on("end", () => {
   }
 });
 redisClient.on("ready", () =>
-  console.log("Redis listo para aceptar conexiones.")
+  console.log("Redis listo para aceptar conexiones."),
 );
 redisClient.on("connect", () => {
   console.log(`Redis conectado: ${REDIS_HOST}:${REDIS_PORT}`);
@@ -150,8 +158,10 @@ async function verifyRedisKeys() {
   try {
     const eventsExists = await redisClient.exists(KEY_EVENTS);
     const attendeesExists = await redisClient.exists(KEY_ATTENDEES);
+    const materiasExists = await redisClient.exists(KEY_MATERIAS);
+    const profesoresExists = await redisClient.exists(KEY_PROFESORES);
 
-    if (eventsExists && attendeesExists) {
+    if (eventsExists && attendeesExists && materiasExists) {
       console.log("Las claves existen.");
       return;
     }
@@ -171,14 +181,46 @@ async function verifyRedisKeys() {
       attendees: [],
       visits: [],
     };
+
+    //crear clave de eventos con un evento de prueba para evitar errores en la app
     await redisClient.json.set(KEY_EVENTS, "$", [testEvent]);
     console.log("Clave de eventos creada con un evento de prueba.");
 
+    //crear clave de asistentes vacía
     await redisClient.hSet(
       KEY_ATTENDEES,
       "init",
-      JSON.stringify({ events: [] })
+      JSON.stringify({ events: [] }),
     );
+
+    //crear clave de materias vacía (hset con campo dummy para evitar que se borre la clave)
+    await redisClient.hSet(
+      KEY_MATERIAS,
+      "init",
+      JSON.stringify({
+        name: "Materia de prueba",
+        code: "init",
+        semester: "2026-1",
+        career: "Ingeniería en Computación",
+        attendance: {
+          "1999-01-01": [420124928],
+        },
+      }),
+    );
+
+    //crear clave de profesores vacía (hset con campo dummy para evitar que se borre la clave)
+    await redisClient.hSet({
+      KEY_PROFESORES,
+      init123: JSON.stringify({
+        name: "Profesor de prueba",
+        rfc: "init123",
+        email: "test@aragon.unam.mx",
+        phone: "5555555555",
+        career: "Ingeniería en Computación",
+        subjects: ["init"], //usar clave de materia
+        password: "password",
+      }),
+    });
   } catch (error) {
     console.error("Error al verificar claves.", error);
   }
@@ -186,15 +228,23 @@ async function verifyRedisKeys() {
 
 // ---- Utilidades ----
 function isJsonEventCorrect(event) {
+  console.log("EVENTO:", event);
+
   if (!event.name) return false;
-  if (!event.date) return false;
-  if (!event.start_time) return false;
-  if (!event.end_time) return false;
+  if (!event.is_subject) {
+    // Si no es un evento de materia, se requieren start_time, end_time y date. Si es de materia, no se requieren esos campos porque cada fecha de asistencia puede tener horarios distintos.
+    if (!event.date) return false;
+    if (!event.start_time) return false;
+    if (!event.end_time) return false;
+  }
   if (!event.location) return false;
   if (!event.max_attendees) return false;
   if (!event.career) return false;
   if (!event.exponent) return false;
   if (!event.status) return false;
+
+  console.log("EVENTO CORRECTO");
+
   return true;
 }
 
@@ -225,7 +275,7 @@ app.get("/global.css", (req, res) => {
 });
 app.get("/img/:imgid", (req, res) => {
   res.sendFile(
-    path.join(__dirname, "svelte", "public", "img", `${req.params.imgid}`)
+    path.join(__dirname, "svelte", "public", "img", `${req.params.imgid}`),
   );
 });
 app.get("/build/qr-scanner-worker.min*.js", (req, res) => {
@@ -235,16 +285,83 @@ app.get("/build/qr-scanner-worker.min*.js", (req, res) => {
 
 // ---- API de eventos ----
 
+//Ping de salud
+app.get("/api/ping", (req, res) => {
+  res.status(200).json({ message: "pong" });
+});
+
+// Enlaces para guardar credencial en wallets (si están configurados por env)
+app.get("/api/wallet/links/:accountId", (req, res) => {
+  const accountId = String(req.params.accountId || "").trim();
+  if (!accountId) {
+    return res.status(400).json({ error: "accountId requerido" });
+  }
+
+  const replaceAccountId = (tpl) =>
+    String(tpl || "").replaceAll("{{ACCOUNT_ID}}", encodeURIComponent(accountId));
+
+  const appleWalletUrl = APPLE_WALLET_PASS_URL_TEMPLATE
+    ? replaceAccountId(APPLE_WALLET_PASS_URL_TEMPLATE)
+    : null;
+  const googleWalletUrl = GOOGLE_WALLET_SAVE_URL_TEMPLATE
+    ? replaceAccountId(GOOGLE_WALLET_SAVE_URL_TEMPLATE)
+    : null;
+
+  return res.status(200).json({
+    ok: true,
+    accountId,
+    appleWalletUrl,
+    googleWalletUrl,
+    configured: {
+      apple: Boolean(APPLE_WALLET_PASS_URL_TEMPLATE),
+      google: Boolean(GOOGLE_WALLET_SAVE_URL_TEMPLATE),
+    },
+  });
+});
+
 // Públicos (solo Activo) — no muta arrays internos; expone attendees como count
 app.get("/api/eventos", async (req, res) => {
+  console.log("/api/eventos");
+  
   try {
     const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
+    const materias = await redisClient.hGetAll(KEY_MATERIAS) || {};
     const allowedEvents = eventos
       .filter((e) => isActiveStatus(e.status))
       .map((e) => ({
         ...e,
         attendees: Array.isArray(e.attendees) ? e.attendees.length : 0,
       }));
+
+      // Agregar materias al listado de eventos, transformando su formato
+    for (const [id, matStr] of Object.entries(materias)) {
+      if (id === "init") continue; // saltar campo dummy
+      try {
+        const mat = JSON.parse(matStr);
+        const attendeesCount = Array.isArray(mat.suscribed)
+          ? mat.suscribed.length
+          : 0;
+        allowedEvents.push({
+          id,
+          name: mat.name,
+          date: "", // las materias no tienen fecha fija, así que se deja vacío
+          start_time: "",
+          end_time: "",
+          location: mat.location || "N/A",
+          max_attendees: mat.max_attendees || "N/A",
+          career: mat.career,
+          exponent: mat.exponent || "N/A",
+          status: mat.status || "Activo",
+          attendees: attendeesCount,
+          is_subject: true, // marcar que es un evento de materia
+        });
+      } catch (error) {
+        console.error("Error al parsear materia:", error);
+      }
+    }
+    console.log("Devolviendo", allowedEvents.length, "eventos");
+    
+
     res.status(200).json(allowedEvents);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -255,9 +372,45 @@ app.get("/api/eventos", async (req, res) => {
 app.get("/api/eventos_admin", requireAdmin, async (req, res) => {
   try {
     const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
+    const materias = await redisClient.hGetAll(KEY_MATERIAS) || {};
+
+    // Agregar materias al listado de eventos, transformando su formato
+    for (const [id, matStr] of Object.entries(materias)) {
+      if (id === "init") continue; // saltar campo dummy
+      try {
+        const mat = JSON.parse(matStr);
+        const attendeesCount = Array.isArray(mat.suscribed)
+          ? mat.suscribed.length
+          : 0;
+        eventos.push({
+          id,
+          name: mat.name,
+          date: "", // las materias no tienen fecha fija, así que se deja vacío
+          start_time: "",
+          end_time: "",
+          location: mat.location || "N/A",
+          max_attendees: mat.max_attendees || "N/A",
+          career: mat.career,
+          exponent: mat.exponent || "N/A",
+          status: mat.status || "Activo",
+          attendees: attendeesCount,
+          suscribed: Array.isArray(mat.suscribed) ? mat.suscribed : [],
+          attendance: mat.attendance && typeof mat.attendance === "object"
+            ? mat.attendance
+            : {},
+          image: mat.image || "",
+          is_subject: true, // marcar que es un evento de materia
+        });
+      } catch (error) {
+        console.error("Error al parsear materia:", error);
+      }
+    }
+
     eventos.forEach((ev) => {
-      if (!Array.isArray(ev.attendees)) ev.attendees = [];
-      if (!Array.isArray(ev.visits)) ev.visits = [];
+      if (!ev.is_subject) {
+        if (!Array.isArray(ev.attendees)) ev.attendees = [];
+        if (!Array.isArray(ev.visits)) ev.visits = [];
+      }
     });
     res.status(200).json(eventos);
   } catch (error) {
@@ -268,20 +421,45 @@ app.get("/api/eventos_admin", requireAdmin, async (req, res) => {
 app.post("/api/evento", requireAdmin, async (req, res) => {
   const evento = req.body;
   try {
+    //revisar si el body contiene "is_subject"
+    const isSubject = req.body && req.body.is_subject;
+
     if (!isJsonEventCorrect(evento)) {
+      console.log("EVENTO INCORRECTAMENTE CONSTRUIDO");
+
       return res.status(400).json({ error: "Cuerpo de evento inválido" });
     }
     evento.id = uuidv4();
-    if (!Array.isArray(evento.attendees)) evento.attendees = [];
-    if (!Array.isArray(evento.visits)) evento.visits = [];
 
-    const exists = await redisClient.exists(KEY_EVENTS);
-    if (!exists) {
-      await redisClient.json.set(KEY_EVENTS, "$", [evento]);
+    if (!isSubject) {
+      if (!Array.isArray(evento.attendees)) evento.attendees = [];
+      if (!Array.isArray(evento.visits)) evento.visits = [];
+      const exists = await redisClient.exists(KEY_EVENTS);
+      if (!exists) {
+        await redisClient.json.set(KEY_EVENTS, "$", [evento]);
+      } else {
+        await redisClient.json.arrAppend(KEY_EVENTS, "$", evento);
+      }
+      res.status(200).send("Evento agregado correctamente");
     } else {
-      await redisClient.json.arrAppend(KEY_EVENTS, "$", evento);
+      console.log("Creando materia...");
+
+      // Materia: usar suscribed/attendance, sin attendees/visits
+      if (!Array.isArray(evento.suscribed)) evento.suscribed = [];
+      if (!evento.attendance || typeof evento.attendance !== "object") {
+        evento.attendance = {};
+      }
+      delete evento.attendees;
+      delete evento.visits;
+
+      // al ser evento, usar KEY_MATERIAS
+      await redisClient.hSet(
+        KEY_MATERIAS,
+        evento.id, // TODO: Obtener codigo unico desde el body o generar uno decente
+        JSON.stringify(evento),
+      );
+      res.status(200).send("Materia agregada correctamente");
     }
-    res.status(200).send("Evento agregado correctamente");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -289,22 +467,84 @@ app.post("/api/evento", requireAdmin, async (req, res) => {
 
 // Actualizar evento (merge)
 app.put("/api/evento", requireAdmin, async (req, res) => {
-  const evento = req.body;
+  const evento = req.body || {};
   try {
-    if (!isJsonEventCorrect(evento)) {
+    if (!evento.id) {
+      return res.status(400).json({ error: "ID de evento requerido" });
+    }
+
+    const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
+    const index = eventos.findIndex((e) => e.id === evento.id);
+
+    let source = "events";
+    let current = index >= 0 ? eventos[index] : null;
+
+    if (!current) {
+      const materiaStr = await redisClient.hGet(KEY_MATERIAS, evento.id);
+      if (materiaStr) {
+        current = JSON.parse(materiaStr);
+        source = "subjects";
+      }
+    }
+
+    if (!current) {
+      return res.status(404).json({ error: "Evento no encontrado" });
+    }
+
+    const currentIsSubject = Boolean(current.is_subject);
+    const requestedIsSubject =
+      evento.is_subject === undefined
+        ? currentIsSubject
+        : Boolean(evento.is_subject);
+
+    // El tipo de evento NO se puede modificar después de creado
+    if (requestedIsSubject !== currentIsSubject) {
+      return res.status(400).json({
+        error:
+          "No se puede cambiar el tipo de evento. is_subject solo se define al crear.",
+      });
+    }
+
+    const merged = {
+      ...current,
+      ...evento,
+      id: current.id,
+      is_subject: currentIsSubject,
+    };
+
+    if (!isJsonEventCorrect(merged)) {
       return res.status(400).json({ error: "Cuerpo de evento inválido" });
     }
-    const eventos = await redisClient.json.get(KEY_EVENTS);
-    const index = eventos.findIndex((e) => e.id === evento.id);
-    if (index === -1)
-      return res.status(404).json({ error: "Evento no encontrado" });
 
-    if (!Array.isArray(eventos[index].visits)) eventos[index].visits = [];
-    if (!Array.isArray(eventos[index].attendees)) eventos[index].attendees = [];
+    if (currentIsSubject) {
+      if (!Array.isArray(merged.suscribed)) {
+        merged.suscribed = Array.isArray(current.suscribed)
+          ? current.suscribed
+          : [];
+      }
+      if (!merged.attendance || typeof merged.attendance !== "object") {
+        merged.attendance =
+          current.attendance && typeof current.attendance === "object"
+            ? current.attendance
+            : {};
+      }
+      delete merged.attendees;
+      delete merged.visits;
+      await redisClient.hSet(KEY_MATERIAS, merged.id, JSON.stringify(merged));
+    } else {
+      if (!Array.isArray(merged.attendees)) {
+        merged.attendees = Array.isArray(current.attendees)
+          ? current.attendees
+          : [];
+      }
+      if (!Array.isArray(merged.visits)) {
+        merged.visits = Array.isArray(current.visits) ? current.visits : [];
+      }
 
-    Object.assign(eventos[index], evento);
+      eventos[index] = merged;
+      await redisClient.json.set(KEY_EVENTS, "$", eventos);
+    }
 
-    await redisClient.json.set(KEY_EVENTS, "$", eventos);
     res.status(200).send("Evento actualizado correctamente");
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -349,17 +589,39 @@ const MAX_ALLOWED_EVENTS = 5;
 async function handlerSubscribe(req, res) {
   const idEvento = req.body.event_id;
   const idAsistente = req.body.user_id;
-
+  const isSubject = req.body.is_subject || false;
   try {
-    await redisClient.watch(KEY_EVENTS);
-    const eventos = await redisClient.json.get(KEY_EVENTS);
-    const index = eventos.findIndex((e) => e.id === idEvento);
-    if (index === -1) {
+    await redisClient.watch(KEY_EVENTS, KEY_MATERIAS);
+
+    const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
+    let index = eventos.findIndex((e) => e.id === idEvento);
+    let evento = index >= 0 ? eventos[index] : null;
+    let source = "events";
+
+    // Si no se encuentra en eventos regulares, buscar en materias
+    if (!evento) {
+      const materiaStr = await redisClient.hGet(KEY_MATERIAS, idEvento);
+      if (materiaStr) {
+        evento = JSON.parse(materiaStr);
+        source = "subjects";
+      }
+    }
+
+    if (!evento) {
       await redisClient.unwatch();
       return res.status(404).json({ error: "Evento no encontrado" });
     }
 
-    const evento = eventos[index];
+    const isSubjectEvent = Boolean(evento.is_subject || isSubject);
+
+    if (isSubjectEvent) {
+      await redisClient.unwatch();
+      return res.status(403).json({
+        error:
+          "Las materias no permiten autoinscripción. Admin debe cargar la lista suscribed.",
+      });
+    }
+
     if (!Array.isArray(evento.attendees)) evento.attendees = [];
 
     // Validar cupo del evento
@@ -376,6 +638,12 @@ async function handlerSubscribe(req, res) {
     let attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
     let attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
 
+    // Si ya aparece en el historial del usuario, evitar duplicados
+    if (Array.isArray(attendee.events) && attendee.events.includes(idEvento)) {
+      await redisClient.unwatch();
+      return res.status(400).json({ error: "Ya estás inscrito en este evento" });
+    }
+
     // Límite máximo por usuario
     if (attendee.events.length >= MAX_ALLOWED_EVENTS) {
       await redisClient.unwatch();
@@ -384,59 +652,69 @@ async function handlerSubscribe(req, res) {
         .json({ error: `Ya estás inscrito en ${MAX_ALLOWED_EVENTS} eventos.` });
     }
 
-    // --- Validación de traslape de horarios ---
-    // Solo comparamos con eventos que existan todavía en la lista
-    const newStart = makeDateTime(evento.date, evento.start_time);
-    const newEnd = makeDateTime(evento.date, evento.end_time);
+    // --- Validación de traslape de horarios (solo para eventos no-materia) ---
+    if (!isSubjectEvent) {
+      const newStart = makeDateTime(evento.date, evento.start_time);
+      const newEnd = makeDateTime(evento.date, evento.end_time);
 
-    if (!newStart.isValid() || !newEnd.isValid() || !newEnd.isAfter(newStart)) {
-      await redisClient.unwatch();
-      return res
-        .status(400)
-        .json({ error: "Horario inválido para el evento nuevo." });
-    }
+      if (
+        !newStart.isValid() ||
+        !newEnd.isValid() ||
+        !newEnd.isAfter(newStart)
+      ) {
+        await redisClient.unwatch();
+        return res
+          .status(400)
+          .json({ error: "Horario inválido para el evento nuevo." });
+      }
 
-    // Buscar conflictos con los eventos a los que ya está inscrito el usuario
-    const conflict = attendee.events
-      .map((evId) => eventos.find((e) => e.id === evId))
-      .filter(Boolean)
-      .find((e) => {
-        // Si la fecha es diferente, no hay conflicto
-        if ((e.date || "").trim() !== (evento.date || "").trim()) return false;
+      // Buscar conflictos con eventos no-materia del usuario
+      const conflict = attendee.events
+        .map((evId) => eventos.find((e) => e.id === evId))
+        .filter(Boolean)
+        .filter((e) => !e.is_subject)
+        .find((e) => {
+          if ((e.date || "").trim() !== (evento.date || "").trim()) return false;
 
-        const s = makeDateTime(e.date, e.start_time);
-        const t = makeDateTime(e.date, e.end_time);
-        if (!s.isValid() || !t.isValid() || !t.isAfter(s)) return false;
+          const s = makeDateTime(e.date, e.start_time);
+          const t = makeDateTime(e.date, e.end_time);
+          if (!s.isValid() || !t.isValid() || !t.isAfter(s)) return false;
 
-        return intervalsOverlap(newStart, newEnd, s, t);
-      });
+          return intervalsOverlap(newStart, newEnd, s, t);
+        });
 
-    if (conflict) {
-      await redisClient.unwatch();
-      return res.status(400).json({
-        error: "Conflicto de horario con otro evento inscrito.",
-        conflict_with: {
-          id: conflict.id,
-          name: conflict.name,
-          date: conflict.date,
-          start_time: conflict.start_time,
-          end_time: conflict.end_time,
-        },
-      });
+      if (conflict) {
+        await redisClient.unwatch();
+        return res.status(400).json({
+          error: "Conflicto de horario con otro evento inscrito.",
+          conflict_with: {
+            id: conflict.id,
+            name: conflict.name,
+            date: conflict.date,
+            start_time: conflict.start_time,
+            end_time: conflict.end_time,
+          },
+        });
+      }
     }
     // --- Fin validación de traslape ---
 
     // Registrar inscripción (transacción)
     evento.attendees.push(idAsistente);
     const multi = redisClient.multi();
-    multi.json.set(KEY_EVENTS, "$", eventos);
+    if (source === "events") {
+      eventos[index] = evento;
+      multi.json.set(KEY_EVENTS, "$", eventos);
+    } else {
+      multi.hSet(KEY_MATERIAS, idEvento, JSON.stringify(evento));
+    }
     await multi.exec();
 
     attendee.events.push(idEvento);
     await redisClient.hSet(
       KEY_ATTENDEES,
       idAsistente,
-      JSON.stringify(attendee)
+      JSON.stringify(attendee),
     );
 
     res.status(200).json({ message: "Inscrito correctamente", ok: true });
@@ -451,28 +729,56 @@ async function handlerUnsubscribe(req, res) {
   const idAsistente = req.body.user_id;
 
   try {
-    const eventos = await redisClient.json.get(KEY_EVENTS);
+    const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
     const index = eventos.findIndex((e) => e.id === idEvento);
-    if (index === -1)
+    let evento = index >= 0 ? eventos[index] : null;
+    let source = "events";
+
+    if (!evento) {
+      const materiaStr = await redisClient.hGet(KEY_MATERIAS, idEvento);
+      if (materiaStr) {
+        evento = JSON.parse(materiaStr);
+        source = "subjects";
+      }
+    }
+
+    if (!evento)
       return res.status(404).json({ error: "Evento no encontrado" });
 
-    const evento = eventos[index];
+    if (evento.is_subject) {
+      return res.status(400).json({
+        error:
+          "Las materias no permiten baja automática. Admin debe editar la lista suscribed.",
+      });
+    }
+
     if (!Array.isArray(evento.attendees)) evento.attendees = [];
 
-    if (!evento.attendees.includes(idAsistente)) {
+    let attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
+    let attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
+
+    const inEvent = evento.attendees.includes(idAsistente);
+    const inAttendee = Array.isArray(attendee.events)
+      ? attendee.events.includes(idEvento)
+      : false;
+
+    if (!inEvent && !inAttendee) {
       return res.status(400).json({ error: "No estás inscrito a este evento" });
     }
 
     evento.attendees = evento.attendees.filter((id) => id !== idAsistente);
-    await redisClient.json.set(KEY_EVENTS, "$", eventos);
+    if (source === "events") {
+      eventos[index] = evento;
+      await redisClient.json.set(KEY_EVENTS, "$", eventos);
+    } else {
+      await redisClient.hSet(KEY_MATERIAS, idEvento, JSON.stringify(evento));
+    }
 
-    let attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
-    let attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
     attendee.events = attendee.events.filter((id) => id !== idEvento);
     await redisClient.hSet(
       KEY_ATTENDEES,
       idAsistente,
-      JSON.stringify(attendee)
+      JSON.stringify(attendee),
     );
 
     res.status(200).send("Desinscrito correctamente");
@@ -493,10 +799,30 @@ app.post("/api/evento/atendees/unsuscribe", handlerUnsubscribe);
 async function handlerEventsByAttendee(req, res) {
   try {
     const idAsistente = req.params.id;
-    const attendees = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
-    if (!attendees)
-      return res.status(404).json({ error: "Usuario no encontrado" });
-    res.status(200).json(JSON.parse(attendees).events);
+    const attendeeData = await redisClient.hGet(KEY_ATTENDEES, idAsistente);
+    const attendee = attendeeData ? JSON.parse(attendeeData) : { events: [] };
+    const enrolledEventIds = new Set(Array.isArray(attendee.events) ? attendee.events : []);
+
+    // Compatibilidad: sincronizar también con materias que guarden attendees por separado
+    const materias = (await redisClient.hGetAll(KEY_MATERIAS)) || {};
+    for (const [id, matStr] of Object.entries(materias)) {
+      if (id === "init") continue;
+      try {
+        const mat = JSON.parse(matStr);
+        const suscribedIds = Array.isArray(mat.suscribed)
+          ? mat.suscribed.map((s) =>
+              typeof s === "object" && s !== null ? String(s.id || "") : String(s),
+            )
+          : [];
+        if (suscribedIds.includes(String(idAsistente))) {
+          enrolledEventIds.add(id);
+        }
+      } catch (error) {
+        console.error("Error al parsear materia en consulta por asistente:", error);
+      }
+    }
+
+    res.status(200).json(Array.from(enrolledEventIds));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -506,34 +832,182 @@ app.get("/api/evento/attendee/:id", handlerEventsByAttendee);
 // Alias retro-compatibles
 app.get("/api/evento/atendee/:id", handlerEventsByAttendee);
 
+// ---- Toggle manual de asistencia para materias (admin) ----
+app.patch("/api/evento/subject/attendance", requireAdmin, async (req, res) => {
+  try {
+    const eventId = String(req.body?.event_id || "").trim();
+    const userId = String(req.body?.user_id || "").trim();
+    const date = String(req.body?.date || "").trim();
+
+    if (!eventId || !userId || !date) {
+      return res.status(400).json({
+        error: "event_id, user_id y date son requeridos",
+      });
+    }
+
+    if (!moment(date, "YYYY-MM-DD", true).isValid()) {
+      return res.status(400).json({
+        error: "date debe tener formato YYYY-MM-DD",
+      });
+    }
+
+    const materiaStr = await redisClient.hGet(KEY_MATERIAS, eventId);
+    if (!materiaStr) {
+      return res.status(404).json({ error: "Materia no encontrada" });
+    }
+
+    const materia = JSON.parse(materiaStr);
+    if (!materia?.is_subject) {
+      return res.status(400).json({
+        error: "El endpoint solo aplica para eventos tipo materia",
+      });
+    }
+
+    const suscribedIds = Array.isArray(materia.suscribed)
+      ? materia.suscribed.map((s) =>
+          typeof s === "object" && s !== null ? String(s.id || "") : String(s),
+        )
+      : [];
+
+    if (!suscribedIds.includes(userId)) {
+      return res.status(400).json({
+        error: `El usuario ${userId} no está en la lista suscribed`,
+      });
+    }
+
+    if (!materia.attendance || typeof materia.attendance !== "object") {
+      materia.attendance = {};
+    }
+
+    const current = Array.isArray(materia.attendance[date])
+      ? materia.attendance[date].map((x) => String(x))
+      : [];
+
+    let present = false;
+    if (current.includes(userId)) {
+      materia.attendance[date] = current.filter((x) => x !== userId);
+      present = false;
+    } else {
+      materia.attendance[date] = [...current, userId];
+      present = true;
+    }
+
+    if (Array.isArray(materia.attendance[date]) && materia.attendance[date].length === 0) {
+      delete materia.attendance[date];
+    }
+
+    await redisClient.hSet(KEY_MATERIAS, eventId, JSON.stringify(materia));
+
+    return res.status(200).json({
+      ok: true,
+      event_id: eventId,
+      user_id: userId,
+      date,
+      present,
+      message: present ? "Asistencia marcada" : "Asistencia desmarcada",
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // ---- Registrar visita ----
 app.post("/api/evento/visit", async (req, res) => {
   const idEvento = req.body.event_id;
   const idAsistente = req.body.user_id;
+  const qrType = Number(req.body.qr_type);
+  const requestedAttendanceDate = (req.body.attendance_date || "").trim();
 
   try {
-    const eventos = await redisClient.json.get(KEY_EVENTS);
-    const index = eventos.findIndex((e) => e.id === idEvento);
-    if (index === -1)
+    const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
+    const eventIndex = eventos.findIndex((e) => e.id === idEvento);
+    let evento = eventIndex >= 0 ? eventos[eventIndex] : null;
+    let source = "events";
+
+    const shouldUseSubjects = qrType === 1 || (qrType !== 0 && !evento);
+    if (shouldUseSubjects) {
+      const materiaStr = await redisClient.hGet(KEY_MATERIAS, idEvento);
+      if (materiaStr) {
+        evento = JSON.parse(materiaStr);
+        source = "subjects";
+      }
+    }
+
+    if (!evento && qrType === 0) {
       return res.status(404).json({ error: "Evento no encontrado" });
-
-    const evento = eventos[index];
-    if (!Array.isArray(evento.visits)) evento.visits = [];
-    if (!Array.isArray(evento.attendees)) evento.attendees = [];
-
-    if (evento.visits.includes(idAsistente)) {
-      return res.status(400).json({
-        error: `Visita ya registrada para: ${idAsistente}`,
-      });
-    }
-    if (!evento.attendees.includes(idAsistente)) {
-      return res.status(400).json({
-        error: `El usuario ${idAsistente} no está inscrito al evento`,
-      });
     }
 
-    evento.visits.push(idAsistente);
-    await redisClient.json.set(KEY_EVENTS, "$", eventos);
+    if (!evento) {
+      return res.status(404).json({ error: "Evento o materia no encontrada" });
+    }
+
+    // Para materias: guardar asistencia por fecha en attendance[YYYY-MM-DD]
+    if (source === "subjects") {
+      const suscribedIds = Array.isArray(evento.suscribed)
+        ? evento.suscribed.map((s) =>
+            typeof s === "object" && s !== null ? String(s.id || "") : String(s),
+          )
+        : [];
+
+      if (!suscribedIds.includes(String(idAsistente))) {
+        return res.status(400).json({
+          error: `El usuario ${idAsistente} no se encuentra en la lista suscribed`,
+        });
+      }
+
+      if (!evento.attendance || typeof evento.attendance !== "object") {
+        evento.attendance = {};
+      }
+
+      const todayLocal = moment().format("YYYY-MM-DD");
+      const attendanceDate =
+        requestedAttendanceDate &&
+        moment(requestedAttendanceDate, "YYYY-MM-DD", true).isValid()
+          ? requestedAttendanceDate
+          : todayLocal;
+
+      const normalizedAttendanceDate = moment(
+        attendanceDate,
+        "YYYY-MM-DD",
+        true,
+      ).isAfter(moment(todayLocal, "YYYY-MM-DD", true))
+        ? todayLocal
+        : attendanceDate;
+
+      if (!Array.isArray(evento.attendance[normalizedAttendanceDate])) {
+        evento.attendance[normalizedAttendanceDate] = [];
+      }
+
+      if (evento.attendance[normalizedAttendanceDate].includes(idAsistente)) {
+        return res.status(400).json({
+          error: `Asistencia ya registrada para ${idAsistente} en ${normalizedAttendanceDate}`,
+        });
+      }
+
+      evento.attendance[normalizedAttendanceDate].push(idAsistente);
+    } else {
+      if (!Array.isArray(evento.attendees)) evento.attendees = [];
+      if (!evento.attendees.includes(idAsistente)) {
+        return res.status(400).json({
+          error: `El usuario ${idAsistente} no está inscrito al evento`,
+        });
+      }
+
+      if (!Array.isArray(evento.visits)) evento.visits = [];
+      if (evento.visits.includes(idAsistente)) {
+        return res.status(400).json({
+          error: `Visita ya registrada para: ${idAsistente}`,
+        });
+      }
+      evento.visits.push(idAsistente);
+    }
+
+    if (source === "events") {
+      eventos[eventIndex] = evento;
+      await redisClient.json.set(KEY_EVENTS, "$", eventos);
+    } else {
+      await redisClient.hSet(KEY_MATERIAS, idEvento, JSON.stringify(evento));
+    }
 
     res.status(200).json({
       message: `Visita registrada correctamente para: ${idAsistente}`,
@@ -557,7 +1031,7 @@ app.get("/api/report/csv", requireAdmin, async (req, res) => {
       const eventEndTime = evento.end_time;
 
       const duration = moment.duration(
-        moment(eventEndTime, "HH:mm").diff(moment(eventStartTime, "HH:mm"))
+        moment(eventEndTime, "HH:mm").diff(moment(eventStartTime, "HH:mm")),
       );
       const totalEventTime = duration.asHours();
 
@@ -608,8 +1082,12 @@ app.get("/api/report/csv", requireAdmin, async (req, res) => {
 // --- Manager login ---
 app.post("/api/admin/login", async (req, res) => {
   try {
+    console.log(req.body);
+
     const { username, password } = req.body;
     if (username === ADMIN_USER && password === ADMIN_PASS) {
+      console.log("Intento admin", username, password);
+
       const issued = await createAdminToken({ issuedFor: username });
       if (!issued)
         return res.status(500).json({ error: "No se pudo crear token" });

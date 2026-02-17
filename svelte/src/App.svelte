@@ -5,6 +5,14 @@
   import { Router, Route, Link } from "svelte-routing";
   import UserEvents from "./routes/UserEvents.svelte";
   import { Toaster } from "svelte-french-toast";
+  import { API_URL } from "./store";
+
+
+  //API_URL.set(`${window.location.origin}`);
+  API_URL.set("https://127.0.0.1:3000");
+  console.log($API_URL);
+  
+
 </script>
 
 <Router>

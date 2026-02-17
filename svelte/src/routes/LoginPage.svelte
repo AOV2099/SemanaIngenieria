@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { toast } from "svelte-french-toast";
   import { navigate } from "svelte-routing";
-  import { adminToken } from "../store";
+  import { adminToken, API_URL } from "../store";
 
   onMount(() => {
     //selectedPage.set("LOGIN_PAGE");
@@ -29,14 +29,16 @@
 
   async function testManagerLogin(user, pass) {
   try {
-    let res = await fetch(`/api/admin/login`, {
+    //console.log( "credenciales", user, pass);
+    
+    let res = await fetch(`${$API_URL}/api/admin/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+      headers: { //enviar como json
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         username: user,
-        password: pass,
+        password: pass
       }),
     });
 
