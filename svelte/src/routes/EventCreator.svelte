@@ -318,11 +318,11 @@
         const data = await res.json();
         data.forEach((event) => {
           if (event.is_subject) {
-            if (!Array.isArray(event.suscribed)) event.suscribed = [];
+            if (!Array.isArray(event.attendees)) event.attendees = [];
             if (!event.attendance || typeof event.attendance !== "object") {
               event.attendance = {};
             }
-            event.attendees_num = event.suscribed.length;
+            event.attendees_num = event.attendees.length;
           } else {
             if (!Array.isArray(event.attendees)) event.attendees = [];
             if (!Array.isArray(event.visits)) event.visits = [];
@@ -575,20 +575,11 @@
   });
 
   // --- Helpers de asistencias en materias ---
-  function normalizeSubjectSuscribed(subject) {
-    const list = Array.isArray(subject?.suscribed) ? subject.suscribed : [];
+  function normalizeSubjectAttendees(subject) {
+    const list = Array.isArray(subject?.attendees) ? subject.attendees : [];
     return list
-      .map((item) => {
-        if (item && typeof item === "object") {
-          return {
-            id: String(item.id || "").trim(),
-            name: String(item.name || "").trim() || "Sin nombre",
-          };
-        }
-        const id = String(item || "").trim();
-        return { id, name: "Sin nombre" };
-      })
-      .filter((x) => x.id);
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
   }
 
   function getSubjectAttendanceDates(subject) {
@@ -1096,7 +1087,7 @@
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-info">
             {selectedEvent?.is_subject
-              ? normalizeSubjectSuscribed(selectedEvent).length
+              ? normalizeSubjectAttendees(selectedEvent).length
               : selectedEvent?.attendees?.length || 0}
             inscritos
           </span>
@@ -1118,7 +1109,7 @@
 
       <div class="modal-body">
         {#if selectedEvent?.is_subject}
-          {@const subjectRows = normalizeSubjectSuscribed(selectedEvent)}
+          {@const subjectRows = normalizeSubjectAttendees(selectedEvent)}
           {@const subjectDates = getSubjectAttendanceDates(selectedEvent)}
 
           {#if subjectRows.length > 0}
@@ -1127,7 +1118,7 @@
                 <thead>
                   <tr>
                     <th style="width:56px;">#</th>
-                    <th style="min-width: 220px;">Alumno</th>
+                    <th style="min-width: 220px;">Boleta</th>
                     {#if subjectDates.length > 0}
                       {#each subjectDates as dt}
                         <th class="text-center" style="min-width: 130px;">{dt}</th>
@@ -1138,18 +1129,17 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {#each subjectRows as student, i}
+                  {#each subjectRows as studentId, i}
                     <tr>
                       <td class="text-muted">{i + 1}</td>
                       <td>
-                        <div class="fw-semibold">{student.name}</div>
-                        <code>{student.id}</code>
+                        <code>{studentId}</code>
                       </td>
 
                       {#if subjectDates.length > 0}
                         {#each subjectDates as dt}
                           <td class="text-center">
-                            {#if isAttendanceCellLoading(student.id, dt)}
+                            {#if isAttendanceCellLoading(studentId, dt)}
                               <button class="btn btn-sm btn-outline-secondary" disabled>
                                 Actualizando...
                               </button>
@@ -1158,19 +1148,19 @@
                                 class="btn btn-sm attendance-toggle-btn"
                                 class:btn-success={isSubjectPresentOnDate(
                                   selectedEvent,
-                                  student.id,
+                                  studentId,
                                   dt,
                                 )}
                                 class:btn-outline-secondary={!isSubjectPresentOnDate(
                                   selectedEvent,
-                                  student.id,
+                                  studentId,
                                   dt,
                                 )}
                                 on:click={() =>
-                                  toggleSubjectAttendance(student.id, dt)}
+                                  toggleSubjectAttendance(studentId, dt)}
                                 title="Marcar / desmarcar asistencia"
                               >
-                                {#if isSubjectPresentOnDate(selectedEvent, student.id, dt)}
+                                {#if isSubjectPresentOnDate(selectedEvent, studentId, dt)}
                                   <i class="bi bi-check2-circle"></i> Asistió
                                 {:else}
                                   <i class="bi bi-dash-circle"></i> Pendiente
@@ -1188,7 +1178,7 @@
               </table>
             </div>
           {:else}
-            <div class="text-muted">Aún no hay alumnos en suscribed.</div>
+            <div class="text-muted">Aún no hay boletas registradas.</div>
           {/if}
         {:else if selectedEvent?.attendees && selectedEvent.attendees.length > 0}
           <div class="table-responsive small">

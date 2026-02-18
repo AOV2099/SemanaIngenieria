@@ -5998,7 +5998,7 @@ function get_each_context_2(ctx, list, i) {
 
 function get_if_ctx(ctx) {
 	const child_ctx = ctx.slice();
-	const constants_0 = normalizeSubjectSuscribed(/*selectedEvent*/ child_ctx[1]);
+	const constants_0 = normalizeSubjectAttendees(/*selectedEvent*/ child_ctx[1]);
 	child_ctx[55] = constants_0;
 	const constants_1 = getSubjectAttendanceDates(/*selectedEvent*/ child_ctx[1]);
 	child_ctx[56] = constants_1;
@@ -6017,7 +6017,7 @@ function get_each_context_5(ctx, list, i) {
 	return child_ctx;
 }
 
-// (840:14) {:else}
+// (831:14) {:else}
 function create_else_block_8(ctx) {
 	let span;
 
@@ -6026,7 +6026,7 @@ function create_else_block_8(ctx) {
 			span = element("span");
 			span.textContent = "Inactivo";
 			attr_dev(span, "class", "badge bg-danger svelte-2611os");
-			add_location(span, file$3, 840, 16, 25196);
+			add_location(span, file$3, 831, 16, 24917);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, span, anchor);
@@ -6040,14 +6040,14 @@ function create_else_block_8(ctx) {
 		block,
 		id: create_else_block_8.name,
 		type: "else",
-		source: "(840:14) {:else}",
+		source: "(831:14) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (838:14) {#if event.status === "Activo"}
+// (829:14) {#if event.status === "Activo"}
 function create_if_block_12(ctx) {
 	let span;
 
@@ -6056,7 +6056,7 @@ function create_if_block_12(ctx) {
 			span = element("span");
 			span.textContent = "Activo";
 			attr_dev(span, "class", "badge bg-success svelte-2611os");
-			add_location(span, file$3, 838, 16, 25113);
+			add_location(span, file$3, 829, 16, 24834);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, span, anchor);
@@ -6070,14 +6070,14 @@ function create_if_block_12(ctx) {
 		block,
 		id: create_if_block_12.name,
 		type: "if",
-		source: "(838:14) {#if event.status === \\\"Activo\\\"}",
+		source: "(829:14) {#if event.status === \\\"Activo\\\"}",
 		ctx
 	});
 
 	return block;
 }
 
-// (760:4) {#each filteredEvents as event}
+// (751:4) {#each filteredEvents as event}
 function create_each_block_5(ctx) {
 	let div11;
 	let div10;
@@ -6210,53 +6210,53 @@ function create_each_block_5(ctx) {
 			attr_dev(i0, "class", "bi");
 			toggle_class(i0, "bi-toggle-on", /*event*/ ctx[70].status === "Activo");
 			toggle_class(i0, "bi-toggle-off", /*event*/ ctx[70].status !== "Activo");
-			add_location(i0, file$3, 779, 16, 23041);
-			add_location(span0, file$3, 784, 16, 23242);
+			add_location(i0, file$3, 770, 16, 22762);
+			add_location(span0, file$3, 775, 16, 22963);
 			attr_dev(button0, "class", "mac-btn svelte-2611os");
 
 			attr_dev(button0, "title", button0_title_value = /*event*/ ctx[70].status === "Activo"
 			? "Desactivar"
 			: "Activar");
 
-			add_location(button0, file$3, 774, 14, 22835);
+			add_location(button0, file$3, 765, 14, 22556);
 			attr_dev(i1, "class", "bi bi-trash");
-			add_location(i1, file$3, 805, 16, 23871);
+			add_location(i1, file$3, 796, 16, 23592);
 			attr_dev(button1, "class", "mac-btn danger svelte-2611os");
 			attr_dev(button1, "title", "Borrar");
-			add_location(button1, file$3, 800, 14, 23705);
+			add_location(button1, file$3, 791, 14, 23426);
 			attr_dev(div0, "class", "actions svelte-2611os");
-			add_location(div0, file$3, 773, 12, 22799);
+			add_location(div0, file$3, 764, 12, 22520);
 			attr_dev(div1, "class", "card-navbar only-actions svelte-2611os");
-			add_location(div1, file$3, 772, 10, 22723);
+			add_location(div1, file$3, 763, 10, 22444);
 			if (!src_url_equal(img.src, img_src_value = API_URL + "/img/" + /*$availableCareers*/ ctx[6].find(func).img_bg)) attr_dev(img, "src", img_src_value);
 			attr_dev(img, "class", "background-image svelte-2611os");
 			attr_dev(img, "alt", "");
-			add_location(img, file$3, 811, 10, 24037);
+			add_location(img, file$3, 802, 10, 23758);
 			attr_dev(div2, "class", "info-box svelte-2611os");
-			add_location(div2, file$3, 823, 14, 24428);
+			add_location(div2, file$3, 814, 14, 24149);
 			attr_dev(div3, "class", "info-box svelte-2611os");
-			add_location(div3, file$3, 825, 16, 24539);
+			add_location(div3, file$3, 816, 16, 24260);
 			attr_dev(div4, "class", "info-box svelte-2611os");
-			add_location(div4, file$3, 826, 16, 24615);
+			add_location(div4, file$3, 817, 16, 24336);
 			attr_dev(div5, "class", "d-flex gap-2");
-			add_location(div5, file$3, 824, 14, 24496);
+			add_location(div5, file$3, 815, 14, 24217);
 			attr_dev(div6, "class", "d-flex justify-content-between flex-wrap gap-2");
-			add_location(div6, file$3, 822, 12, 24353);
+			add_location(div6, file$3, 813, 12, 24074);
 			attr_dev(div7, "class", "event-name svelte-2611os");
-			add_location(div7, file$3, 830, 12, 24726);
+			add_location(div7, file$3, 821, 12, 24447);
 			attr_dev(span1, "class", "badge bg-secondary svelte-2611os");
-			add_location(span1, file$3, 833, 14, 24869);
+			add_location(span1, file$3, 824, 14, 24590);
 			attr_dev(span2, "class", "badge bg-info svelte-2611os");
-			add_location(span2, file$3, 834, 14, 24940);
+			add_location(span2, file$3, 825, 14, 24661);
 			attr_dev(div8, "class", "d-flex justify-content-start gap-2 flex-wrap");
-			add_location(div8, file$3, 832, 12, 24796);
+			add_location(div8, file$3, 823, 12, 24517);
 			attr_dev(div9, "class", "content svelte-2611os");
-			add_location(div9, file$3, 821, 10, 24319);
+			add_location(div9, file$3, 812, 10, 24040);
 			attr_dev(div10, "class", "main-card-container shadow h-100 svelte-2611os");
 			set_style(div10, "background-color", /*$availableCareers*/ ctx[6].find(func_1).color);
-			add_location(div10, file$3, 765, 8, 22465);
+			add_location(div10, file$3, 756, 8, 22186);
 			attr_dev(div11, "class", "col-12 col-md-6 col-lg-4 col-xl-3 event-card mb-4 svelte-2611os");
-			add_location(div11, file$3, 761, 6, 22331);
+			add_location(div11, file$3, 752, 6, 22052);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div11, anchor);
@@ -6372,14 +6372,14 @@ function create_each_block_5(ctx) {
 		block,
 		id: create_each_block_5.name,
 		type: "each",
-		source: "(760:4) {#each filteredEvents as event}",
+		source: "(751:4) {#each filteredEvents as event}",
 		ctx
 	});
 
 	return block;
 }
 
-// (893:12) {#if selectedEvent.id}
+// (884:12) {#if selectedEvent.id}
 function create_if_block_11(ctx) {
 	let small;
 
@@ -6388,7 +6388,7 @@ function create_if_block_11(ctx) {
 			small = element("small");
 			small.textContent = "El tipo de evento solo se puede definir al crear.";
 			attr_dev(small, "class", "text-muted");
-			add_location(small, file$3, 893, 14, 26692);
+			add_location(small, file$3, 884, 14, 26413);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, small, anchor);
@@ -6402,14 +6402,14 @@ function create_if_block_11(ctx) {
 		block,
 		id: create_if_block_11.name,
 		type: "if",
-		source: "(893:12) {#if selectedEvent.id}",
+		source: "(884:12) {#if selectedEvent.id}",
 		ctx
 	});
 
 	return block;
 }
 
-// (916:10) {#if !selectedEvent.is_subject}
+// (907:10) {#if !selectedEvent.is_subject}
 function create_if_block_10(ctx) {
 	let div1;
 	let label0;
@@ -6472,44 +6472,44 @@ function create_if_block_10(ctx) {
 			t10 = space();
 			input2 = element("input");
 			attr_dev(label0, "class", "form-label");
-			add_location(label0, file$3, 917, 14, 27473);
+			add_location(label0, file$3, 908, 14, 27194);
 			attr_dev(i0, "class", "bi bi-calendar-event");
-			add_location(i0, file$3, 920, 19, 27619);
+			add_location(i0, file$3, 911, 19, 27340);
 			attr_dev(span0, "class", "input-group-text");
-			add_location(span0, file$3, 919, 16, 27569);
+			add_location(span0, file$3, 910, 16, 27290);
 			attr_dev(input0, "type", "date");
 			attr_dev(input0, "class", "form-control");
-			add_location(input0, file$3, 922, 16, 27696);
+			add_location(input0, file$3, 913, 16, 27417);
 			attr_dev(div0, "class", "input-group");
-			add_location(div0, file$3, 918, 14, 27527);
+			add_location(div0, file$3, 909, 14, 27248);
 			attr_dev(div1, "class", "col-md-6");
-			add_location(div1, file$3, 916, 12, 27436);
+			add_location(div1, file$3, 907, 12, 27157);
 			attr_dev(label1, "class", "form-label");
-			add_location(label1, file$3, 930, 14, 27930);
+			add_location(label1, file$3, 921, 14, 27651);
 			attr_dev(i1, "class", "bi bi-clock");
-			add_location(i1, file$3, 932, 47, 28066);
+			add_location(i1, file$3, 923, 47, 27787);
 			attr_dev(span1, "class", "input-group-text");
-			add_location(span1, file$3, 932, 16, 28035);
+			add_location(span1, file$3, 923, 16, 27756);
 			attr_dev(input1, "type", "time");
 			attr_dev(input1, "class", "form-control");
-			add_location(input1, file$3, 934, 16, 28134);
+			add_location(input1, file$3, 925, 16, 27855);
 			attr_dev(div2, "class", "input-group");
-			add_location(div2, file$3, 931, 14, 27993);
+			add_location(div2, file$3, 922, 14, 27714);
 			attr_dev(div3, "class", "col-md-6");
-			add_location(div3, file$3, 929, 12, 27893);
+			add_location(div3, file$3, 920, 12, 27614);
 			attr_dev(label2, "class", "form-label");
-			add_location(label2, file$3, 942, 14, 28374);
+			add_location(label2, file$3, 933, 14, 28095);
 			attr_dev(i2, "class", "bi bi-clock-history");
-			add_location(i2, file$3, 945, 19, 28526);
+			add_location(i2, file$3, 936, 19, 28247);
 			attr_dev(span2, "class", "input-group-text");
-			add_location(span2, file$3, 944, 16, 28476);
+			add_location(span2, file$3, 935, 16, 28197);
 			attr_dev(input2, "type", "time");
 			attr_dev(input2, "class", "form-control");
-			add_location(input2, file$3, 947, 16, 28602);
+			add_location(input2, file$3, 938, 16, 28323);
 			attr_dev(div4, "class", "input-group");
-			add_location(div4, file$3, 943, 14, 28434);
+			add_location(div4, file$3, 934, 14, 28155);
 			attr_dev(div5, "class", "col-md-6");
-			add_location(div5, file$3, 941, 12, 28337);
+			add_location(div5, file$3, 932, 12, 28058);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div1, anchor);
@@ -6580,14 +6580,14 @@ function create_if_block_10(ctx) {
 		block,
 		id: create_if_block_10.name,
 		type: "if",
-		source: "(916:10) {#if !selectedEvent.is_subject}",
+		source: "(907:10) {#if !selectedEvent.is_subject}",
 		ctx
 	});
 
 	return block;
 }
 
-// (987:16) {#each $availableCareers as career}
+// (978:16) {#each $availableCareers as career}
 function create_each_block_4(ctx) {
 	let option;
 	let t_value = /*career*/ ctx[67].name + "";
@@ -6600,7 +6600,7 @@ function create_each_block_4(ctx) {
 			t = text(t_value);
 			option.__value = option_value_value = /*career*/ ctx[67].name;
 			option.value = option.__value;
-			add_location(option, file$3, 987, 18, 30079);
+			add_location(option, file$3, 978, 18, 29800);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, option, anchor);
@@ -6623,14 +6623,14 @@ function create_each_block_4(ctx) {
 		block,
 		id: create_each_block_4.name,
 		type: "each",
-		source: "(987:16) {#each $availableCareers as career}",
+		source: "(978:16) {#each $availableCareers as career}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1008:10) {#if selectedEvent.image}
+// (999:10) {#if selectedEvent.image}
 function create_if_block_9(ctx) {
 	let div1;
 	let div0;
@@ -6656,16 +6656,16 @@ function create_if_block_9(ctx) {
 			if (!src_url_equal(img.src, img_src_value = /*selectedEvent*/ ctx[1].image)) attr_dev(img, "src", img_src_value);
 			attr_dev(img, "alt", "Preview");
 			attr_dev(img, "class", "img-thumbnail svelte-2611os");
-			add_location(img, file$3, 1010, 16, 30797);
+			add_location(img, file$3, 1001, 16, 30518);
 			attr_dev(div0, "class", "image-preview mb-2 svelte-2611os");
-			add_location(div0, file$3, 1009, 14, 30748);
+			add_location(div0, file$3, 1000, 14, 30469);
 			attr_dev(i, "class", "bi bi-x-circle");
-			add_location(i, file$3, 1020, 16, 31123);
-			add_location(span, file$3, 1020, 46, 31153);
+			add_location(i, file$3, 1011, 16, 30844);
+			add_location(span, file$3, 1011, 46, 30874);
 			attr_dev(button, "class", "btn btn-outline-danger btn-sm inline-btn");
-			add_location(button, file$3, 1016, 14, 30972);
+			add_location(button, file$3, 1007, 14, 30693);
 			attr_dev(div1, "class", "col-12");
-			add_location(div1, file$3, 1008, 12, 30713);
+			add_location(div1, file$3, 999, 12, 30434);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div1, anchor);
@@ -6697,14 +6697,14 @@ function create_if_block_9(ctx) {
 		block,
 		id: create_if_block_9.name,
 		type: "if",
-		source: "(1008:10) {#if selectedEvent.image}",
+		source: "(999:10) {#if selectedEvent.image}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1063:8) {:else}
+// (1054:8) {:else}
 function create_else_block_7(ctx) {
 	let button0;
 	let i0;
@@ -6728,15 +6728,15 @@ function create_else_block_7(ctx) {
 			span1 = element("span");
 			span1.textContent = "Cancelar";
 			attr_dev(i0, "class", "bi bi-check2-circle");
-			add_location(i0, file$3, 1064, 12, 32634);
-			add_location(span0, file$3, 1064, 47, 32669);
+			add_location(i0, file$3, 1055, 12, 32355);
+			add_location(span0, file$3, 1055, 47, 32390);
 			attr_dev(button0, "class", "btn btn-success inline-btn");
-			add_location(button0, file$3, 1063, 10, 32557);
+			add_location(button0, file$3, 1054, 10, 32278);
 			attr_dev(i1, "class", "bi bi-x-circle");
-			add_location(i1, file$3, 1070, 12, 32838);
-			add_location(span1, file$3, 1070, 42, 32868);
+			add_location(i1, file$3, 1061, 12, 32559);
+			add_location(span1, file$3, 1061, 42, 32589);
 			attr_dev(button1, "class", "btn btn-secondary inline-btn");
-			add_location(button1, file$3, 1066, 10, 32718);
+			add_location(button1, file$3, 1057, 10, 32439);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, button0, anchor);
@@ -6770,14 +6770,14 @@ function create_else_block_7(ctx) {
 		block,
 		id: create_else_block_7.name,
 		type: "else",
-		source: "(1063:8) {:else}",
+		source: "(1054:8) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1038:8) {#if selectedEvent.id}
+// (1029:8) {#if selectedEvent.id}
 function create_if_block_8(ctx) {
 	let div2;
 	let div0;
@@ -6815,25 +6815,25 @@ function create_if_block_8(ctx) {
 			span1 = element("span");
 			span1.textContent = "Cerrar";
 			attr_dev(i0, "class", "bi bi-people-check");
-			add_location(i0, file$3, 1046, 16, 31988);
+			add_location(i0, file$3, 1037, 16, 31709);
 			attr_dev(button0, "type", "button");
 			attr_dev(button0, "class", "btn btn-outline-primary me-2");
 			attr_dev(button0, "title", "Ver inscritos y asistencias");
-			add_location(button0, file$3, 1040, 14, 31743);
-			add_location(div0, file$3, 1039, 12, 31723);
+			add_location(button0, file$3, 1031, 14, 31464);
+			add_location(div0, file$3, 1030, 12, 31444);
 			attr_dev(i1, "class", "bi bi-save");
-			add_location(i1, file$3, 1052, 16, 32192);
-			add_location(span0, file$3, 1052, 42, 32218);
+			add_location(i1, file$3, 1043, 16, 31913);
+			add_location(span0, file$3, 1043, 42, 31939);
 			attr_dev(button1, "class", "btn btn-primary inline-btn");
-			add_location(button1, file$3, 1051, 14, 32111);
+			add_location(button1, file$3, 1042, 14, 31832);
 			attr_dev(i2, "class", "bi bi-x-circle");
-			add_location(i2, file$3, 1058, 16, 32421);
-			add_location(span1, file$3, 1058, 46, 32451);
+			add_location(i2, file$3, 1049, 16, 32142);
+			add_location(span1, file$3, 1049, 46, 32172);
 			attr_dev(button2, "class", "btn btn-secondary inline-btn");
-			add_location(button2, file$3, 1054, 14, 32285);
-			add_location(div1, file$3, 1050, 12, 32091);
+			add_location(button2, file$3, 1045, 14, 32006);
+			add_location(div1, file$3, 1041, 12, 31812);
 			attr_dev(div2, "class", "justify-content-between w-100 d-flex");
-			add_location(div2, file$3, 1038, 10, 31660);
+			add_location(div2, file$3, 1029, 10, 31381);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div2, anchor);
@@ -6873,14 +6873,14 @@ function create_if_block_8(ctx) {
 		block,
 		id: create_if_block_8.name,
 		type: "if",
-		source: "(1038:8) {#if selectedEvent.id}",
+		source: "(1029:8) {#if selectedEvent.id}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1228:8) {:else}
+// (1218:8) {:else}
 function create_else_block_6(ctx) {
 	let div;
 
@@ -6889,7 +6889,7 @@ function create_else_block_6(ctx) {
 			div = element("div");
 			div.textContent = "Aún no hay inscritos.";
 			attr_dev(div, "class", "text-muted");
-			add_location(div, file$3, 1228, 10, 39036);
+			add_location(div, file$3, 1218, 10, 38682);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -6904,14 +6904,14 @@ function create_else_block_6(ctx) {
 		block,
 		id: create_else_block_6.name,
 		type: "else",
-		source: "(1228:8) {:else}",
+		source: "(1218:8) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1193:81) 
+// (1183:81) 
 function create_if_block_6(ctx) {
 	let div;
 	let table;
@@ -6954,17 +6954,17 @@ function create_if_block_6(ctx) {
 			}
 
 			set_style(th0, "width", "56px");
-			add_location(th0, file$3, 1197, 18, 37821);
-			add_location(th1, file$3, 1198, 18, 37870);
+			add_location(th0, file$3, 1187, 18, 37467);
+			add_location(th1, file$3, 1188, 18, 37516);
 			set_style(th2, "width", "160px");
-			add_location(th2, file$3, 1199, 18, 37919);
-			add_location(tr, file$3, 1196, 16, 37798);
-			add_location(thead, file$3, 1195, 14, 37774);
-			add_location(tbody, file$3, 1202, 14, 38019);
+			add_location(th2, file$3, 1189, 18, 37565);
+			add_location(tr, file$3, 1186, 16, 37444);
+			add_location(thead, file$3, 1185, 14, 37420);
+			add_location(tbody, file$3, 1192, 14, 37665);
 			attr_dev(table, "class", "table table-sm table-hover align-middle mb-0 svelte-2611os");
-			add_location(table, file$3, 1194, 12, 37699);
+			add_location(table, file$3, 1184, 12, 37345);
 			attr_dev(div, "class", "table-responsive small");
-			add_location(div, file$3, 1193, 10, 37650);
+			add_location(div, file$3, 1183, 10, 37296);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -7020,14 +7020,14 @@ function create_if_block_6(ctx) {
 		block,
 		id: create_if_block_6.name,
 		type: "if",
-		source: "(1193:81) ",
+		source: "(1183:81) ",
 		ctx
 	});
 
 	return block;
 }
 
-// (1120:8) {#if selectedEvent?.is_subject}
+// (1111:8) {#if selectedEvent?.is_subject}
 function create_if_block$2(ctx) {
 	let if_block_anchor;
 
@@ -7071,14 +7071,14 @@ function create_if_block$2(ctx) {
 		block,
 		id: create_if_block$2.name,
 		type: "if",
-		source: "(1120:8) {#if selectedEvent?.is_subject}",
+		source: "(1111:8) {#if selectedEvent?.is_subject}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1215:22) {:else}
+// (1205:22) {:else}
 function create_else_block_5(ctx) {
 	let span;
 	let i;
@@ -7090,9 +7090,9 @@ function create_else_block_5(ctx) {
 			i = element("i");
 			t = text(" Pendiente");
 			attr_dev(i, "class", "bi bi-clock");
-			add_location(i, file$3, 1218, 26, 38777);
+			add_location(i, file$3, 1208, 26, 38423);
 			attr_dev(span, "class", "badge bg-secondary d-inline-flex align-items-center gap-1 svelte-2611os");
-			add_location(span, file$3, 1215, 24, 38627);
+			add_location(span, file$3, 1205, 24, 38273);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, span, anchor);
@@ -7108,14 +7108,14 @@ function create_else_block_5(ctx) {
 		block,
 		id: create_else_block_5.name,
 		type: "else",
-		source: "(1215:22) {:else}",
+		source: "(1205:22) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1209:22) {#if selectedEvent?.visits && selectedEvent.visits.includes(acc)}
+// (1199:22) {#if selectedEvent?.visits && selectedEvent.visits.includes(acc)}
 function create_if_block_7(ctx) {
 	let span;
 	let i;
@@ -7127,9 +7127,9 @@ function create_if_block_7(ctx) {
 			i = element("i");
 			t = text(" Asistió");
 			attr_dev(i, "class", "bi bi-check2-circle");
-			add_location(i, file$3, 1212, 26, 38497);
+			add_location(i, file$3, 1202, 26, 38143);
 			attr_dev(span, "class", "badge bg-success d-inline-flex align-items-center gap-1 svelte-2611os");
-			add_location(span, file$3, 1209, 24, 38349);
+			add_location(span, file$3, 1199, 24, 37995);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, span, anchor);
@@ -7145,14 +7145,14 @@ function create_if_block_7(ctx) {
 		block,
 		id: create_if_block_7.name,
 		type: "if",
-		source: "(1209:22) {#if selectedEvent?.visits && selectedEvent.visits.includes(acc)}",
+		source: "(1199:22) {#if selectedEvent?.visits && selectedEvent.visits.includes(acc)}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1204:16) {#each selectedEvent.attendees as acc, i}
+// (1194:16) {#each selectedEvent.attendees as acc, i}
 function create_each_block_3(ctx) {
 	let tr;
 	let td0;
@@ -7192,12 +7192,12 @@ function create_each_block_3(ctx) {
 			if_block.c();
 			t4 = space();
 			attr_dev(td0, "class", "text-muted");
-			add_location(td0, file$3, 1205, 20, 38128);
+			add_location(td0, file$3, 1195, 20, 37774);
 			attr_dev(code, "class", "svelte-2611os");
-			add_location(code, file$3, 1206, 24, 38188);
-			add_location(td1, file$3, 1206, 20, 38184);
-			add_location(td2, file$3, 1207, 20, 38232);
-			add_location(tr, file$3, 1204, 18, 38103);
+			add_location(code, file$3, 1196, 24, 37834);
+			add_location(td1, file$3, 1196, 20, 37830);
+			add_location(td2, file$3, 1197, 20, 37878);
+			add_location(tr, file$3, 1194, 18, 37749);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, tr, anchor);
@@ -7235,23 +7235,23 @@ function create_each_block_3(ctx) {
 		block,
 		id: create_each_block_3.name,
 		type: "each",
-		source: "(1204:16) {#each selectedEvent.attendees as acc, i}",
+		source: "(1194:16) {#each selectedEvent.attendees as acc, i}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1190:10) {:else}
+// (1180:10) {:else}
 function create_else_block_4(ctx) {
 	let div;
 
 	const block = {
 		c: function create() {
 			div = element("div");
-			div.textContent = "Aún no hay alumnos en suscribed.";
+			div.textContent = "Aún no hay boletas registradas.";
 			attr_dev(div, "class", "text-muted");
-			add_location(div, file$3, 1190, 12, 37479);
+			add_location(div, file$3, 1180, 12, 37126);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -7266,14 +7266,14 @@ function create_else_block_4(ctx) {
 		block,
 		id: create_else_block_4.name,
 		type: "else",
-		source: "(1190:10) {:else}",
+		source: "(1180:10) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1124:10) {#if subjectRows.length > 0}
+// (1115:10) {#if subjectRows.length > 0}
 function create_if_block_1$1(ctx) {
 	let div;
 	let table;
@@ -7311,7 +7311,7 @@ function create_if_block_1$1(ctx) {
 			th0.textContent = "#";
 			t1 = space();
 			th1 = element("th");
-			th1.textContent = "Alumno";
+			th1.textContent = "Boleta";
 			t3 = space();
 			if_block.c();
 			t4 = space();
@@ -7322,16 +7322,16 @@ function create_if_block_1$1(ctx) {
 			}
 
 			set_style(th0, "width", "56px");
-			add_location(th0, file$3, 1128, 20, 34645);
+			add_location(th0, file$3, 1119, 20, 34366);
 			set_style(th1, "min-width", "220px");
-			add_location(th1, file$3, 1129, 20, 34696);
-			add_location(tr, file$3, 1127, 18, 34620);
-			add_location(thead, file$3, 1126, 16, 34594);
-			add_location(tbody, file$3, 1139, 16, 35149);
+			add_location(th1, file$3, 1120, 20, 34417);
+			add_location(tr, file$3, 1118, 18, 34341);
+			add_location(thead, file$3, 1117, 16, 34315);
+			add_location(tbody, file$3, 1130, 16, 34870);
 			attr_dev(table, "class", "table table-sm table-hover align-middle mb-0 svelte-2611os");
-			add_location(table, file$3, 1125, 14, 34517);
+			add_location(table, file$3, 1116, 14, 34238);
 			attr_dev(div, "class", "table-responsive small");
-			add_location(div, file$3, 1124, 12, 34466);
+			add_location(div, file$3, 1115, 12, 34187);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, div, anchor);
@@ -7400,14 +7400,14 @@ function create_if_block_1$1(ctx) {
 		block,
 		id: create_if_block_1$1.name,
 		type: "if",
-		source: "(1124:10) {#if subjectRows.length > 0}",
+		source: "(1115:10) {#if subjectRows.length > 0}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1135:20) {:else}
+// (1126:20) {:else}
 function create_else_block_3(ctx) {
 	let th;
 
@@ -7416,7 +7416,7 @@ function create_else_block_3(ctx) {
 			th = element("th");
 			th.textContent = "Sin días con asistencias aún";
 			attr_dev(th, "class", "text-muted");
-			add_location(th, file$3, 1135, 22, 35001);
+			add_location(th, file$3, 1126, 22, 34722);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, th, anchor);
@@ -7431,14 +7431,14 @@ function create_else_block_3(ctx) {
 		block,
 		id: create_else_block_3.name,
 		type: "else",
-		source: "(1135:20) {:else}",
+		source: "(1126:20) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1131:20) {#if subjectDates.length > 0}
+// (1122:20) {#if subjectDates.length > 0}
 function create_if_block_5(ctx) {
 	let each_1_anchor;
 	let each_value_2 = /*subjectDates*/ ctx[56];
@@ -7501,14 +7501,14 @@ function create_if_block_5(ctx) {
 		block,
 		id: create_if_block_5.name,
 		type: "if",
-		source: "(1131:20) {#if subjectDates.length > 0}",
+		source: "(1122:20) {#if subjectDates.length > 0}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1132:22) {#each subjectDates as dt}
+// (1123:22) {#each subjectDates as dt}
 function create_each_block_2(ctx) {
 	let th;
 	let t_value = /*dt*/ ctx[60] + "";
@@ -7520,7 +7520,7 @@ function create_each_block_2(ctx) {
 			t = text(t_value);
 			attr_dev(th, "class", "text-center");
 			set_style(th, "min-width", "130px");
-			add_location(th, file$3, 1132, 24, 34861);
+			add_location(th, file$3, 1123, 24, 34582);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, th, anchor);
@@ -7538,14 +7538,14 @@ function create_each_block_2(ctx) {
 		block,
 		id: create_each_block_2.name,
 		type: "each",
-		source: "(1132:22) {#each subjectDates as dt}",
+		source: "(1123:22) {#each subjectDates as dt}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1182:22) {:else}
+// (1172:22) {:else}
 function create_else_block_2(ctx) {
 	let td;
 
@@ -7554,7 +7554,7 @@ function create_else_block_2(ctx) {
 			td = element("td");
 			td.textContent = "Sin registros";
 			attr_dev(td, "class", "text-muted");
-			add_location(td, file$3, 1182, 24, 37260);
+			add_location(td, file$3, 1172, 24, 36907);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, td, anchor);
@@ -7569,14 +7569,14 @@ function create_else_block_2(ctx) {
 		block,
 		id: create_else_block_2.name,
 		type: "else",
-		source: "(1182:22) {:else}",
+		source: "(1172:22) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1149:22) {#if subjectDates.length > 0}
+// (1139:22) {#if subjectDates.length > 0}
 function create_if_block_2(ctx) {
 	let each_1_anchor;
 	let each_value_1 = /*subjectDates*/ ctx[56];
@@ -7639,14 +7639,14 @@ function create_if_block_2(ctx) {
 		block,
 		id: create_if_block_2.name,
 		type: "if",
-		source: "(1149:22) {#if subjectDates.length > 0}",
+		source: "(1139:22) {#if subjectDates.length > 0}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1156:28) {:else}
+// (1146:28) {:else}
 function create_else_block$2(ctx) {
 	let button;
 	let show_if;
@@ -7655,7 +7655,7 @@ function create_else_block$2(ctx) {
 
 	function select_block_type_7(ctx, dirty) {
 		if (dirty[0] & /*selectedEvent*/ 2) show_if = null;
-		if (show_if == null) show_if = !!isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*student*/ ctx[57].id, /*dt*/ ctx[60]);
+		if (show_if == null) show_if = !!isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*studentId*/ ctx[57], /*dt*/ ctx[60]);
 		if (show_if) return create_if_block_4;
 		return create_else_block_1$1;
 	}
@@ -7664,7 +7664,7 @@ function create_else_block$2(ctx) {
 	let if_block = current_block_type(ctx);
 
 	function click_handler_6() {
-		return /*click_handler_6*/ ctx[45](/*student*/ ctx[57], /*dt*/ ctx[60]);
+		return /*click_handler_6*/ ctx[45](/*studentId*/ ctx[57], /*dt*/ ctx[60]);
 	}
 
 	const block = {
@@ -7673,9 +7673,9 @@ function create_else_block$2(ctx) {
 			if_block.c();
 			attr_dev(button, "class", "btn btn-sm attendance-toggle-btn svelte-2611os");
 			attr_dev(button, "title", "Marcar / desmarcar asistencia");
-			toggle_class(button, "btn-success", isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*student*/ ctx[57].id, /*dt*/ ctx[60]));
-			toggle_class(button, "btn-outline-secondary", !isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*student*/ ctx[57].id, /*dt*/ ctx[60]));
-			add_location(button, file$3, 1156, 30, 35939);
+			toggle_class(button, "btn-success", isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*studentId*/ ctx[57], /*dt*/ ctx[60]));
+			toggle_class(button, "btn-outline-secondary", !isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*studentId*/ ctx[57], /*dt*/ ctx[60]));
+			add_location(button, file$3, 1146, 30, 35590);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, button, anchor);
@@ -7700,11 +7700,11 @@ function create_else_block$2(ctx) {
 			}
 
 			if (dirty[0] & /*selectedEvent*/ 2) {
-				toggle_class(button, "btn-success", isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*student*/ ctx[57].id, /*dt*/ ctx[60]));
+				toggle_class(button, "btn-success", isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*studentId*/ ctx[57], /*dt*/ ctx[60]));
 			}
 
 			if (dirty[0] & /*selectedEvent*/ 2) {
-				toggle_class(button, "btn-outline-secondary", !isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*student*/ ctx[57].id, /*dt*/ ctx[60]));
+				toggle_class(button, "btn-outline-secondary", !isSubjectPresentOnDate(/*selectedEvent*/ ctx[1], /*studentId*/ ctx[57], /*dt*/ ctx[60]));
 			}
 		},
 		d: function destroy(detaching) {
@@ -7719,14 +7719,14 @@ function create_else_block$2(ctx) {
 		block,
 		id: create_else_block$2.name,
 		type: "else",
-		source: "(1156:28) {:else}",
+		source: "(1146:28) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1152:28) {#if isAttendanceCellLoading(student.id, dt)}
+// (1142:28) {#if isAttendanceCellLoading(studentId, dt)}
 function create_if_block_3(ctx) {
 	let button;
 
@@ -7736,7 +7736,7 @@ function create_if_block_3(ctx) {
 			button.textContent = "Actualizando...";
 			attr_dev(button, "class", "btn btn-sm btn-outline-secondary");
 			button.disabled = true;
-			add_location(button, file$3, 1152, 30, 35726);
+			add_location(button, file$3, 1142, 30, 35377);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, button, anchor);
@@ -7751,14 +7751,14 @@ function create_if_block_3(ctx) {
 		block,
 		id: create_if_block_3.name,
 		type: "if",
-		source: "(1152:28) {#if isAttendanceCellLoading(student.id, dt)}",
+		source: "(1142:28) {#if isAttendanceCellLoading(studentId, dt)}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1175:32) {:else}
+// (1165:32) {:else}
 function create_else_block_1$1(ctx) {
 	let i;
 	let t;
@@ -7768,7 +7768,7 @@ function create_else_block_1$1(ctx) {
 			i = element("i");
 			t = text(" Pendiente");
 			attr_dev(i, "class", "bi bi-dash-circle");
-			add_location(i, file$3, 1175, 34, 36986);
+			add_location(i, file$3, 1165, 34, 36633);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, i, anchor);
@@ -7784,14 +7784,14 @@ function create_else_block_1$1(ctx) {
 		block,
 		id: create_else_block_1$1.name,
 		type: "else",
-		source: "(1175:32) {:else}",
+		source: "(1165:32) {:else}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1173:32) {#if isSubjectPresentOnDate(selectedEvent, student.id, dt)}
+// (1163:32) {#if isSubjectPresentOnDate(selectedEvent, studentId, dt)}
 function create_if_block_4(ctx) {
 	let i;
 	let t;
@@ -7801,7 +7801,7 @@ function create_if_block_4(ctx) {
 			i = element("i");
 			t = text(" Asistió");
 			attr_dev(i, "class", "bi bi-check2-circle");
-			add_location(i, file$3, 1173, 34, 36868);
+			add_location(i, file$3, 1163, 34, 36515);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, i, anchor);
@@ -7817,14 +7817,14 @@ function create_if_block_4(ctx) {
 		block,
 		id: create_if_block_4.name,
 		type: "if",
-		source: "(1173:32) {#if isSubjectPresentOnDate(selectedEvent, student.id, dt)}",
+		source: "(1163:32) {#if isSubjectPresentOnDate(selectedEvent, studentId, dt)}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1150:24) {#each subjectDates as dt}
+// (1140:24) {#each subjectDates as dt}
 function create_each_block_1$1(ctx) {
 	let td;
 	let show_if;
@@ -7832,7 +7832,7 @@ function create_each_block_1$1(ctx) {
 
 	function select_block_type_6(ctx, dirty) {
 		if (dirty[0] & /*selectedEvent*/ 2) show_if = null;
-		if (show_if == null) show_if = !!/*isAttendanceCellLoading*/ ctx[22](/*student*/ ctx[57].id, /*dt*/ ctx[60]);
+		if (show_if == null) show_if = !!/*isAttendanceCellLoading*/ ctx[22](/*studentId*/ ctx[57], /*dt*/ ctx[60]);
 		if (show_if) return create_if_block_3;
 		return create_else_block$2;
 	}
@@ -7846,7 +7846,7 @@ function create_each_block_1$1(ctx) {
 			if_block.c();
 			t = space();
 			attr_dev(td, "class", "text-center");
-			add_location(td, file$3, 1150, 26, 35597);
+			add_location(td, file$3, 1140, 26, 35249);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, td, anchor);
@@ -7876,14 +7876,14 @@ function create_each_block_1$1(ctx) {
 		block,
 		id: create_each_block_1$1.name,
 		type: "each",
-		source: "(1150:24) {#each subjectDates as dt}",
+		source: "(1140:24) {#each subjectDates as dt}",
 		ctx
 	});
 
 	return block;
 }
 
-// (1141:18) {#each subjectRows as student, i}
+// (1132:18) {#each subjectRows as studentId, i}
 function create_each_block$1(ctx) {
 	let tr;
 	let td0;
@@ -7891,15 +7891,11 @@ function create_each_block$1(ctx) {
 	let t0;
 	let t1;
 	let td1;
-	let div;
-	let t2_value = /*student*/ ctx[57].name + "";
+	let code;
+	let t2_value = /*studentId*/ ctx[57] + "";
 	let t2;
 	let t3;
-	let code;
-	let t4_value = /*student*/ ctx[57].id + "";
 	let t4;
-	let t5;
-	let t6;
 
 	function select_block_type_5(ctx, dirty) {
 		if (/*subjectDates*/ ctx[56].length > 0) return create_if_block_2;
@@ -7916,22 +7912,17 @@ function create_each_block$1(ctx) {
 			t0 = text(t0_value);
 			t1 = space();
 			td1 = element("td");
-			div = element("div");
+			code = element("code");
 			t2 = text(t2_value);
 			t3 = space();
-			code = element("code");
-			t4 = text(t4_value);
-			t5 = space();
 			if_block.c();
-			t6 = space();
+			t4 = space();
 			attr_dev(td0, "class", "text-muted");
-			add_location(td0, file$3, 1142, 22, 35256);
-			attr_dev(div, "class", "fw-semibold");
-			add_location(div, file$3, 1144, 24, 35343);
+			add_location(td0, file$3, 1133, 22, 34979);
 			attr_dev(code, "class", "svelte-2611os");
-			add_location(code, file$3, 1145, 24, 35413);
-			add_location(td1, file$3, 1143, 22, 35314);
-			add_location(tr, file$3, 1141, 20, 35229);
+			add_location(code, file$3, 1135, 24, 35066);
+			add_location(td1, file$3, 1134, 22, 35037);
+			add_location(tr, file$3, 1132, 20, 34952);
 		},
 		m: function mount(target, anchor) {
 			insert_dev(target, tr, anchor);
@@ -7939,18 +7930,14 @@ function create_each_block$1(ctx) {
 			append_dev(td0, t0);
 			append_dev(tr, t1);
 			append_dev(tr, td1);
-			append_dev(td1, div);
-			append_dev(div, t2);
-			append_dev(td1, t3);
 			append_dev(td1, code);
-			append_dev(code, t4);
-			append_dev(tr, t5);
+			append_dev(code, t2);
+			append_dev(tr, t3);
 			if_block.m(tr, null);
-			append_dev(tr, t6);
+			append_dev(tr, t4);
 		},
 		p: function update(ctx, dirty) {
-			if (dirty[0] & /*selectedEvent*/ 2 && t2_value !== (t2_value = /*student*/ ctx[57].name + "")) set_data_dev(t2, t2_value);
-			if (dirty[0] & /*selectedEvent*/ 2 && t4_value !== (t4_value = /*student*/ ctx[57].id + "")) set_data_dev(t4, t4_value);
+			if (dirty[0] & /*selectedEvent*/ 2 && t2_value !== (t2_value = /*studentId*/ ctx[57] + "")) set_data_dev(t2, t2_value);
 
 			if (current_block_type === (current_block_type = select_block_type_5(ctx)) && if_block) {
 				if_block.p(ctx, dirty);
@@ -7960,7 +7947,7 @@ function create_each_block$1(ctx) {
 
 				if (if_block) {
 					if_block.c();
-					if_block.m(tr, t6);
+					if_block.m(tr, t4);
 				}
 			}
 		},
@@ -7974,7 +7961,7 @@ function create_each_block$1(ctx) {
 		block,
 		id: create_each_block$1.name,
 		type: "each",
-		source: "(1141:18) {#each subjectRows as student, i}",
+		source: "(1132:18) {#each subjectRows as studentId, i}",
 		ctx
 	});
 
@@ -8107,7 +8094,7 @@ function create_fragment$4(ctx) {
 	let span10;
 
 	let t49_value = ((/*selectedEvent*/ ctx[1]?.is_subject)
-	? normalizeSubjectSuscribed(/*selectedEvent*/ ctx[1]).length
+	? normalizeSubjectAttendees(/*selectedEvent*/ ctx[1]).length
 	: /*selectedEvent*/ ctx[1]?.attendees?.length || 0) + "";
 
 	let t49;
@@ -8345,203 +8332,203 @@ function create_fragment$4(ctx) {
 			attr_dev(img, "height", "30");
 			attr_dev(img, "alt", "UNAM");
 			attr_dev(img, "class", "svelte-2611os");
-			add_location(img, file$3, 694, 6, 20458);
+			add_location(img, file$3, 685, 6, 20179);
 			attr_dev(a, "class", "navbar-brand d-flex align-items-center gap-2 svelte-2611os");
 			attr_dev(a, "href", "#");
-			add_location(a, file$3, 693, 4, 20386);
+			add_location(a, file$3, 684, 4, 20107);
 			attr_dev(i0, "class", "bi bi-search");
-			add_location(i0, file$3, 706, 11, 20860);
+			add_location(i0, file$3, 697, 11, 20581);
 			attr_dev(span0, "class", "input-group-text bg-secondary text-white border-0");
-			add_location(span0, file$3, 705, 8, 20785);
+			add_location(span0, file$3, 696, 8, 20506);
 			attr_dev(input0, "class", "form-control");
 			attr_dev(input0, "type", "search");
 			attr_dev(input0, "placeholder", "Buscar por nombre, carrera, sede o ponente");
-			add_location(input0, file$3, 708, 8, 20913);
+			add_location(input0, file$3, 699, 8, 20634);
 			attr_dev(div0, "class", "input-group input-group-sm admin-search-wrap svelte-2611os");
-			add_location(div0, file$3, 704, 6, 20718);
+			add_location(div0, file$3, 695, 6, 20439);
 			attr_dev(i1, "class", "bi bi-download");
-			add_location(i1, file$3, 719, 8, 21225);
-			add_location(span1, file$3, 719, 38, 21255);
+			add_location(i1, file$3, 710, 8, 20946);
+			add_location(span1, file$3, 710, 38, 20976);
 			attr_dev(button0, "class", "btn btn-outline-info btn-sm inline-btn svelte-2611os");
-			add_location(button0, file$3, 715, 6, 21107);
+			add_location(button0, file$3, 706, 6, 20828);
 			attr_dev(i2, "class", "bi bi-upload");
-			add_location(i2, file$3, 727, 8, 21466);
-			add_location(span2, file$3, 727, 36, 21494);
+			add_location(i2, file$3, 718, 8, 21187);
+			add_location(span2, file$3, 718, 36, 21215);
 			attr_dev(button1, "class", "btn btn-outline-primary btn-sm inline-btn svelte-2611os");
-			add_location(button1, file$3, 723, 6, 21348);
+			add_location(button1, file$3, 714, 6, 21069);
 			attr_dev(input1, "type", "file");
 			attr_dev(input1, "accept", ".csv,text/csv");
 			attr_dev(input1, "class", "d-none");
-			add_location(input1, file$3, 729, 6, 21538);
+			add_location(input1, file$3, 720, 6, 21259);
 			attr_dev(i3, "class", "bi bi-plus-circle");
-			add_location(i3, file$3, 741, 8, 21809);
-			add_location(span3, file$3, 741, 41, 21842);
+			add_location(i3, file$3, 732, 8, 21530);
+			add_location(span3, file$3, 732, 41, 21563);
 			attr_dev(button2, "class", "btn btn-success btn-sm inline-btn svelte-2611os");
-			add_location(button2, file$3, 737, 6, 21702);
+			add_location(button2, file$3, 728, 6, 21423);
 			attr_dev(i4, "class", "bi bi-box-arrow-right");
-			add_location(i4, file$3, 750, 8, 22050);
-			add_location(span4, file$3, 750, 45, 22087);
+			add_location(i4, file$3, 741, 8, 21771);
+			add_location(span4, file$3, 741, 45, 21808);
 			attr_dev(button3, "class", "btn btn-outline-danger btn-sm inline-btn svelte-2611os");
 			attr_dev(button3, "title", "Cerrar sesión");
-			add_location(button3, file$3, 745, 6, 21913);
+			add_location(button3, file$3, 736, 6, 21634);
 			attr_dev(div1, "class", "d-flex align-items-center gap-2 admin-toolbar svelte-2611os");
-			add_location(div1, file$3, 703, 4, 20652);
+			add_location(div1, file$3, 694, 4, 20373);
 			attr_dev(div2, "class", "container-fluid");
-			add_location(div2, file$3, 692, 2, 20352);
+			add_location(div2, file$3, 683, 2, 20073);
 			attr_dev(nav, "class", "navbar navbar-dark bg-dark elevated fixed-top svelte-2611os");
-			add_location(nav, file$3, 691, 0, 20290);
+			add_location(nav, file$3, 682, 0, 20011);
 			attr_dev(div3, "class", "row");
-			add_location(div3, file$3, 758, 2, 22233);
+			add_location(div3, file$3, 749, 2, 21954);
 			attr_dev(div4, "class", "container admin-content svelte-2611os");
-			add_location(div4, file$3, 756, 0, 22150);
+			add_location(div4, file$3, 747, 0, 21871);
 			attr_dev(h50, "class", "modal-title");
 			attr_dev(h50, "id", "eventModalLabel");
-			add_location(h50, file$3, 864, 8, 25706);
+			add_location(h50, file$3, 855, 8, 25427);
 			attr_dev(button4, "type", "button");
 			attr_dev(button4, "class", "btn-close");
 			attr_dev(button4, "aria-label", "Close");
-			add_location(button4, file$3, 868, 8, 25840);
+			add_location(button4, file$3, 859, 8, 25561);
 			attr_dev(div5, "class", "modal-header");
-			add_location(div5, file$3, 863, 6, 25671);
+			add_location(div5, file$3, 854, 6, 25392);
 			attr_dev(label0, "class", "form-label");
-			add_location(label0, file$3, 878, 12, 26102);
+			add_location(label0, file$3, 869, 12, 25823);
 			attr_dev(input2, "class", "form-check-input");
 			attr_dev(input2, "type", "checkbox");
 			attr_dev(input2, "id", "isMateriaSwitch");
 			input2.disabled = input2_disabled_value = !!/*selectedEvent*/ ctx[1].id;
-			add_location(input2, file$3, 881, 14, 26239);
+			add_location(input2, file$3, 872, 14, 25960);
 			attr_dev(label1, "class", "form-check-label");
 			attr_dev(label1, "for", "isMateriaSwitch");
-			add_location(label1, file$3, 888, 14, 26489);
+			add_location(label1, file$3, 879, 14, 26210);
 			attr_dev(div6, "class", "form-check form-switch");
-			add_location(div6, file$3, 880, 12, 26188);
+			add_location(div6, file$3, 871, 12, 25909);
 			attr_dev(div7, "class", "col-12");
-			add_location(div7, file$3, 877, 10, 26069);
+			add_location(div7, file$3, 868, 10, 25790);
 			attr_dev(label2, "class", "form-label");
-			add_location(label2, file$3, 900, 12, 26887);
+			add_location(label2, file$3, 891, 12, 26608);
 			attr_dev(i5, "class", "bi bi-card-heading");
-			add_location(i5, file$3, 903, 17, 27039);
+			add_location(i5, file$3, 894, 17, 26760);
 			attr_dev(span5, "class", "input-group-text");
-			add_location(span5, file$3, 902, 14, 26991);
+			add_location(span5, file$3, 893, 14, 26712);
 			attr_dev(input3, "type", "text");
 			attr_dev(input3, "class", "form-control");
 			attr_dev(input3, "placeholder", "Nombre del evento");
-			add_location(input3, file$3, 905, 14, 27110);
+			add_location(input3, file$3, 896, 14, 26831);
 			attr_dev(div8, "class", "input-group");
-			add_location(div8, file$3, 901, 12, 26951);
+			add_location(div8, file$3, 892, 12, 26672);
 			attr_dev(div9, "class", "col-12");
-			add_location(div9, file$3, 899, 10, 26854);
+			add_location(div9, file$3, 890, 10, 26575);
 			attr_dev(label3, "class", "form-label");
-			add_location(label3, file$3, 956, 12, 28852);
+			add_location(label3, file$3, 947, 12, 28573);
 			attr_dev(i6, "class", "bi bi-geo-alt");
-			add_location(i6, file$3, 958, 45, 28975);
+			add_location(i6, file$3, 949, 45, 28696);
 			attr_dev(span6, "class", "input-group-text");
-			add_location(span6, file$3, 958, 14, 28944);
+			add_location(span6, file$3, 949, 14, 28665);
 			attr_dev(input4, "type", "text");
 			attr_dev(input4, "class", "form-control");
 			attr_dev(input4, "placeholder", "Lugar");
-			add_location(input4, file$3, 960, 14, 29041);
+			add_location(input4, file$3, 951, 14, 28762);
 			attr_dev(div10, "class", "input-group");
-			add_location(div10, file$3, 957, 12, 28904);
+			add_location(div10, file$3, 948, 12, 28625);
 			attr_dev(div11, "class", "col-md-6");
-			add_location(div11, file$3, 955, 10, 28817);
+			add_location(div11, file$3, 946, 10, 28538);
 			attr_dev(label4, "class", "form-label");
-			add_location(label4, file$3, 969, 12, 29299);
+			add_location(label4, file$3, 960, 12, 29020);
 			attr_dev(i7, "class", "bi bi-person");
-			add_location(i7, file$3, 971, 45, 29428);
+			add_location(i7, file$3, 962, 45, 29149);
 			attr_dev(span7, "class", "input-group-text");
-			add_location(span7, file$3, 971, 14, 29397);
+			add_location(span7, file$3, 962, 14, 29118);
 			attr_dev(input5, "type", "number");
 			attr_dev(input5, "min", "0");
 			attr_dev(input5, "class", "form-control");
 			attr_dev(input5, "placeholder", "Cupo máximo");
-			add_location(input5, file$3, 972, 14, 29478);
+			add_location(input5, file$3, 963, 14, 29199);
 			attr_dev(div12, "class", "input-group");
-			add_location(div12, file$3, 970, 12, 29357);
+			add_location(div12, file$3, 961, 12, 29078);
 			attr_dev(div13, "class", "col-md-6");
-			add_location(div13, file$3, 968, 10, 29264);
+			add_location(div13, file$3, 959, 10, 28985);
 			attr_dev(label5, "class", "form-label");
-			add_location(label5, file$3, 982, 12, 29773);
+			add_location(label5, file$3, 973, 12, 29494);
 			attr_dev(i8, "class", "bi bi-book");
-			add_location(i8, file$3, 984, 45, 29898);
+			add_location(i8, file$3, 975, 45, 29619);
 			attr_dev(span8, "class", "input-group-text");
-			add_location(span8, file$3, 984, 14, 29867);
+			add_location(span8, file$3, 975, 14, 29588);
 			attr_dev(select, "class", "form-select");
 			if (/*selectedEvent*/ ctx[1].career === void 0) add_render_callback(() => /*select_change_handler*/ ctx[40].call(select));
-			add_location(select, file$3, 985, 14, 29946);
+			add_location(select, file$3, 976, 14, 29667);
 			attr_dev(div14, "class", "input-group");
-			add_location(div14, file$3, 983, 12, 29827);
+			add_location(div14, file$3, 974, 12, 29548);
 			attr_dev(div15, "class", "col-md-6");
-			add_location(div15, file$3, 981, 10, 29738);
+			add_location(div15, file$3, 972, 10, 29459);
 			attr_dev(label6, "class", "form-label");
-			add_location(label6, file$3, 993, 12, 30239);
+			add_location(label6, file$3, 984, 12, 29960);
 			attr_dev(i9, "class", "bi bi-megaphone");
-			add_location(i9, file$3, 996, 17, 30381);
+			add_location(i9, file$3, 987, 17, 30102);
 			attr_dev(span9, "class", "input-group-text");
-			add_location(span9, file$3, 995, 14, 30333);
+			add_location(span9, file$3, 986, 14, 30054);
 			attr_dev(input6, "type", "text");
 			attr_dev(input6, "class", "form-control");
 			attr_dev(input6, "placeholder", "Ponente");
-			add_location(input6, file$3, 998, 14, 30449);
+			add_location(input6, file$3, 989, 14, 30170);
 			attr_dev(div16, "class", "input-group");
-			add_location(div16, file$3, 994, 12, 30293);
+			add_location(div16, file$3, 985, 12, 30014);
 			attr_dev(div17, "class", "col-md-6");
-			add_location(div17, file$3, 992, 10, 30204);
+			add_location(div17, file$3, 983, 10, 29925);
 			attr_dev(div18, "class", "row g-3");
-			add_location(div18, file$3, 876, 8, 26037);
+			add_location(div18, file$3, 867, 8, 25758);
 			attr_dev(div19, "class", "modal-body");
-			add_location(div19, file$3, 875, 6, 26004);
+			add_location(div19, file$3, 866, 6, 25725);
 			attr_dev(div20, "class", "modal-footer");
-			add_location(div20, file$3, 1036, 6, 31592);
+			add_location(div20, file$3, 1027, 6, 31313);
 			attr_dev(div21, "class", "modal-content");
-			add_location(div21, file$3, 862, 4, 25637);
+			add_location(div21, file$3, 853, 4, 25358);
 			attr_dev(div22, "class", "modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable");
-			add_location(div22, file$3, 859, 2, 25544);
+			add_location(div22, file$3, 850, 2, 25265);
 			attr_dev(div23, "class", "modal fade");
 			attr_dev(div23, "id", "eventModal");
 			attr_dev(div23, "tabindex", "-1");
 			attr_dev(div23, "aria-labelledby", "eventModalLabel");
 			attr_dev(div23, "aria-hidden", "true");
-			add_location(div23, file$3, 851, 0, 25398);
+			add_location(div23, file$3, 842, 0, 25119);
 			attr_dev(h51, "class", "modal-title");
 			attr_dev(h51, "id", "attendeesModalLabel");
-			add_location(h51, file$3, 1092, 8, 33325);
+			add_location(h51, file$3, 1083, 8, 33046);
 			attr_dev(span10, "class", "badge bg-info svelte-2611os");
-			add_location(span10, file$3, 1096, 10, 33509);
+			add_location(span10, file$3, 1087, 10, 33230);
 			attr_dev(span11, "class", "badge bg-success svelte-2611os");
-			add_location(span11, file$3, 1102, 10, 33746);
+			add_location(span11, file$3, 1093, 10, 33467);
 			attr_dev(button5, "type", "button");
 			attr_dev(button5, "class", "btn-close");
 			attr_dev(button5, "aria-label", "Close");
-			add_location(button5, file$3, 1109, 10, 33979);
+			add_location(button5, file$3, 1100, 10, 33700);
 			attr_dev(div24, "class", "d-flex align-items-center gap-2");
-			add_location(div24, file$3, 1095, 8, 33453);
+			add_location(div24, file$3, 1086, 8, 33174);
 			attr_dev(div25, "class", "modal-header");
-			add_location(div25, file$3, 1091, 6, 33290);
+			add_location(div25, file$3, 1082, 6, 33011);
 			attr_dev(div26, "class", "modal-body");
-			add_location(div26, file$3, 1118, 6, 34200);
+			add_location(div26, file$3, 1109, 6, 33921);
 			attr_dev(i10, "class", "bi bi-arrow-left");
-			add_location(i10, file$3, 1237, 10, 39271);
-			add_location(span12, file$3, 1237, 42, 39303);
+			add_location(i10, file$3, 1227, 10, 38917);
+			add_location(span12, file$3, 1227, 42, 38949);
 			attr_dev(button6, "class", "btn btn-secondary inline-btn");
-			add_location(button6, file$3, 1233, 8, 39157);
+			add_location(button6, file$3, 1223, 8, 38803);
 			attr_dev(i11, "class", "bi bi-x-circle");
-			add_location(i11, file$3, 1243, 10, 39505);
-			add_location(span13, file$3, 1243, 40, 39535);
+			add_location(i11, file$3, 1233, 10, 39151);
+			add_location(span13, file$3, 1233, 40, 39181);
 			attr_dev(button7, "class", "btn btn-outline-dark inline-btn");
-			add_location(button7, file$3, 1239, 8, 39359);
+			add_location(button7, file$3, 1229, 8, 39005);
 			attr_dev(div27, "class", "modal-footer");
-			add_location(div27, file$3, 1232, 6, 39122);
+			add_location(div27, file$3, 1222, 6, 38768);
 			attr_dev(div28, "class", "modal-content");
-			add_location(div28, file$3, 1090, 4, 33256);
+			add_location(div28, file$3, 1081, 4, 32977);
 			attr_dev(div29, "class", "modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable");
-			add_location(div29, file$3, 1087, 2, 33163);
+			add_location(div29, file$3, 1078, 2, 32884);
 			attr_dev(div30, "class", "modal fade");
 			attr_dev(div30, "id", "attendeesModal");
 			attr_dev(div30, "tabindex", "-1");
 			attr_dev(div30, "aria-labelledby", "attendeesModalLabel");
 			attr_dev(div30, "aria-hidden", "true");
-			add_location(div30, file$3, 1079, 0, 33005);
+			add_location(div30, file$3, 1070, 0, 32726);
 		},
 		l: function claim(nodes) {
 			throw new Error_1$2("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -8872,7 +8859,7 @@ function create_fragment$4(ctx) {
 			if (dirty[0] & /*selectedEvent*/ 2 && t47_value !== (t47_value = (/*selectedEvent*/ ctx[1]?.name || "Evento") + "")) set_data_dev(t47, t47_value);
 
 			if (dirty[0] & /*selectedEvent*/ 2 && t49_value !== (t49_value = ((/*selectedEvent*/ ctx[1]?.is_subject)
-			? normalizeSubjectSuscribed(/*selectedEvent*/ ctx[1]).length
+			? normalizeSubjectAttendees(/*selectedEvent*/ ctx[1]).length
 			: /*selectedEvent*/ ctx[1]?.attendees?.length || 0) + "")) set_data_dev(t49, t49_value);
 
 			if (dirty[0] & /*selectedEvent*/ 2 && t52_value !== (t52_value = ((/*selectedEvent*/ ctx[1]?.is_subject)
@@ -9007,22 +8994,12 @@ function displayTime(timeValue) {
 }
 
 // --- Helpers de asistencias en materias ---
-function normalizeSubjectSuscribed(subject) {
-	const list = Array.isArray(subject?.suscribed)
-	? subject.suscribed
+function normalizeSubjectAttendees(subject) {
+	const list = Array.isArray(subject?.attendees)
+	? subject.attendees
 	: [];
 
-	return list.map(item => {
-		if (item && typeof item === "object") {
-			return {
-				id: String(item.id || "").trim(),
-				name: String(item.name || "").trim() || "Sin nombre"
-			};
-		}
-
-		const id = String(item || "").trim();
-		return { id, name: "Sin nombre" };
-	}).filter(x => x.id);
+	return list.map(item => String(item || "").trim()).filter(Boolean);
 }
 
 function getSubjectAttendanceDates(subject) {
@@ -9317,13 +9294,13 @@ function instance$4($$self, $$props, $$invalidate) {
 
 				data.forEach(event => {
 					if (event.is_subject) {
-						if (!Array.isArray(event.suscribed)) event.suscribed = [];
+						if (!Array.isArray(event.attendees)) event.attendees = [];
 
 						if (!event.attendance || typeof event.attendance !== "object") {
 							event.attendance = {};
 						}
 
-						event.attendees_num = event.suscribed.length;
+						event.attendees_num = event.attendees.length;
 					} else {
 						if (!Array.isArray(event.attendees)) event.attendees = [];
 						if (!Array.isArray(event.visits)) event.visits = [];
@@ -9706,7 +9683,7 @@ function instance$4($$self, $$props, $$invalidate) {
 	}
 
 	const click_handler_5 = () => getModalInstance(attendeesModal)?.hide();
-	const click_handler_6 = (student, dt) => toggleSubjectAttendance(student.id, dt);
+	const click_handler_6 = (studentId, dt) => toggleSubjectAttendance(studentId, dt);
 	const click_handler_7 = () => getModalInstance(attendeesModal)?.hide();
 
 	function div30_binding($$value) {
@@ -9757,7 +9734,7 @@ function instance$4($$self, $$props, $$invalidate) {
 		displayTime,
 		ro,
 		ensureCardClipping,
-		normalizeSubjectSuscribed,
+		normalizeSubjectAttendees,
 		getSubjectAttendanceDates,
 		isSubjectPresentOnDate,
 		getSubjectAttendanceTotal,
@@ -9925,13 +9902,13 @@ function create_fragment$3(ctx) {
 			div6 = element("div");
 			div4 = element("div");
 			h2 = element("h2");
-			h2.textContent = "Semana";
+			h2.textContent = "Registro";
 			t3 = space();
 			h40 = element("h4");
-			h40.textContent = "de la Ingeniería";
+			h40.textContent = "de asistencia";
 			t5 = space();
 			h41 = element("h4");
-			h41.textContent = "2025";
+			h41.textContent = "2026-1";
 			t7 = space();
 			hr0 = element("hr");
 			t8 = space();
@@ -9959,32 +9936,32 @@ function create_fragment$3(ctx) {
 			attr_dev(h2, "class", "fw-bold mb-2 text-uppercase");
 			add_location(h2, file$2, 83, 20, 2413);
 			attr_dev(h40, "class", "fw-bold mb-2 text-uppercase");
-			add_location(h40, file$2, 84, 20, 2485);
+			add_location(h40, file$2, 84, 20, 2487);
 			attr_dev(h41, "class", "fw-bold mb-2 text-uppercase");
-			add_location(h41, file$2, 87, 20, 2611);
-			add_location(hr0, file$2, 89, 20, 2682);
+			add_location(h41, file$2, 87, 20, 2610);
+			add_location(hr0, file$2, 89, 20, 2683);
 			attr_dev(label, "class", "form-label");
 			attr_dev(label, "for", "username");
-			add_location(label, file$2, 92, 22, 2863);
+			add_location(label, file$2, 92, 22, 2864);
 			attr_dev(input, "type", "text");
 			attr_dev(input, "id", "");
 			attr_dev(input, "class", "input form-control");
 			attr_dev(input, "placeholder", "Num. de Cuenta UNAM");
-			add_location(input, file$2, 95, 22, 3010);
+			add_location(input, file$2, 95, 22, 3011);
 			attr_dev(div2, "class", "form-outline form-white mb-4");
-			add_location(div2, file$2, 90, 20, 2709);
-			add_location(hr1, file$2, 105, 22, 3374);
-			add_location(br, file$2, 106, 22, 3403);
+			add_location(div2, file$2, 90, 20, 2710);
+			add_location(hr1, file$2, 105, 22, 3375);
+			add_location(br, file$2, 106, 22, 3404);
 			attr_dev(button, "class", "btn btn-success btn-lg px-5");
-			add_location(button, file$2, 108, 22, 3433);
+			add_location(button, file$2, 108, 22, 3434);
 			attr_dev(div3, "class", "form-outline form-white mb-4");
-			add_location(div3, file$2, 104, 20, 3309);
+			add_location(div3, file$2, 104, 20, 3310);
 			attr_dev(div4, "class", "mb-md-5 mt-md-4 pb-5");
 			add_location(div4, file$2, 82, 18, 2358);
 			attr_dev(p, "class", "text-secondary");
-			add_location(p, file$2, 127, 20, 4253);
+			add_location(p, file$2, 127, 20, 4254);
 			attr_dev(div5, "class", "d-flex justify-content-center");
-			add_location(div5, file$2, 126, 18, 4189);
+			add_location(div5, file$2, 126, 18, 4190);
 			attr_dev(div6, "class", "card-body p-5 text-center");
 			add_location(div6, file$2, 81, 16, 2300);
 			attr_dev(div7, "class", "card bg-light text-black shadow-lg p-3 mb-5 bg-body rounded");
