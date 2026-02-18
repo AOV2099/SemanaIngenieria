@@ -36,8 +36,8 @@ ENV REDIS_HOST=172.17.0.4 \
     APP_MODE=1 \
     API_URL=https://13.58.164.15:3000 \
     REDIS_PASSWORD=perritoencuatro \
-    ADMIN_PASS=perritoencuatro \
-    ADMIN_USER=aaron
+    ADMIN_PASS=Pr0f3soR \
+    ADMIN_USER=profesor-test
 
 # Exponer el puerto que utiliza tu aplicación
 EXPOSE 3000
