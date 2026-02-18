@@ -9,7 +9,7 @@
 
 
   //API_URL.set(`${window.location.origin}`);
-  API_URL.set("https://127.0.0.1:3000");
+  API_URL.set(window.location.origin);
   console.log($API_URL);
   
 
