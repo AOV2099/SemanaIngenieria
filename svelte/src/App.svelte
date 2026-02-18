@@ -9,7 +9,8 @@
 
 
   //API_URL.set(`${window.location.origin}`);
-  API_URL.set(window.location.origin);
+  //url = origen + puerto del backend
+  API_URL.set(window.location.origin + ":3002");
   console.log($API_URL);
   
 

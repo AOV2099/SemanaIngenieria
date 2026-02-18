@@ -26937,7 +26937,7 @@ class UserEvents extends SvelteComponentDev {
 
 const { console: console_1 } = globals;
 
-// (18:0) <Router>
+// (19:0) <Router>
 function create_default_slot(ctx) {
 	let route0;
 	let t0;
@@ -27037,7 +27037,7 @@ function create_default_slot(ctx) {
 		block,
 		id: create_default_slot.name,
 		type: "slot",
-		source: "(18:0) <Router>",
+		source: "(19:0) <Router>",
 		ctx
 	});
 
@@ -27119,7 +27119,7 @@ function instance($$self, $$props, $$invalidate) {
 	component_subscribe($$self, API_URL, $$value => $$invalidate(0, $API_URL = $$value));
 	let { $$slots: slots = {}, $$scope } = $$props;
 	validate_slots('App', slots, []);
-	API_URL.set(window.location.origin);
+	API_URL.set(window.location.origin + ":3002");
 	console.log($API_URL);
 	const writable_props = [];
 
