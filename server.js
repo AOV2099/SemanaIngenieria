@@ -6,13 +6,12 @@ const path = require("path");
 const cors = require("cors");
 const { Parser } = require("json2csv");
 const moment = require("moment");
-const redis = require("redis");
+const { connectRedis, getRedisClient } = require("./redisClient");
 const { v4: uuidv4 } = require("uuid");
 
 // ---- Config ----
 const APP_PORT = process.env.APP_PORT || 3000;
-const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
-const REDIS_PORT = process.env.REDIS_PORT || 6379;
+const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 const APP_MODE = process.env.APP_MODE || "0";
 
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
@@ -26,8 +25,7 @@ const GOOGLE_WALLET_SAVE_URL_TEMPLATE =
 
 console.log("APP MODE", APP_MODE);
 console.log("APP PORT", APP_PORT);
-console.log("REDIS HOST", REDIS_HOST);
-console.log("REDIS PORT", REDIS_PORT);
+console.log("REDIS URL", REDIS_URL);
 
 // ---- Constantes de claves ----
 const KEY_EVENTS = "si:eventos";
@@ -48,6 +46,8 @@ app.use(
     credentials: true,
   }),
 );
+
+let redisClient;
 
 // --- Crear admin token (con expiración automática) ---
 async function createAdminToken(meta = {}) {
@@ -105,52 +105,6 @@ async function requireAdmin(req, res, next) {
   } catch (error) {
     res.status(500).json({ error: "Auth error" });
   }
-}
-
-// ---- Redis (con reconexión) ----
-const redisClient = redis.createClient({
-  socket: { host: REDIS_HOST, port: REDIS_PORT },
-  password: process.env.REDIS_PASSWORD || "",
-});
-let reconnectInterval = null;
-
-async function reconnectRedis() {
-  try {
-    if (!redisClient.isOpen) {
-      console.log("Intentando reconectar a Redis...");
-      await redisClient.connect();
-      console.log("Conectado nuevamente a Redis.");
-      if (reconnectInterval) {
-        clearInterval(reconnectInterval);
-        reconnectInterval = null;
-      }
-    }
-  } catch (error) {
-    console.error("Error al intentar reconectar a Redis:", error);
-  }
-}
-
-redisClient.on("error", (error) => console.error("Error en Redis:", error));
-redisClient.on("end", () => {
-  console.log("Conexión a Redis finalizada.");
-  if (!reconnectInterval) {
-    reconnectInterval = setInterval(reconnectRedis, 5000);
-  }
-});
-redisClient.on("ready", () =>
-  console.log("Redis listo para aceptar conexiones."),
-);
-redisClient.on("connect", () => {
-  console.log(`Redis conectado: ${REDIS_HOST}:${REDIS_PORT}`);
-});
-
-async function connectRedis() {
-  console.log("Conectando a Redis...");
-  await reconnectRedis();
-  redisClient.on("end", () => {
-    console.log("Conexión a Redis finalizada");
-    reconnectRedis();
-  });
 }
 
 // ---- Bootstrap de datos ----
@@ -1157,6 +1111,10 @@ app.get("*", (req, res) => {
 // ---- Inicio del servidor ----
 https.createServer(httpsOptions, app).listen(APP_PORT, async () => {
   await connectRedis();
+  redisClient = getRedisClient();
+  if (!redisClient) {
+    throw new Error("Redis client no inicializado");
+  }
   await verifyRedisKeys();
   console.log("HTTPS server running on port " + APP_PORT);
 });
