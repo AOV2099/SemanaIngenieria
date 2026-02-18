@@ -338,9 +338,15 @@ app.get("/api/eventos", async (req, res) => {
       if (id === "init") continue; // saltar campo dummy
       try {
         const mat = JSON.parse(matStr);
-        const attendeesCount = Array.isArray(mat.suscribed)
-          ? mat.suscribed.length
-          : 0;
+        const attendeesList = Array.isArray(mat.attendees)
+          ? mat.attendees.map((x) => String(x))
+          : Array.isArray(mat.suscribed)
+            ? mat.suscribed.map((s) =>
+                typeof s === "object" && s !== null
+                  ? String(s.id || "")
+                  : String(s),
+              ).filter(Boolean)
+            : [];
         allowedEvents.push({
           id,
           name: mat.name,
@@ -352,7 +358,7 @@ app.get("/api/eventos", async (req, res) => {
           career: mat.career,
           exponent: mat.exponent || "N/A",
           status: mat.status || "Activo",
-          attendees: attendeesCount,
+          attendees: attendeesList.length,
           is_subject: true, // marcar que es un evento de materia
         });
       } catch (error) {
@@ -379,9 +385,15 @@ app.get("/api/eventos_admin", requireAdmin, async (req, res) => {
       if (id === "init") continue; // saltar campo dummy
       try {
         const mat = JSON.parse(matStr);
-        const attendeesCount = Array.isArray(mat.suscribed)
-          ? mat.suscribed.length
-          : 0;
+        const attendeesList = Array.isArray(mat.attendees)
+          ? mat.attendees.map((x) => String(x))
+          : Array.isArray(mat.suscribed)
+            ? mat.suscribed.map((s) =>
+                typeof s === "object" && s !== null
+                  ? String(s.id || "")
+                  : String(s),
+              ).filter(Boolean)
+            : [];
         eventos.push({
           id,
           name: mat.name,
@@ -393,8 +405,7 @@ app.get("/api/eventos_admin", requireAdmin, async (req, res) => {
           career: mat.career,
           exponent: mat.exponent || "N/A",
           status: mat.status || "Activo",
-          attendees: attendeesCount,
-          suscribed: Array.isArray(mat.suscribed) ? mat.suscribed : [],
+          attendees: attendeesList,
           attendance: mat.attendance && typeof mat.attendance === "object"
             ? mat.attendance
             : {},
@@ -444,12 +455,12 @@ app.post("/api/evento", requireAdmin, async (req, res) => {
     } else {
       console.log("Creando materia...");
 
-      // Materia: usar suscribed/attendance, sin attendees/visits
-      if (!Array.isArray(evento.suscribed)) evento.suscribed = [];
+      // Materia: usar attendees/attendance, sin visits/suscribed
+      if (!Array.isArray(evento.attendees)) evento.attendees = [];
       if (!evento.attendance || typeof evento.attendance !== "object") {
         evento.attendance = {};
       }
-      delete evento.attendees;
+      delete evento.suscribed;
       delete evento.visits;
 
       // al ser evento, usar KEY_MATERIAS
@@ -517,9 +528,15 @@ app.put("/api/evento", requireAdmin, async (req, res) => {
     }
 
     if (currentIsSubject) {
-      if (!Array.isArray(merged.suscribed)) {
-        merged.suscribed = Array.isArray(current.suscribed)
-          ? current.suscribed
+      if (!Array.isArray(merged.attendees)) {
+        merged.attendees = Array.isArray(current.attendees)
+          ? current.attendees
+          : Array.isArray(current.suscribed)
+            ? current.suscribed.map((s) =>
+                typeof s === "object" && s !== null
+                  ? String(s.id || "")
+                  : String(s),
+              ).filter(Boolean)
           : [];
       }
       if (!merged.attendance || typeof merged.attendance !== "object") {
@@ -528,7 +545,7 @@ app.put("/api/evento", requireAdmin, async (req, res) => {
             ? current.attendance
             : {};
       }
-      delete merged.attendees;
+          delete merged.suscribed;
       delete merged.visits;
       await redisClient.hSet(KEY_MATERIAS, merged.id, JSON.stringify(merged));
     } else {
@@ -809,12 +826,14 @@ async function handlerEventsByAttendee(req, res) {
       if (id === "init") continue;
       try {
         const mat = JSON.parse(matStr);
-        const suscribedIds = Array.isArray(mat.suscribed)
-          ? mat.suscribed.map((s) =>
+        const attendeeIds = Array.isArray(mat.attendees)
+          ? mat.attendees.map((s) => String(s))
+          : Array.isArray(mat.suscribed)
+            ? mat.suscribed.map((s) =>
               typeof s === "object" && s !== null ? String(s.id || "") : String(s),
             )
           : [];
-        if (suscribedIds.includes(String(idAsistente))) {
+        if (attendeeIds.includes(String(idAsistente))) {
           enrolledEventIds.add(id);
         }
       } catch (error) {
@@ -863,16 +882,16 @@ app.patch("/api/evento/subject/attendance", requireAdmin, async (req, res) => {
       });
     }
 
-    const suscribedIds = Array.isArray(materia.suscribed)
-      ? materia.suscribed.map((s) =>
-          typeof s === "object" && s !== null ? String(s.id || "") : String(s),
-        )
-      : [];
+    if (!Array.isArray(materia.attendees)) {
+      materia.attendees = Array.isArray(materia.suscribed)
+        ? materia.suscribed.map((s) =>
+            typeof s === "object" && s !== null ? String(s.id || "") : String(s),
+          ).filter(Boolean)
+        : [];
+    }
 
-    if (!suscribedIds.includes(userId)) {
-      return res.status(400).json({
-        error: `El usuario ${userId} no está en la lista suscribed`,
-      });
+    if (!materia.attendees.map((x) => String(x)).includes(userId)) {
+      materia.attendees.push(userId);
     }
 
     if (!materia.attendance || typeof materia.attendance !== "object") {
@@ -943,16 +962,16 @@ app.post("/api/evento/visit", async (req, res) => {
 
     // Para materias: guardar asistencia por fecha en attendance[YYYY-MM-DD]
     if (source === "subjects") {
-      const suscribedIds = Array.isArray(evento.suscribed)
-        ? evento.suscribed.map((s) =>
-            typeof s === "object" && s !== null ? String(s.id || "") : String(s),
-          )
-        : [];
+      if (!Array.isArray(evento.attendees)) {
+        evento.attendees = Array.isArray(evento.suscribed)
+          ? evento.suscribed.map((s) =>
+              typeof s === "object" && s !== null ? String(s.id || "") : String(s),
+            ).filter(Boolean)
+          : [];
+      }
 
-      if (!suscribedIds.includes(String(idAsistente))) {
-        return res.status(400).json({
-          error: `El usuario ${idAsistente} no se encuentra en la lista suscribed`,
-        });
+      if (!evento.attendees.map((x) => String(x)).includes(String(idAsistente))) {
+        evento.attendees.push(String(idAsistente));
       }
 
       if (!evento.attendance || typeof evento.attendance !== "object") {
@@ -987,10 +1006,8 @@ app.post("/api/evento/visit", async (req, res) => {
       evento.attendance[normalizedAttendanceDate].push(idAsistente);
     } else {
       if (!Array.isArray(evento.attendees)) evento.attendees = [];
-      if (!evento.attendees.includes(idAsistente)) {
-        return res.status(400).json({
-          error: `El usuario ${idAsistente} no está inscrito al evento`,
-        });
+      if (!evento.attendees.map((x) => String(x)).includes(String(idAsistente))) {
+        evento.attendees.push(String(idAsistente));
       }
 
       if (!Array.isArray(evento.visits)) evento.visits = [];
