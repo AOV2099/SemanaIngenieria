@@ -27119,7 +27119,7 @@ function instance($$self, $$props, $$invalidate) {
 	component_subscribe($$self, API_URL, $$value => $$invalidate(0, $API_URL = $$value));
 	let { $$slots: slots = {}, $$scope } = $$props;
 	validate_slots('App', slots, []);
-	API_URL.set(window.location.origin + ":3002");
+	API_URL.set(window.location.origin);
 	console.log($API_URL);
 	const writable_props = [];
 
