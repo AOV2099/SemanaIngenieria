@@ -30,7 +30,7 @@ RUN npm install
 WORKDIR /app
 
 # Establecer variables de entorno
-ENV REDIS_HOST=172.17.0.4 \
+ENV REDIS_HOST=172.18.0.2 \
     REDIS_PORT=6379 \
     APP_PORT=3000 \
     APP_MODE=1 \
