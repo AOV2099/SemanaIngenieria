@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 
 export var test = writable("Hello, world!");
-export const API_URL = writable("https://localhost:3000");
+export const API_URL = writable("https://132.248.44.4:3002");
 //export const API_URL = "https://localhost:3000";
 
 export const adminToken = writable("");

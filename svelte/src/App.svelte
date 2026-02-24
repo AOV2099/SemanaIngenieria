@@ -11,9 +11,9 @@
   // Si la app corre desde el backend (3000), usa mismo origen.
   // Si corre en dev server de Svelte (ej. 5000), conserva el valor del store
   // para que las peticiones vayan al backend.
-  if (window.location.port === "3000") {
-    API_URL.set(window.location.origin);
-  }
+  //if (window.location.port === "3000") {
+    //API_URL.set(window.location.origin);
+  //}
   console.log($API_URL);
   
 
