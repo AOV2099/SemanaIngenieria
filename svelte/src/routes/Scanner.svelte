@@ -18,6 +18,7 @@
   let selectedEventId = "";
   let selectedEventType = 0;
   let token = "";
+  let validatingSession = false;
 
   let lastAlertTime = 0;
 
@@ -205,6 +206,26 @@
     }
   }
 
+  async function revalidateAdminSession() {
+    if (document.visibilityState === "hidden" || validatingSession) return;
+    validatingSession = true;
+    try {
+      const tk = await requireAdminOrRedirect($API_URL, navigate, toast);
+      token = tk || "";
+      if (!token) {
+        try {
+          qrScanner?.stop();
+        } catch (_) {}
+      }
+    } finally {
+      validatingSession = false;
+    }
+  }
+
+  function handleResumeSessionCheck() {
+    revalidateAdminSession();
+  }
+
   onMount(async () => {
     token = await requireAdminOrRedirect($API_URL, navigate, toast);
     if (!token) return;
@@ -223,9 +244,19 @@
         console.error("Could not list cameras:", error);
         centerError("No se pudieron listar las cámaras. Revisa permisos.");
       });
+
+    window.addEventListener("focus", handleResumeSessionCheck);
+    window.addEventListener("pageshow", handleResumeSessionCheck);
+    document.addEventListener("visibilitychange", handleResumeSessionCheck);
   });
 
   onDestroy(() => {
+    window.removeEventListener("focus", handleResumeSessionCheck);
+    window.removeEventListener("pageshow", handleResumeSessionCheck);
+    document.removeEventListener(
+      "visibilitychange",
+      handleResumeSessionCheck,
+    );
     try {
       qrScanner?.stop();
     } catch (_) {}

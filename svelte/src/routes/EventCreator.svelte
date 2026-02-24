@@ -20,6 +20,22 @@
 
   let token = "";
   let attendanceToggleLoading = {};
+  let validatingSession = false;
+
+  async function revalidateAdminSession() {
+    if (document.visibilityState === "hidden" || validatingSession) return;
+    validatingSession = true;
+    try {
+      const tk = await requireAdminOrRedirect($API_URL, navigate, toast);
+      token = tk || "";
+    } finally {
+      validatingSession = false;
+    }
+  }
+
+  function handleResumeSessionCheck() {
+    revalidateAdminSession();
+  }
 
   // --- utils cookies ---
   function deleteCookie(name) {
@@ -562,10 +578,19 @@
     }
 
     window.addEventListener("resize", ensureCardClipping);
+    window.addEventListener("focus", handleResumeSessionCheck);
+    window.addEventListener("pageshow", handleResumeSessionCheck);
+    document.addEventListener("visibilitychange", handleResumeSessionCheck);
   });
 
   onDestroy(() => {
     window.removeEventListener("resize", ensureCardClipping);
+    window.removeEventListener("focus", handleResumeSessionCheck);
+    window.removeEventListener("pageshow", handleResumeSessionCheck);
+    document.removeEventListener(
+      "visibilitychange",
+      handleResumeSessionCheck,
+    );
     if (ro) ro.disconnect();
     // limpia cualquier resto por seguridad
     hardResetBodyScroll();
