@@ -624,6 +624,10 @@
     return Object.keys(attendance).sort();
   }
 
+  function getDefaultAttendanceDate() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   function isSubjectPresentOnDate(subject, studentId, date) {
     const attendance =
       subject?.attendance && typeof subject.attendance === "object"
@@ -1169,6 +1173,7 @@
         {#if selectedEvent?.is_subject}
           {@const subjectRows = normalizeSubjectAttendees(selectedEvent)}
           {@const subjectDates = getSubjectAttendanceDates(selectedEvent)}
+          {@const fallbackDate = getDefaultAttendanceDate()}
 
           {#if subjectRows.length > 0}
             <div class="table-responsive small">
@@ -1182,7 +1187,9 @@
                         <th class="text-center" style="min-width: 130px;">{dt}</th>
                       {/each}
                     {:else}
-                      <th class="text-muted">Sin días con asistencias aún</th>
+                      <th class="text-center text-muted" style="min-width: 130px;">
+                        {fallbackDate}
+                      </th>
                     {/if}
                   </tr>
                 </thead>
@@ -1228,7 +1235,36 @@
                           </td>
                         {/each}
                       {:else}
-                        <td class="text-muted">Sin registros</td>
+                        <td class="text-center">
+                          {#if isAttendanceCellLoading(studentId, fallbackDate)}
+                            <button class="btn btn-sm btn-outline-secondary" disabled>
+                              Actualizando...
+                            </button>
+                          {:else}
+                            <button
+                              class="btn btn-sm attendance-toggle-btn"
+                              class:btn-success={isSubjectPresentOnDate(
+                                selectedEvent,
+                                studentId,
+                                fallbackDate,
+                              )}
+                              class:btn-outline-secondary={!isSubjectPresentOnDate(
+                                selectedEvent,
+                                studentId,
+                                fallbackDate,
+                              )}
+                              on:click={() =>
+                                toggleSubjectAttendance(studentId, fallbackDate)}
+                              title="Marcar / desmarcar asistencia"
+                            >
+                              {#if isSubjectPresentOnDate(selectedEvent, studentId, fallbackDate)}
+                                <i class="bi bi-check2-circle"></i> Asistió
+                              {:else}
+                                <i class="bi bi-dash-circle"></i> Pendiente
+                              {/if}
+                            </button>
+                          {/if}
+                        </td>
                       {/if}
                     </tr>
                   {/each}
