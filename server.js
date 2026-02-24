@@ -11,7 +11,7 @@ const { v4: uuidv4 } = require("uuid");
 
 // ---- Config ----
 const APP_PORT = process.env.APP_PORT || 3000;
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
+const REDIS_URL = process.env.REDIS_HOST || "redis://localhost:6379";
 const APP_MODE = process.env.APP_MODE || "0";
 
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
