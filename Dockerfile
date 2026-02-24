@@ -30,9 +30,7 @@ RUN npm install
 WORKDIR /app
 
 # Establecer variables de entorno
-ENV REDIS_HOST=172.18.0.2 \
-    REDIS_PORT=6379 \
-    APP_PORT=3000 \
+ENV APP_PORT=3000 \
     APP_MODE=1 \
     API_URL=https://132.248.44.4:3000 \
     REDIS_URL=redis://localhost:6379 \

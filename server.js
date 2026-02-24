@@ -22,9 +22,6 @@ const APPLE_WALLET_PASS_URL_TEMPLATE =
 const GOOGLE_WALLET_SAVE_URL_TEMPLATE =
   process.env.GOOGLE_WALLET_SAVE_URL_TEMPLATE || "";
 
-console.log("APP MODE", APP_MODE);
-console.log("APP PORT", APP_PORT);
-console.log("REDIS URL", REDIS_URL);
 
 // ---- Constantes de claves ----
 const KEY_EVENTS = "si:eventos";
