@@ -193,7 +193,8 @@ function isJsonEventCorrect(event) {
   }
   if (!event.location) return false;
   if (!event.max_attendees) return false;
-  if (!event.career) return false;
+  // Para materias, carrera puede omitirse por ahora (se normaliza a "default").
+  if (!event.is_subject && !event.career) return false;
   if (!event.exponent) return false;
   if (!event.status) return false;
 
@@ -389,6 +390,10 @@ app.post("/api/evento", requireAdmin, async (req, res) => {
     //revisar si el body contiene "is_subject"
     const isSubject = req.body && req.body.is_subject;
 
+    if (isSubject && !evento.career) {
+      evento.career = "default";
+    }
+
     if (!isJsonEventCorrect(evento)) {
       console.log("EVENTO INCORRECTAMENTE CONSTRUIDO");
 
@@ -482,6 +487,9 @@ app.put("/api/evento", requireAdmin, async (req, res) => {
     }
 
     if (currentIsSubject) {
+      if (!merged.career) {
+        merged.career = "default";
+      }
       if (!Array.isArray(merged.attendees)) {
         merged.attendees = Array.isArray(current.attendees)
           ? current.attendees
@@ -526,14 +534,23 @@ app.put("/api/evento", requireAdmin, async (req, res) => {
 app.delete("/api/evento/:id", requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    const eventos = await redisClient.json.get(KEY_EVENTS);
+    const eventos = (await redisClient.json.get(KEY_EVENTS)) || [];
     const index = eventos.findIndex((e) => e.id === id);
-    if (index === -1)
-      return res.status(404).json({ error: "Evento no encontrado" });
 
-    eventos.splice(index, 1);
-    await redisClient.json.set(KEY_EVENTS, "$", eventos);
-    res.status(200).send("Evento eliminado correctamente");
+    // 1) Intentar borrar evento regular
+    if (index !== -1) {
+      eventos.splice(index, 1);
+      await redisClient.json.set(KEY_EVENTS, "$", eventos);
+      return res.status(200).send("Evento eliminado correctamente");
+    }
+
+    // 2) Si no existe en eventos, intentar borrar materia
+    const deletedSubjectCount = await redisClient.hDel(KEY_MATERIAS, id);
+    if (deletedSubjectCount > 0) {
+      return res.status(200).send("Materia eliminada correctamente");
+    }
+
+    return res.status(404).json({ error: "Evento no encontrado" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

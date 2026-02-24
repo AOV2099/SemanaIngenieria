@@ -19,7 +19,8 @@
       if (boleta.includes(",")) {
         let parts = boleta.split(",");
         if (parts.length === 2) {
-          testManagerLogin(parts[0].trim(), parts[1].trim());
+          await testManagerLogin(parts[0].trim(), parts[1].trim());
+          return;
         }
       }
 
@@ -43,6 +44,13 @@
     });
 
     if (res.ok) {
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await res.text();
+        throw new Error(
+          `Respuesta inesperada del servidor (${res.status}). URL API actual: ${$API_URL}. Inicio de respuesta: ${text.slice(0, 80)}`
+        );
+      }
       let data = await res.json();
       document.cookie = `adminToken=${data.token}; max-age=86400; path=/`;
       adminToken.set(data.token);  // guarda en store

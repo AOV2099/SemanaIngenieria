@@ -2,6 +2,9 @@
   import { onMount, onDestroy } from "svelte";
   import QrScanner from "qr-scanner";
   import { API_URL } from "../store";
+  import { requireAdminOrRedirect } from "../auth";
+  import { navigate } from "svelte-routing";
+  import toast from "svelte-french-toast";
   import Swal from "sweetalert2"; // si instalaste con npm
   // Si prefieres usar CDN, quita esta línea y usa window.Swal
 
@@ -14,6 +17,7 @@
   let scannerEvents = [];
   let selectedEventId = "";
   let selectedEventType = 0;
+  let token = "";
 
   let lastAlertTime = 0;
 
@@ -71,7 +75,10 @@
     try {
       const res = await fetch(`${$API_URL}/api/eventos`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (!res.ok) throw new Error("No se pudieron obtener eventos");
@@ -174,7 +181,10 @@
 
       const res = await fetch(`${$API_URL}/api/evento/visit`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           user_id: userId,
           event_id: selectedEventId,
@@ -195,7 +205,10 @@
     }
   }
 
-  onMount(() => {
+  onMount(async () => {
+    token = await requireAdminOrRedirect($API_URL, navigate, toast);
+    if (!token) return;
+
     loadScannerEvents();
 
     QrScanner.listCameras(true)

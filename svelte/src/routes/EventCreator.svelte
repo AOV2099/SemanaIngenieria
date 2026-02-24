@@ -322,6 +322,8 @@
             if (!event.attendance || typeof event.attendance !== "object") {
               event.attendance = {};
             }
+            // En materias usamos carrera por defecto.
+            event.career = "default";
             event.attendees_num = event.attendees.length;
           } else {
             if (!Array.isArray(event.attendees)) event.attendees = [];
@@ -357,6 +359,9 @@
     if (!selectedEvent.name || (!selectedEvent.date && !selectedEvent.is_subject )) {
       toast.error("Nombre y fecha son obligatorios");
       return;
+    }
+    if (selectedEvent.is_subject) {
+      selectedEvent.career = "default";
     }
     if (selectedEvent.id) {
       try {
@@ -470,6 +475,10 @@
     };
     const inst = getModalInstance(eventModal);
     inst?.show();
+  }
+
+  function openScannerInNewTab() {
+    window.open("/event-qr-scanner", "_blank", "noopener,noreferrer");
   }
 
   function removeImagePreview() {
@@ -680,9 +689,9 @@
 </script>
 
 <!-- NAVBAR PRINCIPAL -->
-<nav class="navbar navbar-dark bg-dark elevated fixed-top">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark elevated fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/admin">
       <img
         src="https://propiedadintelectual.unam.mx/assets/img/unamblanco.png"
         width="30"
@@ -692,7 +701,20 @@
       Administrador de Eventos
     </a>
 
-    <div class="d-flex align-items-center gap-2 admin-toolbar">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#adminToolbarNav"
+      aria-controls="adminToolbarNav"
+      aria-expanded="false"
+      aria-label="Mostrar herramientas"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="adminToolbarNav">
+      <div class="d-flex align-items-center gap-2 admin-toolbar">
       <div class="input-group input-group-sm admin-search-wrap">
         <span class="input-group-text bg-secondary text-white border-0"
           ><i class="bi bi-search"></i></span
@@ -733,6 +755,14 @@
         <i class="bi bi-plus-circle"></i><span>Nuevo Evento</span>
       </button>
 
+      <button
+        class="btn btn-outline-primary btn-sm inline-btn"
+        on:click={openScannerInNewTab}
+        title="Abrir escáner QR"
+      >
+        <i class="bi bi-qr-code-scan"></i><span>Escáner QR</span>
+      </button>
+
       <!-- Logout -->
       <button
         class="btn btn-outline-danger btn-sm inline-btn"
@@ -741,6 +771,7 @@
       >
         <i class="bi bi-box-arrow-right"></i><span>Salir</span>
       </button>
+      </div>
     </div>
   </div>
 </nav>
@@ -970,17 +1001,19 @@
               />
             </div>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Carrera</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-book"></i></span>
-              <select class="form-select" bind:value={selectedEvent.career}>
-                {#each $availableCareers as career}
-                  <option>{career.name}</option>
-                {/each}
-              </select>
+          {#if !selectedEvent.is_subject}
+            <div class="col-md-6">
+              <label class="form-label">Carrera</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-book"></i></span>
+                <select class="form-select" bind:value={selectedEvent.career}>
+                  {#each $availableCareers as career}
+                    <option>{career.name}</option>
+                  {/each}
+                </select>
+              </div>
             </div>
-          </div>
+          {/if}
           <div class="col-md-6">
             <label class="form-label">Ponente</label>
             <div class="input-group">
@@ -1279,8 +1312,7 @@
   }
 
   /* --- NAVBAR PRINCIPAL: icono + texto en línea --- */
-  .navbar .btn.inline-btn,
-  .navbar label.btn.inline-btn {
+  .navbar .btn.inline-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -1293,9 +1325,14 @@
       align-items: flex-start;
     }
 
+    :global(.navbar .navbar-collapse) {
+      width: 100%;
+    }
+
     .admin-toolbar {
       width: 100%;
       justify-content: flex-start;
+      padding-top: 0.5rem;
     }
 
     .admin-search-wrap {
@@ -1311,7 +1348,7 @@
     }
 
     .admin-content {
-      margin-top: 150px;
+      margin-top: 92px;
     }
   }
 
@@ -1331,7 +1368,7 @@
     }
 
     .admin-content {
-      margin-top: 170px;
+      margin-top: 92px;
     }
   }
 
