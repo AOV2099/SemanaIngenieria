@@ -33,7 +33,7 @@ WORKDIR /app
 ENV APP_PORT=3000 \
     APP_MODE=1 \
     API_URL=https://132.248.44.4:3000 \
-    REDIS_URL=redis://localhost:6379 \
+    REDIS_URL=redis://redis-stack:6379 \
     REDIS_PASSWORD=perritoencuatro \
     ADMIN_PASS=Pr0f3soR \
     ADMIN_USER=profesor-test
